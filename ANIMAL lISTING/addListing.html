@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Animal Listing</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reusing basic styles for consistency */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f8f9fa; color: #333; }
+        
+        .navbar { background-color: #1a4031; padding: 0 20px; height: 60px; display: flex; align-items: center; color: white; }
+        .back-link { color: white; text-decoration: none; margin-right: 15px; }
+
+        .form-container { max-width: 800px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        
+        h2 { margin-bottom: 20px; color: #1a4031; }
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
+        
+        .row { display: flex; gap: 20px; }
+        .col { flex: 1; }
+
+        .submit-btn { width: 100%; background: #457b68; color: white; padding: 15px; border: none; border-radius: 6px; font-size: 1.1rem; cursor: pointer; }
+        .submit-btn:hover { background: #1a4031; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="animalListingIndex.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back</a>
+        <div style="font-weight: bold;">Create New Listing</div>
+    </nav>
+
+    <div class="form-container">
+        <h2>Basic Information</h2>
+        
+        <form id="addAnimalForm">
+            <div class="row">
+                <div class="col form-group">
+                    <label>Animal Name *</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="col form-group">
+                    <label>Animal Type *</label>
+                    <select id="type">
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col form-group">
+                    <label>Breed</label>
+                    <input type="text" id="breed" placeholder="e.g. Golden Retriever">
+                </div>
+                <div class="col form-group">
+                    <label>Gender *</label>
+                    <select id="gender">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col form-group">
+                    <label>Age (Years) *</label>
+                    <input type="number" id="age" required>
+                </div>
+                <div class="col form-group">
+                    <label>Vaccination Status</label>
+                    <select id="vaccine">
+                        <option value="Vaccinated">Vaccinated</option>
+                        <option value="Not Vaccinated">Not Vaccinated</option>
+                        <option value="Unknown">Unknown</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Shelter Location *</label>
+                <input type="text" id="location" required placeholder="e.g. Downtown Shelter">
+            </div>
+
+            <div class="form-group">
+                <label>Image URL (Paste a link to an image) *</label>
+                <input type="url" id="photo" required placeholder="https://example.com/dog.jpg">
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="desc" rows="4" placeholder="Describe the animal..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Listing</button>
+        </form>
+    </div>
+
+    <script type="module" src="js/listingAuth.js"></script>
+</body>
+</html>

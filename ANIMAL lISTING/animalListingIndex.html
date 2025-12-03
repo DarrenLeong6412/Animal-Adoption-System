@@ -2,66 +2,135 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Animal Adoption Listings</title>
-    <link rel="stylesheet" href="stylesAnimalListing.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Welfare - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- CSS STYLES --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f8f9fa; color: #333; }
+
+        /* Navbar */
+        .navbar { background-color: #1a4031; padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; color: white; }
+        .nav-left { display: flex; gap: 20px; align-items: center; }
+        .nav-link { color: #cfd8d4; text-decoration: none; padding: 18px 5px; border-bottom: 3px solid transparent; }
+        .nav-link.active { color: white; border-bottom-color: #d77f59; }
+
+        /* Layout */
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        
+        /* Add Button */
+        .add-btn {
+            background-color: #e60023; color: white; text-decoration: none;
+            padding: 10px 20px; border-radius: 6px; font-weight: bold;
+            display: flex; align-items: center; gap: 8px; border: none; cursor: pointer;
+        }
+
+        /* Filter Section */
+        .filter-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .filter-row { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr 1fr; gap: 20px; margin-top: 10px; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+
+        /* Grid */
+        .listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+
+        /* Animal Card */
+        .animal-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
+        .animal-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .card-image { height: 200px; background-color: #ddd; position: relative; }
+        .card-image img { width: 100%; height: 100%; object-fit: cover; }
+        .badge { position: absolute; top: 15px; right: 15px; background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+        .card-body { padding: 20px; }
+        .animal-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; }
+        .info-row { display: flex; gap: 10px; color: #555; font-size: 0.9rem; margin-bottom: 8px; }
+        .info-row i { width: 16px; color: #888; }
+
+        /* --- MODAL POPUP STYLES --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-card { background: white; width: 90%; max-width: 900px; border-radius: 12px; display: flex; overflow: hidden; position: relative; height: 500px; }
+        .modal-left { width: 50%; background: #f0f0f0; }
+        .modal-left img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-right { width: 50%; padding: 30px; overflow-y: auto; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 2rem; border: none; background: none; cursor: pointer; }
+        
+        .adopt-btn { width: 100%; background: #e60023; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+    </style>
 </head>
 <body>
 
-<nav>
-    <h2>Animal Adoption System</h2>
-    <div>
-        <a href="index.html">Home</a>
-        <a href="create-listing.html">Create Listing</a>
-        <a href="admin.html">Admin Panel</a>
-    </div>
-</nav>
+    <nav class="navbar">
+        <div class="nav-left">
+            <div style="font-weight: bold;"><i class="fa-solid fa-paw"></i> Animal Welfare</div>
+            <a href="animalListingIndex.html" class="nav-link active">Animals</a>
+            <a href="#" class="nav-link">Approvals</a>
+        </div>
+        <div>Admin User <i class="fa-regular fa-user"></i></div>
+    </nav>
 
-<div class="container">
-    <h2>Browse Animals for Adoption</h2>
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1>Animals for Adoption</h1>
+                <p>Find your perfect companion</p>
+            </div>
+            <a href="addListing.html" class="add-btn"><i class="fa-solid fa-plus"></i> Add Listing</a>
+        </div>
 
-    <!-- SEARCH & FILTER SECTION -->
-    <form>
-        <label>Search by Animal Type:</label>
-        <select>
-            <option>All</option>
-            <option>Dog</option>
-            <option>Cat</option>
-            <option>Rabbit</option>
-        </select>
+        <div class="filter-card">
+            <div style="font-weight: bold; margin-bottom: 10px;"><i class="fa-solid fa-filter"></i> Filters</div>
+            <div class="filter-row">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search name...">
+                <select id="typeFilter" class="form-control">
+                    <option value="All">All Types</option>
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                </select>
+                <input type="text" class="form-control" placeholder="Location...">
+                <select class="form-control"><option>Approved</option></select>
+            </div>
+        </div>
 
-        <label>Filter by Age:</label>
-        <select>
-            <option>All</option>
-            <option>Below 1 year</option>
-            <option>1 - 3 years</option>
-            <option>3+ years</option>
-        </select>
-
-        <label>Location:</label>
-        <input type="text" placeholder="Enter city or shelter location">
-
-        <button type="submit">Search</button>
-    </form>
-
-    <hr><br>
-
-    <!-- SAMPLE APPROVED ANIMAL LISTING -->
-    <div class="card">
-        <h3>Brown Dog (Approved)</h3>
-        <p><b>Type:</b> Dog</p>
-        <p><b>Age:</b> 2 years</p>
-        <p><b>Location:</b> KL Animal Shelter</p>
-        <p><b>Vaccination:</b> Yes</p>
+        <div id="listings-container" class="listing-grid">
+            <p>Loading animals from database...</p>
+        </div>
     </div>
 
-    <div class="card">
-        <h3>Grey Cat (Approved)</h3>
-        <p><b>Type:</b> Cat</p>
-        <p><b>Age:</b> 1 year</p>
-        <p><b>Location:</b> Penang Stray Centre</p>
-        <p><b>Vaccination:</b> No</p>
-    </div>
-</div>
+    <div id="animalModal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <div class="modal-left">
+                <img id="modal-img" src="" alt="Animal">
+            </div>
+            <div class="modal-right">
+                <h2 id="modal-name">Name</h2>
+                <span class="badge" style="position:static; margin-left: 10px;">approved</span>
+                <p id="modal-details" style="color:#666; margin: 10px 0;">Details here</p>
+                <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+                
+                <div class="info-row"><i class="fa-solid fa-location-dot"></i> <span id="modal-location">Loc</span></div>
+                <div class="info-row"><i class="fa-solid fa-syringe"></i> <span id="modal-vaccine">Vac</span></div>
+                <div class="info-row"><i class="fa-regular fa-user"></i> <span>Posted by Admin</span></div>
+                
+                <h3 style="margin-top:20px; font-size:1rem;">About</h3>
+                <p id="modal-desc" style="line-height: 1.5; color:#555; margin-top:5px;">Description...</p>
 
+                <button class="adopt-btn"><i class="fa-regular fa-heart"></i> Apply to Adopt</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/listingAuth.js"></script>
+    <script>
+        // Simple Modal Logic
+        function closeModal() {
+            document.getElementById('animalModal').style.display = 'none';
+        }
+        // Close if clicked outside
+        window.onclick = function(e) {
+            if (e.target == document.getElementById('animalModal')) closeModal();
+        }
+    </script>
 </body>
 </html>
