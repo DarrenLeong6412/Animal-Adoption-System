@@ -18,10 +18,22 @@
     z-index: 100;
 }
 
+.logo-wrapper{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .logo{
-    width: 80px;
-    height: 80px;
-    margin-top: 15px;
+    margin-top: 30px;
+    width: 100px;
+    height: 100px;
+}
+
+.logo-shapes path,
+.logo-shapes circle,
+.logo-shapes rect {
+    fill: #FFFF;      /* change main color via CSS */
     cursor: pointer;
 }
 
@@ -62,9 +74,17 @@
 #navbar.scrolled a{
     color: #164A41;
 }
+
 #navbar.scrolled a:hover{
     color: #F1B24A;
 }
+
+#navbar.scrolled .logo-shapes path,
+#navbar.scrolled .logo-shapes circle,
+#navbar.scrolled .logo-shapes rect {
+    fill: #164A41;
+}
+
 
 .banner{
     width: 100%;
@@ -127,7 +147,7 @@ button:hover{
 .stats{
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 40px;
     justify-content: center;
     align-items: center;
 }
