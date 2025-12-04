@@ -1,0 +1,166 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    box-sizing: border-box;
+}
+
+#navbar{
+    position:fixed;
+    width: 100%;
+    padding: 30px;
+    height: 80px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: 0.5s;
+    z-index: 100;
+}
+
+.logo{
+    width: 80px;
+    height: 80px;
+    margin-top: 15px;
+    cursor: pointer;
+}
+
+#navbar ul li{
+    list-style: none;
+    display: inline-block;
+    margin: 20px;
+}
+
+#navbar ul li a{
+    text-decoration: none;
+    text-transform: uppercase;
+    color: white;
+    padding: 10px; 
+    border-radius: 5px;
+    font-weight: 600;
+    transition: 0.5s;
+    font-size: 15px;
+}
+
+#navbar ul li a:hover{
+    background: white;
+}
+
+#navbar a:hover{
+    color: black;
+}
+
+.navicon{
+    width: 20px;
+    height: 20px;
+}
+
+#navbar.scrolled{
+    background-color: #FFFF;
+}
+
+#navbar.scrolled a{
+    color: #164A41;
+}
+#navbar.scrolled a:hover{
+    color: #F1B24A;
+}
+
+.banner{
+    width: 100%;
+    height: 100vh;
+    background-image: linear-gradient(rgba(0,0,0,0.40), rgba(0,0,0,0.40));
+    background-position: center;
+    background-size: center;
+    overflow: hidden;
+}
+
+.banner video{
+    position: relative;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+}
+
+@media(min-aspect-ratio: 16/9){
+    .banner video{
+        width: 100%;
+        height: auto;
+    }
+}
+
+.content{
+    width: 100%;
+    position: absolute;
+    color: white;
+    top: 45%;
+    transform: translateY(-50%);
+    text-align: center;
+}
+
+.content h1{
+    margin-top: 80px;
+    font-size: 90px;
+    font-weight: 800;
+}
+
+button{
+    width: 200px;
+    padding: 15px;
+    margin: 20px 5px;
+    text-align: center;
+    border-radius: 25px;
+    background: #164A41;
+    color: white;
+    border: 2px;
+    font-size: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.5s;
+}
+
+button:hover{
+    background: #FFFF;
+    color: #164A41;
+}
+
+.stats{
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.stats p{
+    padding: 3px;
+}
+
+.name{
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.details{
+    font-size: 15px;
+    font-style: normal;
+}
+
+.cards-container{
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.card{
+    /*flex: 1 1 40%;     /* grow, shrink, basis ~50% minus gap */
+    padding: 20px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+.cardimg{
+    width: 250px;
+    height: 250px;
+}
