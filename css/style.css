@@ -184,3 +184,36 @@ button:hover{
     width: 250px;
     height: 250px;
 }
+
+.footer{
+    width: 100%;
+    bottom: 0;
+    background: linear-gradient(to right, #164A41, #2b592c);
+    padding: 100px 0 30px;
+    /*border-top-left-radius: 125px;*/
+    font-size: 14px;
+    line-height: 20px;
+    color: white;
+}
+
+.footerlogo{
+    width: 120px;
+    height: 120px;
+}
+
+.row{
+    width: 85%;
+    margin: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.col{
+    flex-basis: 25%;
+    padding: 10px;
+}
+
+.col p{
+    padding: 10px 10px 60px 0;
+}
