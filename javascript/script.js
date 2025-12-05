@@ -15,3 +15,13 @@ window.addEventListener("scroll", function(){
     const navbar = this.document.getElementById("navbar");
     navbar.classList.add("scrolled");
 }
+
+function showSidebar(){
+    const sidebar = this.document.getElementById("sidebar");
+    sidebar.style.right = '0';
+}
+
+function closeSidebar(){
+    const sidebar = this.document.getElementById("sidebar");
+    sidebar.style.right = '-100%';
+}
