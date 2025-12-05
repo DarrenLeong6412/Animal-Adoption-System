@@ -1,4 +1,6 @@
 console.log("JS connected")
+
+if (document.body.classList.contains("home")){
 window.addEventListener("scroll", function(){
 
     const navbar = this.document.getElementById("navbar");
@@ -9,3 +11,7 @@ window.addEventListener("scroll", function(){
         navbar.classList.remove("scrolled");
     }
 });
+}else{
+    const navbar = this.document.getElementById("navbar");
+    navbar.classList.add("scrolled");
+}
