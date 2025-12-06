@@ -9,6 +9,7 @@
     width: 100%;
 }
 
+/*#region navigation bar*/
 /*Navigation Bar Start*/
 #navbar{
     position:fixed;
@@ -127,8 +128,9 @@
 
 }
 /*Navigation Bar End*/
+/*#endregion*/
 
-
+/*#region homepage*/
 /*Homepage Video Banner Start*/
 .banner{
     width: 100%;
@@ -189,7 +191,6 @@ button:hover{
 }
 /*Homepage Video Banner End*/
 
-
 /*Homepage Recent Animals Start*/
 .stats{
     display: flex;
@@ -247,7 +248,9 @@ button:hover{
     color: black;
 }
 /*Homepage Recent Animals End*/
+/*#endregion*/
 
+/*#region requestpage*/
 /*My Requests*/
 .request-content{
     display: flex;
@@ -380,8 +383,9 @@ button:hover{
     border: 1px solid #F1B24A;
     border-radius: 50px;
 }
+/*#endregion*/
 
-
+/*#region Footer*/
 /*Footer Start*/
 .footer{
     width: 100%;
@@ -416,3 +420,4 @@ button:hover{
     padding: 10px 10px 60px 0;
 }
 /*Footer End*/
+/*#endregion*/
