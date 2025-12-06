@@ -5,6 +5,10 @@
     box-sizing: border-box;
 }
 
+.body{
+    width: 100%;
+}
+
 /*Navigation Bar Start*/
 #navbar{
     position:fixed;
@@ -243,6 +247,140 @@ button:hover{
     color: black;
 }
 /*Homepage Recent Animals End*/
+
+/*My Requests*/
+.request-content{
+    display: flex;
+    padding-top: 80px; /*height of navbar*/
+    padding-bottom: 40px;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.request-content h1{
+    color: #164A41;
+}
+.request-content hr{
+    width: 80%;
+    height: 1px;
+    background-color: #164A41;
+    margin: 15px 0 15px 0 ;
+    border: none;
+}
+.request-filter{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: 13px;
+}
+.request-filter p{
+    color: #164A41;
+}
+.request-filter input[type="radio"]{
+    display: none;
+}
+.request-filter label{
+    padding: 6px 12px 6px 12px;
+    background-color: #eeeeee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    user-select: none;
+}
+.request-filter label:hover{
+    background-color: #d3d3d3;
+}
+.request-filter input[id="all"]:checked + label{
+    background-color: #CFE1B9;
+}
+.request-filter input[id="pending"]:checked + label{
+    background-color: #F1B24A;
+}
+.request-filter input[id="approved"]:checked + label{
+    background-color: #CFE1B9;
+}
+.request-filter input[id="rejected"]:checked + label{
+    background-color: rgb(252, 128, 128);
+}
+.request-filter input[type="radio"]:checked:hover + label:hover{
+    color: black;
+}
+
+.request-flex-container{
+    width: 60%;
+    display: flex;
+    justify-content: start;
+    flex-direction: column;
+    max-width: 950px;
+}
+.request-card{
+    display: flex;
+    justify-content: start;
+    transition: 0.3s;
+    padding: 5px;
+}
+
+.request-card-img-container{
+    overflow: hidden;
+    height: 250px;
+    flex: 3;
+}
+.request-card-img{
+    width: 260px;
+    height: 260px;
+}
+.request-card-info-section{
+    flex: 7;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: flex-start;
+}
+.request-card-info{
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    height: 100%;
+    flex: 8;
+}
+.request-card-info p{
+    font-size: 16px;
+    padding: 15px 5px 2px 20px;
+}
+.request-card-animal-name{
+    color: #000000;
+    font-weight: 600;
+}
+.request-card-info a{
+    text-decoration: none;
+}
+.request-card-info a:hover{
+    color: #F1B24A;
+}
+.request-card-view-details{
+    font-weight: 550;
+    color: #2b592c;
+    text-decoration: underline;
+}
+.request-card-view-details:hover{
+    color: #F1B24A;
+}
+.request-card-status{
+    text-align: center;
+    flex: 2;
+}
+.request-card-status p{
+    padding: 2px;
+    color: white;
+    background-color: #F1B24A;
+    border: 1px solid #F1B24A;
+    border-radius: 50px;
+}
+
 
 /*Footer Start*/
 .footer{
