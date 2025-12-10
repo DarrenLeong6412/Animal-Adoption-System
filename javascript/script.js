@@ -27,3 +27,12 @@ function closeSidebar(){
     sidebar.style.right = '-100%';
 }
 
+//open/close popup
+function openModal(){
+    const modal = this.document.getElementById("modal");
+    modal.classList.add("open");
+}
+function closeModal(){
+    const modal = this.document.getElementById("modal");
+    modal.classList.remove("open");
+}
