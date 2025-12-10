@@ -17,7 +17,8 @@ import {
 import {
   getFirestore,
   doc,
-  setDoc
+  setDoc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
@@ -49,7 +50,6 @@ window.auth = auth;
 window.db   = db;
 
 // ============== "REPOSITORY" LAYER ==============
-// Talks directly to Firestore
 function generateUserId() {
   // VARCHAR(5), format U + 4 digits (U0000–U9999)
   const num = Math.floor(Math.random() * 10000);
@@ -68,19 +68,16 @@ async function saveUserProfileToFirestore(firebaseUser, formData) {
   const userRef = doc(db, "users", firebaseUser.uid);
 
   const userData = {
-    // USER(user_ID, username, email, password, gender,
-    //      identification_Number, role, phone_Number, address)
     user_ID: generateUserId(),                 // VARCHAR(5), U+4 digits
     username: fullName || "",
     email: firebaseUser.email,
     password: null,                            // NOT storing plain password
     gender: gender || null,
     identification_Number: identificationNumber || null,
-    role: "User",                              // default, NOT NULL
+    role: "User",
     phone_Number: phoneNumber || null,
     address: address || null,
 
-    // extra meta
     createdAt: new Date().toISOString(),
     authProvider: "password",
     firebaseUid: firebaseUser.uid
@@ -90,7 +87,6 @@ async function saveUserProfileToFirestore(firebaseUser, formData) {
 }
 
 // ============== "USE CASE" LAYER ==============
-// Business logic + (simple) validation
 function validateSignupData({
   fullName,
   email,
@@ -102,14 +98,12 @@ function validateSignupData({
 }) {
   const errors = [];
 
-  // username (fullName) – NOT NULL, VARCHAR(50)
   if (!fullName || fullName.trim().length === 0) {
     errors.push("Full Name is required.");
   } else if (fullName.length > 50) {
     errors.push("Full Name must not exceed 50 characters.");
   }
 
-  // email – NOT NULL, VARCHAR(100), valid format
   if (!email || email.trim().length === 0) {
     errors.push("Email is required.");
   } else if (email.length > 100) {
@@ -121,19 +115,16 @@ function validateSignupData({
     }
   }
 
-  // password – NOT NULL, VARCHAR(255)
   if (!password || password.length === 0) {
     errors.push("Password is required.");
   } else if (password.length > 255) {
     errors.push("Password must not exceed 255 characters.");
   }
 
-  // gender – CHAR(1) M/F/O – nullable
   if (gender && !["M", "F", "O"].includes(gender)) {
     errors.push("Gender must be M, F, or O.");
   }
 
-  // identification_Number – VARCHAR(20) – nullable
   if (identificationNumber) {
     if (identificationNumber.length > 20) {
       errors.push("Identification Number must not exceed 20 characters.");
@@ -144,7 +135,6 @@ function validateSignupData({
     }
   }
 
-  // phone_Number – VARCHAR(15) – nullable
   if (phoneNumber) {
     if (phoneNumber.length > 15) {
       errors.push("Phone Number must not exceed 15 characters.");
@@ -155,7 +145,6 @@ function validateSignupData({
     }
   }
 
-  // address – VARCHAR(255) – nullable
   if (address && address.length > 255) {
     errors.push("Address must not exceed 255 characters.");
   }
@@ -166,7 +155,6 @@ function validateSignupData({
 }
 
 async function registerUserInDatabase(firebaseUser, formData) {
-  // validate according to your data dictionary
   validateSignupData({
     fullName: formData.fullName,
     email: firebaseUser.email,
@@ -177,7 +165,6 @@ async function registerUserInDatabase(firebaseUser, formData) {
     address: formData.address
   });
 
-  // save to Firestore via "repository"
   await saveUserProfileToFirestore(firebaseUser, formData);
 }
 
@@ -197,7 +184,6 @@ if (signupForm) {
     const phoneNumber = document.getElementById("signupPhone")?.value.trim() || "";
     const address = document.getElementById("signupAddress")?.value.trim() || "";
 
-    // 1) Validate BEFORE hitting Firebase Auth (your rules)
     try {
       validateSignupData({
         fullName,
@@ -213,13 +199,11 @@ if (signupForm) {
       return;
     }
 
-    // 2) Create user in Firebase Authentication
     createUserWithEmailAndPassword(auth, email, password)
       .then(async (userCredential) => {
         const user = userCredential.user;
 
         try {
-          // 3) Register in Firestore (DB) using use-case
           await registerUserInDatabase(user, {
             fullName,
             gender,
@@ -256,7 +240,8 @@ if (loginForm) {
     signInWithEmailAndPassword(auth, email, password)
       .then(() => {
         alert("Login successful!");
-        window.location.href = "index.html"; // change to main page
+        // 👉 After login, go to profile page
+        window.location.href = "profile.html";
       })
       .catch((error) => {
         console.error("Login error:", error);
@@ -264,3 +249,71 @@ if (loginForm) {
       });
   });
 }
+
+// LOGOUT HANDLER (used on profile.html)
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+      alert("Logged out successfully.");
+      window.location.href = "login.html";
+    } catch (err) {
+      console.error("Logout error:", err);
+      alert("Failed to log out.");
+    }
+  });
+}
+
+// ============== AUTH STATE LISTENER (SESSION) ==============
+// This will run on every page that includes auth.js
+onAuthStateChanged(auth, async (user) => {
+  console.log("Auth state changed. Current user:", user?.uid || "null");
+
+  // Elements only exist on profile.html
+  const profileEmailEl = document.getElementById("profileEmail");
+  const profileNameEl  = document.getElementById("profileName");
+  const profileIdEl    = document.getElementById("profileUserId");
+  const profileGenderEl= document.getElementById("profileGender");
+  const profilePhoneEl = document.getElementById("profilePhone");
+  const profileAddressEl = document.getElementById("profileAddress");
+
+  const onProfilePage =
+    profileEmailEl ||
+    profileNameEl ||
+    profileIdEl ||
+    profileGenderEl ||
+    profilePhoneEl ||
+    profileAddressEl;
+
+  // If we're on profile.html and user is NOT logged in → kick to login
+  if (onProfilePage && !user) {
+    alert("You must be logged in to view your profile.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  // If user is logged in & we're on profile page → load data from Firestore
+  if (onProfilePage && user) {
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef);
+
+      if (snap.exists()) {
+        const data = snap.data();
+
+        if (profileEmailEl)   profileEmailEl.textContent = data.email || "";
+        if (profileNameEl)    profileNameEl.textContent = data.username || "";
+        if (profileIdEl)      profileIdEl.textContent   = data.user_ID || "";
+        if (profileGenderEl)  profileGenderEl.textContent = data.gender || "";
+        if (profilePhoneEl)   profilePhoneEl.textContent  = data.phone_Number || "";
+        if (profileAddressEl) profileAddressEl.textContent = data.address || "";
+      } else {
+        console.warn("No profile data found for this user.");
+      }
+    } catch (err) {
+      console.error("Error loading profile:", err);
+    }
+  }
+});
