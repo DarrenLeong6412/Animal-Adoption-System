@@ -1,0 +1,646 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: "Montserrat", sans-serif;
+    box-sizing: border-box;
+}
+
+.body{
+    width: 100%;
+}
+
+/*#region navigation bar*/
+/*Navigation Bar Start*/
+#navbar{
+    position:fixed;
+    width: 100%;
+    padding: 30px;
+    height: 80px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: 0.3s;
+    z-index: 100;
+}
+
+.logo-wrapper{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo{
+    margin-top: 35px;
+    margin-left: 30px;
+    width: 100px;
+    height: 100px;
+}
+
+.logo-shapes path,
+.logo-shapes circle,
+.logo-shapes rect {
+    fill: #FFFF;      /* change main color via CSS */
+    cursor: pointer;
+}
+
+#navbar ul li{
+    list-style: none;
+    display: inline;
+    margin: 20px;
+}
+
+#navbar ul li a{
+    text-decoration: none;
+    text-transform: uppercase;
+    color: white;
+    padding: 10px; 
+    border-radius: 5px;
+    font-weight: 600;
+    transition: 0.3s;
+    font-size: 15px;
+}
+
+#navbar ul li a:hover{
+    background: white;
+}
+
+#navbar a:hover{
+    color: black;
+}
+
+.navicon{
+    width: 20px;
+    height: 20px;
+}
+
+#navbar.scrolled{
+    background-color: #FFFF;
+}
+
+#navbar.scrolled a{
+    color: #164A41;
+}
+
+#navbar.scrolled a:hover{
+    color: #F1B24A;
+}
+
+#navbar.scrolled .logo-shapes path,
+#navbar.scrolled .logo-shapes circle,
+#navbar.scrolled .logo-shapes rect {
+    fill: #164A41;
+}
+
+/*Sidebar*/
+#sidebar {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    height: 100vh;
+    width: 250px;
+    z-index: 999;
+    background-color: rgb(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: -10px 0 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    transition: 0.3s ease-in-out;
+}
+#sidebar li{
+    width: 100%;
+}
+#sidebar a{
+    width: 100%;
+}
+.menu-button{
+    display: none;
+}
+@media(max-width: 950px){
+    .hideOnMobile{
+        display: none;
+    }
+    .menu-button{
+        display: inline;
+    }
+
+}
+/*Navigation Bar End*/
+/*#endregion*/
+
+/*#region homepage*/
+/*Homepage Video Banner Start*/
+.banner{
+    width: 100%;
+    height: 100vh;
+    background-image: linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.40));
+    background-position: center;
+    background-size: center;
+    overflow: hidden;
+}
+
+.banner video{
+    position: relative;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+}
+
+@media(min-aspect-ratio: 16/9){
+    .banner video{
+        width: 100%;
+        height: auto;
+    }
+}
+
+.banner-content{
+    width: 100%;
+    position: absolute;
+    color: white;
+    top: 45%;
+    transform: translateY(-50%);
+    text-align: center;
+}
+
+.banner-content h1{
+    margin-top: 80px;
+    font-size: 90px;
+    font-weight: 800;
+}
+
+button{
+    width: 160px;
+    padding: 12px;
+    margin: 8px 5px;
+    text-align: center;
+    border-radius: 25px;
+    background: #164A41;
+    color: white;
+    border: 2px;
+    font-size: 20px;
+    cursor: pointer;
+    font-weight: 400;
+    transition: 0.3s;
+}
+
+button:hover{
+    background: #FFFF;
+    color: #164A41;
+}
+/*Homepage Video Banner End*/
+
+/*Homepage Recent Animals Start*/
+.stats{
+    display: flex;
+    flex-direction: column;
+    padding: 40px;
+    justify-content: center;
+    align-items: center;
+}
+
+.stats h1{
+    font-weight: 400;
+    color: #0e2e29;
+}
+
+.stats p{
+    padding: 3px;
+}
+
+.name{
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.details{
+    font-size: 15px;
+    font-style: normal;
+}
+
+.cards-container{
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.card{
+    /*flex: 1 1 40%;     /* grow, shrink, basis ~50% minus gap */
+    padding: 20px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+.cardimg{
+    width: 250px;
+    height: 250px;
+}
+
+.viewall{
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    color: #353535;
+}
+
+.viewall:hover{
+    color: black;
+}
+/*Homepage Recent Animals End*/
+/*#endregion*/
+
+/*#region requestpage*/
+/*My Requests*/
+.request-content{
+    display: flex;
+    padding-top: 80px; /*height of navbar*/
+    padding-bottom: 40px;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.request-content h1{
+    color: #164A41;
+    font-weight: 500;
+}
+.request-filter-divider {
+    width: 80%;
+    height: 1px;
+    background-color: #164A41;
+    margin: 15px 0 15px 0 ;
+    border: none;
+}
+.request-filter{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: 13px;
+}
+.request-filter p{
+    color: #164A41;
+}
+.request-filter input[type="radio"]{
+    display: none;
+}
+.request-filter label{
+    padding: 6px 12px 6px 12px;
+    background-color: #eeeeee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    user-select: none;
+}
+.request-filter label:hover{
+    background-color: #d3d3d3;
+}
+.request-filter input[type="radio"]:checked + label{
+    background-color: #CFE1B9;
+}
+.request-filter input[type="radio"]:checked:hover + label:hover{
+    color: black;
+}
+
+.request-flex-container{
+    width: 60%;
+    display: flex;
+    justify-content: start;
+    flex-direction: column;
+    max-width: 950px;
+}
+.request-card{
+    display: flex;
+    justify-content: start;
+    transition: 0.3s;
+    padding: 5px;
+}
+
+.request-card-img-container{
+    overflow: hidden;
+    height: 250px;
+    flex: 3;
+}
+.request-card-img{
+    width: 260px;
+    height: 260px;
+}
+.request-card-info-section{
+    flex: 7;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: flex-start;
+}
+.request-card-info{
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    height: 100%;
+    flex: 8;
+}
+.request-card-info p{
+    font-size: 16px;
+    padding: 15px 5px 2px 20px;
+}
+.request-card-animal-name{
+    color: #000000;
+    font-weight: 600;
+}
+.request-card-info a{
+    cursor: pointer;
+    text-decoration: none;
+}
+.request-card-info a:hover{
+    color: #F1B24A;
+}
+.request-card-view-details{
+    font-weight: 550;
+    color: #2b592c;
+    text-decoration: underline;
+}
+.request-card-view-details:hover{
+    color: #F1B24A;
+}
+.request-card-status{
+    text-align: center;
+    flex: 2;
+}
+.request-card-status p{
+    padding: 2px;
+    color: white;
+    background-color: #F1B24A;
+    border: 1px solid #F1B24A;
+    border-radius: 50px;
+}
+
+.modal {
+    background-color: rgba(0,0,0,0.3);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: all 0.1s ease-in-out;
+    z-index: -1;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-inner{
+    background-color: white;
+    max-width: 900px;
+    width: 90%;
+    height: 90vh;  
+    max-height: 70vh;
+    overflow-y: auto; /* scroll if content is too tall */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    transform: scale(0.9);
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+}
+.modal-inner-top{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 20px;
+    flex-shrink: 0;
+}
+.modal-inner-top-title{
+    flex: 1;
+    text-align: left;
+    padding: 6px;
+}
+.modal-inner-top-title h1{
+    font-weight: 500;
+    font-size: 30px;
+}
+.modal-inner-top-exit{
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+.modal-inner-top-exit a{
+    padding: 8px;
+}
+.modal-inner-top-exit i{
+    align-items: center;
+    color: #164A41;
+    font-size: 18px;
+}
+.modal-inner-top-exit a:hover{
+    border-radius: 100%;
+    background-color: #eeeeee;
+    cursor: pointer;
+}
+.modal-divider{
+    width: 100%;
+    height: 1px;
+    background-color: #164A41;
+
+}
+.modal-inner-details-section{
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    overflow-y: hidden;
+}
+.modal-inner-image-container{
+    max-height: 400px;
+    max-width: 400px;
+    min-height: 400px;
+    min-width: 400px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+.modal-inner-image-container img{
+    width: 350px;
+    height: 350px;  
+}
+.modal-inner-info-container{
+    flex: 1;
+    flex-shrink: 0;
+    text-align: left;
+    padding: 10px;
+    overflow: auto;
+    max-height: 500px;
+}
+.modal.open{
+    opacity: 1;
+    z-index: 999;
+}
+/*#endregion*/
+
+/*#region lostpetpage*/
+/*Lost Pet Reports*/
+.lostpet-content{
+    display: flex;
+    padding-top: 80px; /*height of navbar*/
+    padding-bottom: 40px;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative; 
+}
+
+.lostpet-container{
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* space between search and listings */
+    padding: 20px; /* adds space inside the container */
+    width: 100%;
+    max-width: 1200px; /* optional, keeps layout centered */
+    margin: 0 auto;
+}
+
+.lostpet-listings{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(1, 1fr)); 
+    gap: 25px;   /* spacing between cards */
+    width: 80%;
+}
+.lostpet-content h1{
+    color: #164A41;
+    font-weight: 500;
+}
+.lostpet-filter-divider {
+    width: 80%;
+    height: 1px;
+    background-color: #164A41;
+    margin: 15px 0 15px 0 ;
+    border: none;
+}
+
+.search-box {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 12px 40px;
+  border: 2px solid black;
+  border-radius: 12px;
+  font-size: 16px;
+}
+
+.search-box input::placeholder {
+  color: gray;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: gray;
+}
+
+/* PET CARD */
+.lostpet-card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  display: flex;
+  justify-content: start;
+  transition: 0.3s;
+}
+
+.lostpet-card-img-container {
+    width: 260px;       /* fixed width */
+    height: 200px;      /* fixed height */
+    overflow: hidden;   /* hides extra parts of image */
+    border-radius: 10px;
+    flex-shrink: 0;     /* prevent flex from squeezing the image */
+}
+
+.lostpet-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* the magic: auto crop + maintain aspect ratio */
+    display: block;
+}
+
+.card .content {
+  padding: 12px;
+}
+
+.lostpet-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: orange;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.lostpet-btn {
+    margin: 15px 0 10px 20px;
+    padding: 8px 20px;
+    border: none;
+    background-color: #164A41;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.lostpet-btn:hover {
+    background-color: #F1B24A;
+}
+
+/*#endregion*/
+
+/*#region Footer*/
+/*Footer Start*/
+.footer{
+    width: 100%;
+    bottom: 0;
+    background: linear-gradient(to right, #164A41, #2b592c);
+    padding: 100px 0 30px;
+    /*border-top-left-radius: 125px;*/
+    font-size: 14px;
+    line-height: 20px;
+    color: white;
+}
+
+.footerlogo{
+    width: 120px;
+    height: 120px;
+}
+
+.row{
+    width: 85%;
+    margin: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.col{
+    flex-basis: 25%;
+    padding: 10px;
+}
+
+.col p{
+    padding: 10px 10px 60px 0;
+}
+/*Footer End*/
+/*#endregion*/
