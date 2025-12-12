@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <h1>Create an Account</h1>
+
+  <form id="signupForm">
+    <!-- Email -->
+    <label>Email</label>
+    <input type="email" id="signupEmail" required />
+
+    <!-- Password -->
+    <label>Password</label>
+    <input type="password" id="signupPassword" minlength="6" required />
+
+    <!-- Full Name (we map this to username for now) -->
+    <label>Full Name</label>
+    <input type="text" id="signupName" required />
+
+    <!-- Gender -->
+    <label>Gender</label>
+    <select id="signupGender">
+      <option value="">-- Select Gender --</option>
+      <option value="M">Male</option>
+      <option value="F">Female</option>
+      <option value="O">Other</option>
+    </select>
+
+
+    <!-- Identification Number -->
+    <label>Identification Number (IC / Passport)</label>
+    <input type="text" id="signupIC" />
+
+    <!-- Phone Number -->
+    <label>Phone Number</label>
+    <input type="tel" id="signupPhone" />
+
+    <!-- Address -->
+    <label>Address</label>
+    <textarea id="signupAddress" rows="3"></textarea>
+
+    <!-- Button -->
+    <button type="submit">Sign Up</button>
+  </form>
+
+  <p>Already have an account? <a href="login.html">Log in here</a></p>
+
+  <!-- IMPORTANT: module -->
+  <script type="module" src="js/auth.js"></script>
+</body>
+</html>

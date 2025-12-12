@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Site — Home</title>
+
+  <link rel="stylesheet" href="css/style.css"> <!--link to external CSS-->
+  <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script> <!--link for cart and acc icons-->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!--link for google fonts-->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  
+</head>
+<body class="lostpet">
+
+    <div id="navbar"></div>
+
+    <div class="lostpet-content">
+        <h1>Lost Pet Reports</h1>
+        <hr class="lostpet-filter-divider">
+
+    <div class="lostpet-container">
+
+  <!-- SEARCH SECTION -->
+  <section class="lostpet-search">
+    <div class="search-box">
+      <i class="fa fa-search search-icon"></i>
+      <input type="text" id="searchInput" placeholder="Search by pet name, species, breed, or location...">
+    </div>
+    <p id="countText"></p>
+  </section>
+
+  <!-- PET LISTING SECTION -->
+  <section class="lostpet-listing">
+    <div id="petGrid" class="lostpet-listings"></div>
+  </section>
+
+</div>
+
+    <div id="footer"></div>
+
+    <script src="javascript/script.js"></script>
+    <script src="javascript/template-loader.js"></script>
+    <script src="javascript/lostpet.js"></script>
+</body>
+</html>
