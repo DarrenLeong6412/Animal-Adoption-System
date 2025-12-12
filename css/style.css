@@ -250,6 +250,422 @@ button:hover{
 /*Homepage Recent Animals End*/
 /*#endregion*/
 
+/*#region listingpage*/
+/*My Listing*/
+.listing-content {
+    display: flex;
+    padding-top: 80px; /* height of navbar as requested */
+    padding-bottom: 40px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #ffffff;
+}
+
+/* Flex Container for Width Control (60% width) */
+.listing-flex-container {
+    width: 60%;
+    display: flex;
+    justify-content: start;
+    flex-direction: column;
+    max-width: 950px;
+}
+
+/* Header Row Styling */
+.listing-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    margin-bottom: 25px;
+}
+
+.listing-content h1 {
+    color: #0f172a; /* Dark color from image */
+    font-weight: 700;
+    font-size: 24px;
+    margin: 0 0 8px 0;
+}
+
+.listing-title-group p {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Add Listing Button */
+.btn-add-listing {
+    background-color: #164A41; 
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+.btn-add-listing:hover {
+    background-color: #d0e0d3;
+}
+
+/* Filter Card Styling */
+.listing-filter-card {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    width: 100%;
+}
+
+.listing-filter-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.listing-icon-muted {
+    color: #164A41;
+}
+
+/* Inputs Grid */
+.listing-inputs-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.listing-input-group {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.listing-input-group label {
+    font-size: 14px;
+    color: #475569;
+    font-weight: 500;
+}
+
+.listing-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.listing-input-field {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    transition: 0.2s;
+    box-sizing: border-box; /* Ensures padding doesn't break width */
+}
+
+.listing-input-field:focus {
+    border-color: #94a3b8;
+}
+
+.listing-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #164A41;
+    pointer-events: none;
+}
+
+.listing-input-field.has-icon {
+    padding-left: 35px;
+}
+
+/* Select Dropdown Arrow */
+select.listing-input-field {
+    background-color: white;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px top 50%;
+    background-size: 10px auto;
+}
+
+/* Count Label - Centered Text */
+    .listing-count-label {
+        width: 100%;
+        text-align: center; /* Centered as requested */
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+
+/* Grid Display - Centered Items */
+    .listing-grid-display {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 25px;
+        width: 100%;
+        justify-content: center; /* This centers the cards in the container */
+    }
+
+/* Card: Vertical Column */
+    .listing-card{
+        display: flex;
+        flex-direction: column; 
+        justify-content: start;
+        transition: 0.3s;
+        padding: 0;
+        width: 320px;      
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        overflow: hidden;       
+        position: relative;
+    }
+
+    .listing-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .listing-card-img-container{
+        overflow: hidden;
+        height: 220px;
+        width: 100%;
+        flex: none;
+        position: relative;
+    }
+
+    .listing-card-img{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+/* Status Badge */
+    .listing-card-status{
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 2;
+        padding: 0;
+        flex: none;
+    }
+        
+    .listing-card-status p{
+        padding: 6px 14px;
+        color: #2b592c;
+        background-color: #d1fae5;
+        border: none;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin: 0;
+        display: inline-block;
+    }
+
+    .listing-card-info-section{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        padding: 20px;
+        box-sizing: border-box; 
+        align-items: flex-start;
+        flex: 1;
+    }
+
+    .listing-card-info{
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+        width: 100%;
+        flex: 1;
+    }
+
+    .listing-card-animal-name{
+        color: #333;
+        font-weight: 700;
+        font-size: 20px !important;
+        margin: 0 0 8px 0;
+        padding: 0;
+    }
+
+    .listing-card-info p {
+        padding: 0;
+        margin-bottom: 12px;
+        color: #666;
+        font-size: 15px;
+    }
+
+    .listing-card-details-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #555;
+        font-size: 14px;
+        margin-top: 8px;
+        width: 100%;
+    }
+        
+    .listing-card-details-row i {
+        color: #94a3b8; 
+        width: 16px; 
+        text-align: center;
+    }
+
+    /* ... (Keep your existing CSS above) ... */
+
+/* --- CORRECTED MODAL CSS --- */
+.modal {
+    background-color: rgba(0,0,0,0.4);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: all 0.2s ease-in-out;
+    z-index: -1;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.modal.open {
+    opacity: 1;
+    z-index: 999;
+    pointer-events: auto;
+}
+
+.modal-inner {
+    background-color: white;
+    max-width: 900px;
+    width: 90%;
+    max-height: 85vh; /* Adjusted height */
+    overflow-y: auto; /* Allow scrolling for the whole card if needed */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    transform: scale(0.95);
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+}
+
+.modal.open .modal-inner {
+    transform: scale(1);
+}
+
+.modal-inner-top {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between; /* Fix spacing */
+    padding: 20px 30px;
+    flex-shrink: 0;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-inner-top-title h1 {
+    font-weight: 600;
+    font-size: 24px;
+    margin: 0;
+    color: #164A41;
+}
+
+.modal-inner-top-exit a {
+    padding: 8px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #555;
+}
+
+.modal-inner-top-exit a:hover {
+    color: #d00;
+}
+
+.modal-inner-details-section {
+    display: flex;
+    flex-direction: row;
+    padding: 30px;
+    gap: 30px;
+    /* REMOVED overflow-y: hidden to prevent cutting off text */
+}
+
+/* FIX: Made image container flexible instead of rigid 400px */
+.modal-inner-image-container {
+    flex: 1; 
+    min-width: 300px; /* Minimum width but allows shrinking */
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.modal-inner-image-container img {
+    width: 100%;
+    height: 350px; 
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.modal-inner-info-container {
+    flex: 1;
+    text-align: left;
+}
+
+.modal-inner-info-container h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 28px;
+    margin-bottom: 15px;
+}
+
+/* ADDED MISSING CSS FOR ICONS/TEXT ROWS */
+.modal-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: #555;
+    font-size: 15px;
+}
+
+.modal-detail-item i {
+    color: #164A41;
+    width: 20px;
+    text-align: center;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .modal-inner-details-section {
+        flex-direction: column;
+    }
+    .modal-inner-image-container img {
+        height: 250px;
+    }
+}
+/*#endregion*/
+
+
 /*#region requestpage*/
 /*My Requests*/
 .request-content{
