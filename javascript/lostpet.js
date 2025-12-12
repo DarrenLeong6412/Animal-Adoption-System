@@ -44,16 +44,27 @@ function renderPets(list) {
   grid.innerHTML = "";
   list.forEach((pet) => {
     grid.innerHTML += `
-      <div class="card">
-        <div style="position: relative;">
-          <img src="${pet.imageUrl}" alt="${pet.name}">
-          <span class="badge">${pet.status}</span>
+      <div class="lostpet-card">
+        
+        <div class="lostpet-card-img-container">
+          <img class="lostpet-card-img" src="${pet.imageUrl}" alt="${pet.name}">
         </div>
-        <div class="content">
-          <h3>${pet.name}</h3>
-          <p>${pet.breed} • ${pet.species} • ${pet.color}</p>
-          <p><strong>Last seen:</strong> ${pet.lastSeenLocation}</p>
+
+        <div class="lostpet-card-info-section">
+          <div class="lostpet-card-info">
+            <p class="lostpet-card-animal-name">${pet.name}</p>
+            <p>${pet.breed} • ${pet.species} • ${pet.color}</p>
+            <p><strong>Last seen:</strong> ${pet.lastSeenLocation}</p>
+
+            <!-- ⭐ NEW BUTTON ⭐ -->
+            <button class="lostpet-btn">View Details</button>
+          </div>
         </div>
+
+        <div class="lostpet-card-status">
+          <p>${pet.status}</p>
+        </div>
+
       </div>
     `;
   });
@@ -62,6 +73,13 @@ function renderPets(list) {
 }
 
 renderPets(pets);
+
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("lostpet-btn")) {
+    alert("Button clicked — currently no function assigned");
+  }
+});
+
 
 // ---------- LIVE SEARCH ----------
 searchInput.addEventListener("input", () => {
