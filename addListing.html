@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Animal Listing</title>
+    <style>
+        /* Basic Reset & Font */
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f3f4f6; padding: 20px; display: flex; justify-content: center; }
+
+        /* Card Container */
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 700px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* Headers */
+        .header { margin-bottom: 25px; }
+        .back-link { text-decoration: none; color: #555; font-size: 14px; display: flex; align-items: center; gap: 5px; margin-bottom: 15px;}
+        h2 { margin: 0; color: #333; }
+        p.subtitle { color: #666; margin: 5px 0 0 0; font-size: 14px; }
+
+        /* Form Sections */
+        .section-title { font-size: 16px; color: #374151; margin-top: 20px; margin-bottom: 10px; font-weight: 600; }
+        
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .form-group { flex: 1; }
+
+        label { display: block; font-size: 14px; color: #4b5563; margin-bottom: 6px; }
+        .required { color: #dc2626; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+        input:focus, select:focus, textarea:focus { border-color: #10b981; }
+        textarea { resize: vertical; height: 80px; }
+
+        /* Image Upload Styling */
+        .image-preview-container {
+            margin-top: 10px;
+            border: 2px dashed #d1d5db;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+        }
+        .image-preview-container:hover { border-color: #10b981; background: #f0fdf4; }
+        #previewImg { max-height: 200px; display: none; margin: 0 auto; border-radius: 4px; }
+        #uploadText { color: #6b7280; font-size: 14px; }
+
+        /* Buttons */
+        .button-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; }
+        .btn { padding: 10px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; font-weight: 500; }
+        .btn-cancel { background: white; border: 1px solid #d1d5db; color: #374151; }
+        .btn-submit { background: #3c6e48; color: white; } /* Matches your green button */
+        .btn-submit:hover { background: #2f5738; }
+        .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <a href="listing.html" class="back-link">← Back</a>
+        <h2>Create Animal Listing</h2>
+        <p class="subtitle">Help a stray animal find their forever home</p>
+    </div>
+
+    <form id="addListingForm">
+        
+        <div class="section-title">Basic Information</div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Animal Name <span class="required">*</span></label>
+                <input type="text" id="animalName" placeholder="e.g. Buddy" required>
+            </div>
+            <div class="form-group">
+                <label>Animal Type <span class="required">*</span></label>
+                <select id="animalType">
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                    <option value="Bird">Bird</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Age (Month)<span class="required">*</span></label>
+                <input type="number" id="animalAge" placeholder="e.g. 2" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Gender <span class="required">*</span></label>
+                <select id="animalGender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Breed</label>
+                <input type="text" id="animalBreed" placeholder="e.g. Golden Retriever">
+            </div>
+    
+        </div>
+
+        <div class="section-title">Location & Health</div>
+        
+        <div class="form-group">
+            <label>Temporary Shelter Location <span class="required">*</span></label>
+            <input type="text" id="animalLocation" placeholder="e.g., Downtown Shelter, Main Street" required>
+        </div>
+
+        <br>
+        <div class="form-group">
+            <label>Vaccination Status <span class="required">*</span></label>
+            <select id="animalVaccination">
+                <option value="Unknown">Unknown</option>
+                <option value="Vaccinated">Vaccinated</option>
+                <option value="Not Vaccinated">Not Vaccinated</option>
+            </select>
+        </div>
+
+        <br>
+        <div class="form-group">
+            <label>Description <span class="required">*</span></label>
+            <textarea id="animalDescription" placeholder="Describe the animal's personality, behavior..." required></textarea>
+        </div>
+
+        <div class="section-title">Animal Photo</div>
+        <div class="form-group">
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            <div class="image-preview-container" onclick="document.getElementById('fileInput').click()">
+                <div id="uploadText">
+                    Click to upload image<br>
+                    <span style="font-size: 12px; color: #9ca3af;">(Max size auto-resized to fit database)</span>
+                </div>
+                <img id="previewImg" src="" alt="Preview">
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button type="button" class="btn btn-cancel" onclick="window.history.back()">Cancel</button>
+            <button type="submit" class="btn btn-submit" id="submitBtn">Submit Listing</button>
+        </div>
+    </form>
+</div>
+
+<script type="module" src="js/addListing.js"></script>
+
+</body>
+</html>

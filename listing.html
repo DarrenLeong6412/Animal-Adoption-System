@@ -5,12 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>My Site — Home</title>
 
-  <link rel="stylesheet" href="css/style.css"> <!--link to external CSS-->
-  <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script> <!--link for cart and acc icons-->
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!--link for google fonts-->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css"> <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script> <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   
 </head>
 <body class="listing">
@@ -25,7 +21,7 @@
                     <h1>Animals for Adoption</h1>
                     <p>Find your perfect companion and give them a forever home</p>
                 </div>
-                <button class="btn-add-listing">
+                <button class="btn-add-listing" onclick="window.location.href='addListing.html'">
                     <i class="fas fa-plus"></i> Add Listing
                 </button>
             </div>
@@ -78,51 +74,16 @@
         </div>
 
         <div class="listing-count-label">
-                Showing 3 animals
-            </div>
+            Showing available animals
+        </div>
 
-            <div class="listing-grid-display">
-
-                    <div class="listing-card" onclick="showAnimalDetails('Max', 'https://placedog.net/400/300?id=12', 'Golden Retriever • 2 years', 'Downtown Shelter', 'Vaccinated')">
-                    <div class="listing-card-img-container">
-                        <img src="https://placedog.net/400/300?id=12" alt="Max" class="listing-card-img">
-                        <div class="listing-card-status"><p>Approved</p></div>
-                    </div>
-                    <div class="listing-card-info-section">
-                        <p class="listing-card-animal-name">Max</p>
-                        <p>Golden Retriever • 24 months • male</p>
-                        <div class="listing-card-details-row">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Downtown Shelter</span>
-                        </div>
-                        <div class="listing-card-details-row">
-                            <i class="fas fa-syringe"></i>
-                            <span>Vaccinated</span>
-                        </div>
-                    </div>
-                </div>
-
-                 <div class="listing-card" onclick="showAnimalDetails('Charlie', 'https://placedog.net/400/300?id=45', 'Beagle Mix • 3 years', 'Westside Care', 'Vaccinated')">
-                    <div class="listing-card-img-container">
-                        <img src="https://placedog.net/400/300?id=45" alt="Charlie" class="listing-card-img">
-                        <div class="listing-card-status"><p>Approved</p></div>
-                    </div>
-                    <div class="listing-card-info-section">
-                        <p class="listing-card-animal-name">Charlie</p>
-                        <p>Beagle Mix • 36 months • male</p>
-                        <div class="listing-card-details-row">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Westside Care</span>
-                        </div>
-                        <div class="listing-card-details-row">
-                            <i class="fas fa-syringe"></i>
-                            <span>Vaccinated</span>
-                        </div>
-                    </div>
-                </div>
-            </div> </div>
+        <div id="listingGrid" class="listing-grid-display">
+            <p style="text-align: center; color: #666; padding: 20px;">Loading animals from database...</p>
+        </div>
+        
     </div>
-   <div class="modal" id="animalModal">
+
+    <div class="modal" id="animalModal">
         <div class="modal-inner">
 
             <div class="modal-inner-top">
@@ -172,8 +133,8 @@
     <script>
         var modal = document.getElementById("animalModal");
 
+        // This function is called by the Firebase script when a card is clicked
         function showAnimalDetails(name, image, desc, loc, vaccine) {
-            // 1. Fill the modal with the data
             document.getElementById('modalTitle').innerText = name + "'s Details";
             document.getElementById('modalName').innerText = name;
             document.getElementById('modalImg').src = image;
@@ -181,7 +142,6 @@
             document.getElementById('modalLoc').innerText = loc;
             document.getElementById('modalVaccine').innerText = vaccine;
 
-            // 2. Add the 'open' class
             modal.classList.add("open");
         }
 
@@ -189,7 +149,6 @@
             modal.classList.remove("open");
         }
 
-        // Close if clicked outside
         window.onclick = function(event) {
             if (event.target == modal) {
                 closeAnimalModal();
@@ -197,12 +156,10 @@
         }
     </script>
     
-
-
-    <div id="footer"></div>
-
     <script src="javascript/script.js"></script>
     <script src="javascript/template-loader.js"></script>
+
+    <script type="module" src="js/displayListing.js"></script>
 
 </body>
 </html>
