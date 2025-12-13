@@ -558,7 +558,7 @@ select.listing-input-field {
     background-color: white;
     max-width: 900px;
     width: 90%;
-    max-height: 85vh; /* Adjusted height */
+    max-height: 90vh; /* Adjusted height */
     overflow-y: auto; /* Allow scrolling for the whole card if needed */
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     transform: scale(0.95);
