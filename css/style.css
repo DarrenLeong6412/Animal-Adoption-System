@@ -665,6 +665,175 @@ select.listing-input-field {
 }
 /*#endregion*/
 
+/*#region addListingPage*/
+/* Add Listing Specific Body */
+.add-listing-body {
+    background-color: #f3f4f6;
+    padding: 100px 20px 40px; /* Added top padding for Navbar clearance */
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* Card Container */
+.add-listing-container {
+    background: white;
+    width: 100%;
+    max-width: 700px;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    height: fit-content;
+}
+
+/* Headers */
+.add-listing-header { 
+    margin-bottom: 25px; 
+}
+
+.back-link { 
+    text-decoration: none; 
+    color: #555; 
+    font-size: 14px; 
+    display: flex; 
+    align-items: center; 
+    gap: 5px; 
+    margin-bottom: 15px;
+}
+
+.add-listing-header h2 { 
+    margin: 0; 
+    color: #333; 
+    font-weight: 700;
+}
+
+p.subtitle { 
+    color: #666; 
+    margin: 5px 0 0 0; 
+    font-size: 14px; 
+}
+
+/* Form Sections */
+.section-title { 
+    font-size: 16px; 
+    color: #374151; 
+    margin-top: 20px; 
+    margin-bottom: 10px; 
+    font-weight: 600; 
+}
+
+.form-row { 
+    display: flex; 
+    gap: 15px; 
+    margin-bottom: 15px; 
+}
+
+.form-group { 
+    flex: 1; 
+}
+
+.add-listing-container label { 
+    display: block; 
+    font-size: 14px; 
+    color: #4b5563; 
+    margin-bottom: 6px; 
+    font-weight: 500;
+}
+
+.required { 
+    color: #dc2626; 
+}
+
+/* Inputs */
+.add-listing-container input, 
+.add-listing-container select, 
+.add-listing-container textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.add-listing-container input:focus, 
+.add-listing-container select:focus, 
+.add-listing-container textarea:focus { 
+    border-color: #10b981; 
+}
+
+.add-listing-container textarea { 
+    resize: vertical; 
+    height: 80px; 
+}
+
+/* Image Upload Styling */
+.image-preview-container {
+    margin-top: 10px;
+    border: 2px dashed #d1d5db;
+    padding: 20px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    background-color: #fafafa;
+}
+
+.image-preview-container:hover { 
+    border-color: #10b981; 
+    background: #f0fdf4; 
+}
+
+#previewImg { 
+    max-height: 200px; 
+    display: none; 
+    margin: 0 auto; 
+    border-radius: 4px; 
+}
+
+#uploadText { 
+    color: #6b7280; 
+    font-size: 14px; 
+}
+
+/* Form Buttons */
+.button-group { 
+    display: flex; 
+    justify-content: flex-end; 
+    gap: 10px; 
+    margin-top: 30px; 
+}
+
+.btn { 
+    padding: 10px 20px; 
+    border-radius: 6px; 
+    font-size: 14px; 
+    cursor: pointer; 
+    border: none; 
+    font-weight: 500; 
+}
+
+.btn-cancel { 
+    background: white; 
+    border: 1px solid #d1d5db; 
+    color: #374151; 
+}
+
+.btn-submit { 
+    background: #3c6e48; 
+    color: white; 
+}
+
+.btn-submit:hover { 
+    background: #2f5738; 
+}
+
+.btn:disabled { 
+    opacity: 0.7; 
+    cursor: not-allowed; 
+}
+/*#endregion*/
 
 /*#region requestpage*/
 /*My Requests*/

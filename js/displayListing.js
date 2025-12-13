@@ -1,4 +1,4 @@
-// js/displayListings.js
+// js/displayListing.js
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
@@ -16,61 +16,30 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 1. Global list to store animal data for the Modal
-window.allAnimals = {}; 
+// Global store
+let allListings = [];
 
 async function loadAnimals() {
     const grid = document.getElementById("listingGrid");
-    
-    // Clear the hardcoded "Max" and "Charlie"
     grid.innerHTML = '<p style="text-align:center; width:100%;">Loading animals...</p>';
 
     try {
         const querySnapshot = await getDocs(collection(db, "animals"));
         
-        // If empty
         if (querySnapshot.empty) {
             grid.innerHTML = '<p>No animals found. Add one!</p>';
             return;
         }
 
-        // Clear loading text
-        grid.innerHTML = "";
-
+        allListings = [];
         querySnapshot.forEach((doc) => {
-            const animal = doc.data();
-            const animalId = doc.id;
-            
-            // Store data for the modal popup later
-            window.allAnimals[animalId] = animal;
-
-            // Create the Card HTML
-            // We use a specific onclick function: openModalById('ID')
-            const cardHTML = `
-                <div class="listing-card" onclick="openModalById('${animalId}')">
-                    <div class="listing-card-img-container">
-                        <img src="${animal.imageUrl}" alt="${animal.name}" class="listing-card-img">
-                        <div class="listing-card-status"><p>${animal.status || 'Available'}</p></div>
-                    </div>
-                    <div class="listing-card-info-section">
-                        <p class="listing-card-animal-name">${animal.name}</p>
-                        <p>${animal.breed || animal.type} • ${animal.age} ${animal.ageUnit} • ${animal.gender}</p>
-                        
-                        <div class="listing-card-details-row">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>${animal.location}</span>
-                        </div>
-                        <div class="listing-card-details-row">
-                            <i class="fas fa-syringe"></i>
-                            <span>${animal.vaccinationStatus}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Add to grid
-            grid.innerHTML += cardHTML;
+            let data = doc.data();
+            data.id = doc.id; 
+            allListings.push(data);
         });
+
+        renderGrid(allListings);
+        setupFilters();
 
     } catch (error) {
         console.error("Error loading animals:", error);
@@ -78,24 +47,106 @@ async function loadAnimals() {
     }
 }
 
-// Run the function when page loads
-loadAnimals();
+function renderGrid(dataList) {
+    const grid = document.getElementById("listingGrid");
+    grid.innerHTML = ""; 
 
-// Expose the open function to the global window so HTML can see it
+    if (dataList.length === 0) {
+        grid.innerHTML = '<p style="text-align:center; width:100%; padding:20px;">No animals match your filters.</p>';
+        return;
+    }
+
+    dataList.forEach((animal) => {
+        // Construct readable breed string
+        const breedDisplay = animal.breed ? `${animal.type} • ${animal.breed}` : animal.type;
+
+        const cardHTML = `
+            <div class="listing-card" onclick="openModalById('${animal.id}')">
+                <div class="listing-card-img-container">
+                    <img src="${animal.imageUrl}" alt="${animal.name}" class="listing-card-img">
+                    <div class="listing-card-status"><p>${animal.status || 'Available'}</p></div>
+                </div>
+                <div class="listing-card-info-section">
+                    <p class="listing-card-animal-name">${animal.name}</p>
+                    <p>${breedDisplay} • ${animal.age} Months • ${animal.gender}</p>
+                    
+                    <div class="listing-card-details-row">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>${animal.location}</span>
+                    </div>
+                    <div class="listing-card-details-row">
+                        <i class="fas fa-syringe"></i>
+                        <span>${animal.vaccinationStatus}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        grid.innerHTML += cardHTML;
+    });
+}
+
+function setupFilters() {
+    const searchInput = document.getElementById("filterSearch");
+    const ageInput = document.getElementById("filterAge");
+    const typeInput = document.getElementById("filterType");
+    const genderInput = document.getElementById("filterGender");
+
+    searchInput.addEventListener("input", filterAndRender);
+    ageInput.addEventListener("input", filterAndRender);
+    typeInput.addEventListener("change", filterAndRender);
+    genderInput.addEventListener("change", filterAndRender);
+}
+
+function filterAndRender() {
+    const searchText = document.getElementById("filterSearch").value.toLowerCase();
+    const ageVal = document.getElementById("filterAge").value;
+    const typeVal = document.getElementById("filterType").value;
+    const genderVal = document.getElementById("filterGender").value;
+
+    const filteredData = allListings.filter(animal => {
+        const nameMatch = animal.name.toLowerCase().includes(searchText);
+        const breedMatch = (animal.breed || "").toLowerCase().includes(searchText);
+        const searchPass = nameMatch || breedMatch;
+
+        let agePass = true;
+        if (ageVal !== "") {
+            agePass = parseInt(animal.age) == parseInt(ageVal);
+        }
+
+        let typePass = true;
+        if (typeVal !== "All") {
+            typePass = animal.type === typeVal;
+        }
+
+        let genderPass = true;
+        if (genderVal !== "All") {
+            genderPass = animal.gender === genderVal;
+        }
+
+        return searchPass && agePass && typePass && genderPass;
+    });
+
+    renderGrid(filteredData);
+}
+
+// Modal Helper
 window.openModalById = function(id) {
-    const data = window.allAnimals[id];
+    const data = allListings.find(a => a.id === id);
     if (!data) return;
 
-    // Use your existing showAnimalDetails logic, but fed with real data
-    // We construct the description string dynamically
-    const descString = `${data.breed} • ${data.age} ${data.ageUnit}`;
-    
-    // Call the function you already have in your HTML script
+    // Create text for the Paw Icon (e.g., "Dog • Golden Retriever")
+    const breedText = data.breed ? `${data.type} • ${data.breed}` : data.type;
+
+    // Pass data to listing.html function
+    // 1. Name, 2. Image, 3. Breed(for Icon), 4. Location, 5. Vaccine, 6. Description(for Bottom)
     showAnimalDetails(
         data.name, 
         data.imageUrl, 
-        data.description, // Passing full description here
+        breedText,           
         data.location, 
-        data.vaccinationStatus
+        data.vaccinationStatus,
+        data.description || "No description provided." 
     );
 };
+
+loadAnimals();

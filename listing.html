@@ -3,11 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>My Site — Home</title>
-
-  <link rel="stylesheet" href="css/style.css"> <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script> <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <title>PawResQ — Listing</title> <link rel="stylesheet" href="css/style.css"> 
+  <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script> 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   
+  <style>
+    /* Added a small style for the new About Header */
+    #modalAboutTitle {
+        color: #0d3b25; /* Matches your theme dark green */
+        font-size: 18px;
+        font-weight: 700;
+        margin-top: 25px;
+        margin-bottom: 8px;
+    }
+  </style>
 </head>
 <body class="listing">
 
@@ -27,50 +38,43 @@
             </div>
 
             <div class="listing-filter-card">
-                
                 <div class="listing-filter-header">
                     <i class="fas fa-filter listing-icon-muted"></i>
                     <span>Filters</span>
                 </div>
 
                 <div class="listing-inputs-grid">
-                    
                     <div class="listing-input-group">
                         <label>Search</label>
                         <div class="listing-input-wrapper">
                             <i class="fas fa-search listing-search-icon"></i>
-                            <input type="text" class="listing-input-field has-icon" placeholder="Name or breed...">
+                            <input type="text" id="filterSearch" class="listing-input-field has-icon" placeholder="Name or breed...">
                         </div>
                     </div>
-
                     <div class="listing-input-group">
                         <label>Age (Months)</label>
-                        <input type="number" class="listing-input-field" placeholder="e.g. 24" min="0">
+                        <input type="number" id="filterAge" class="listing-input-field" placeholder="e.g. 24" min="0">
                     </div>
-
                     <div class="listing-input-group">
                         <label>Animal Type</label>
-                        <select class="listing-input-field">
-                            <option>All Types</option>
-                            <option>Dog</option>
-                            <option>Cat</option>
-                            <option>Bird</option>
-                            <option>Other</option>
+                        <select id="filterType" class="listing-input-field">
+                            <option value="All">All Types</option>
+                            <option value="Dog">Dog</option>
+                            <option value="Cat">Cat</option>
+                            <option value="Bird">Bird</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
-
                     <div class="listing-input-group">
                         <label>Animal Gender</label>
-                        <select class="listing-input-field">
-                            <option>Male</option>
-                            <option>Female</option>
-                            <option>Other</option>
+                        <select id="filterGender" class="listing-input-field">
+                            <option value="All">All Genders</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
                         </select>
                     </div>
-
                 </div>
             </div>
-
         </div>
 
         <div class="listing-count-label">
@@ -80,7 +84,6 @@
         <div id="listingGrid" class="listing-grid-display">
             <p style="text-align: center; color: #666; padding: 20px;">Loading animals from database...</p>
         </div>
-        
     </div>
 
     <div class="modal" id="animalModal">
@@ -104,7 +107,7 @@
                     
                     <div class="modal-detail-item">
                         <i class="fas fa-paw"></i>
-                        <span id="modalDesc">Description</span>
+                        <span id="modalBreed">Breed Info</span>
                     </div>
 
                     <div class="modal-detail-item">
@@ -117,11 +120,13 @@
                         <span id="modalVaccine">Vaccine</span>
                     </div>
 
-                    <p style="margin-top: 20px; color: #666; line-height: 1.5; font-size: 14px;">
-                        This animal is currently available for adoption. Please click the button below to start the application process.
+                    <h3 id="modalAboutTitle">About Animal</h3>
+
+                    <p id="modalFullDesc" style="color: #555; line-height: 1.6; font-size: 14px; margin-top: 0;">
+                        Loading description...
                     </p>
 
-                    <button class="btn-add-listing" style="margin-top: 15px;">Adopt Me</button>
+                    <button class="btn-add-listing" style="margin-top: 20px; width: 100%;">Adopt Me</button>
                 </div>
             </div>
             
@@ -133,14 +138,22 @@
     <script>
         var modal = document.getElementById("animalModal");
 
-        // This function is called by the Firebase script when a card is clicked
-        function showAnimalDetails(name, image, desc, loc, vaccine) {
+        // ✅ Updated Function: Now accepts 'fullDesc' and updates the new "About" header
+        function showAnimalDetails(name, image, breed, loc, vaccine, fullDesc) {
             document.getElementById('modalTitle').innerText = name + "'s Details";
             document.getElementById('modalName').innerText = name;
             document.getElementById('modalImg').src = image;
-            document.getElementById('modalDesc').innerText = desc;
+            
+            // Map data to specific IDs
+            document.getElementById('modalBreed').innerText = breed;       // Paw Icon = Breed
             document.getElementById('modalLoc').innerText = loc;
             document.getElementById('modalVaccine').innerText = vaccine;
+
+            // Update the "About Max" Header
+            document.getElementById('modalAboutTitle').innerText = "About " + name;
+            
+            // Update the Description Text
+            document.getElementById('modalFullDesc').innerText = fullDesc; 
 
             modal.classList.add("open");
         }

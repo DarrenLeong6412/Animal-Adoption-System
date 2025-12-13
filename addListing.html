@@ -4,75 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Animal Listing</title>
-    <style>
-        /* Basic Reset & Font */
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f3f4f6; padding: 20px; display: flex; justify-content: center; }
-
-        /* Card Container */
-        .container {
-            background: white;
-            width: 100%;
-            max-width: 700px;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        /* Headers */
-        .header { margin-bottom: 25px; }
-        .back-link { text-decoration: none; color: #555; font-size: 14px; display: flex; align-items: center; gap: 5px; margin-bottom: 15px;}
-        h2 { margin: 0; color: #333; }
-        p.subtitle { color: #666; margin: 5px 0 0 0; font-size: 14px; }
-
-        /* Form Sections */
-        .section-title { font-size: 16px; color: #374151; margin-top: 20px; margin-bottom: 10px; font-weight: 600; }
-        
-        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
-        .form-group { flex: 1; }
-
-        label { display: block; font-size: 14px; color: #4b5563; margin-bottom: 6px; }
-        .required { color: #dc2626; }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-            outline: none;
-        }
-        input:focus, select:focus, textarea:focus { border-color: #10b981; }
-        textarea { resize: vertical; height: 80px; }
-
-        /* Image Upload Styling */
-        .image-preview-container {
-            margin-top: 10px;
-            border: 2px dashed #d1d5db;
-            padding: 20px;
-            text-align: center;
-            border-radius: 8px;
-            cursor: pointer;
-            position: relative;
-        }
-        .image-preview-container:hover { border-color: #10b981; background: #f0fdf4; }
-        #previewImg { max-height: 200px; display: none; margin: 0 auto; border-radius: 4px; }
-        #uploadText { color: #6b7280; font-size: 14px; }
-
-        /* Buttons */
-        .button-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; }
-        .btn { padding: 10px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; font-weight: 500; }
-        .btn-cancel { background: white; border: 1px solid #d1d5db; color: #374151; }
-        .btn-submit { background: #3c6e48; color: white; } /* Matches your green button */
-        .btn-submit:hover { background: #2f5738; }
-        .btn:disabled { opacity: 0.7; cursor: not-allowed; }
-
-    </style>
+    
+    <link rel="stylesheet" href="css/style.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="add-listing-body">
 
-<div class="container">
-    <div class="header">
+<div class="add-listing-container">
+    <div class="add-listing-header">
         <a href="listing.html" class="back-link">← Back</a>
         <h2>Create Animal Listing</h2>
         <p class="subtitle">Help a stray animal find their forever home</p>
@@ -100,10 +42,9 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label>Age (Month)<span class="required">*</span></label>
-                <input type="number" id="animalAge" placeholder="e.g. 2" required>
+                <label>Breed</label>
+                <input type="text" id="animalBreed" placeholder="e.g. Golden Retriever">
             </div>
-            
             <div class="form-group">
                 <label>Gender <span class="required">*</span></label>
                 <select id="animalGender">
@@ -115,10 +56,16 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label>Breed</label>
-                <input type="text" id="animalBreed" placeholder="e.g. Golden Retriever">
+                <label>Age <span class="required">*</span></label>
+                <input type="number" id="animalAge" placeholder="e.g. 2" required>
             </div>
-    
+            <div class="form-group">
+                <label>Age Unit <span class="required">*</span></label>
+                <select id="animalAgeUnit">
+                    <option value="Months">Months</option>
+                    <option value="Years">Years</option>
+                </select>
+            </div>
         </div>
 
         <div class="section-title">Location & Health</div>

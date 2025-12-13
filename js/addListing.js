@@ -94,6 +94,7 @@ document.getElementById('addListingForm').addEventListener('submit', async (e) =
             breed: document.getElementById("animalBreed").value,
             gender: document.getElementById("animalGender").value,
             age: document.getElementById("animalAge").value,
+            ageUnit: document.getElementById("animalAgeUnit").value,
             location: document.getElementById("animalLocation").value,
             vaccinationStatus: document.getElementById("animalVaccination").value,
             description: document.getElementById("animalDescription").value,
