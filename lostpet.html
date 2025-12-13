@@ -18,26 +18,50 @@
     <div id="navbar"></div>
 
     <div class="lostpet-content">
-        <h1>Lost Pet Reports</h1>
-        <hr class="lostpet-filter-divider">
 
-    <div class="lostpet-container">
+      <div class="listing-flex-container">
+            
+            <div class="listing-header-row">
+                <div class="listing-title-group">
+                    <h1>Lost Pet Report</h1>
+                    <p>Help our furry companions find their way back home</p>
+                </div>
+                
+                <button class="btn-add-listing">
+                    <i class="fas fa-plus"></i> Create Report
+                </button>
+            </div>
 
-  <!-- SEARCH SECTION -->
-  <section class="lostpet-search">
-    <div class="search-box">
-      <i class="fa fa-search search-icon"></i>
-      <input type="text" id="searchInput" placeholder="Search by pet name, species, breed, or location...">
-    </div>
+            <div class="listing-filter-card">
+                
+                <div class="listing-filter-header">
+                    <i class="fas fa-filter listing-icon-muted"></i>
+                    <span>Filters</span>
+                </div>
+
+                <div class="listing-inputs-grid">
+                    
+                    <div class="listing-input-group">
+                        <label>Search</label>
+                        <div class="listing-input-wrapper">
+                            <i class="fas fa-search listing-search-icon"></i>
+                            <input type="text" id="searchInput" placeholder="Search by pet name, species, breed, or location..." class="listing-input-field has-icon">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+  <div class="lostpet-container">
     <p id="countText"></p>
-  </section>
 
-  <!-- PET LISTING SECTION -->
-  <section class="lostpet-listing">
-    <div id="petGrid" class="lostpet-listings"></div>
-  </section>
+    <!-- PET LISTING SECTION -->
+    <section class="lostpet-listing">
+      <div id="petGrid" class="lostpet-listings"></div>
+    </section>
 
-</div>
+    </div>
+  </div>
 
     <div id="footer"></div>
 
