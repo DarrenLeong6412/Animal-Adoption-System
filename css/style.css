@@ -254,13 +254,12 @@ button:hover{
 /*My Listing*/
 .listing-content {
     display: flex;
-    padding-top: 80px; /* height of navbar as requested */
+    padding-top: 80px; 
     padding-bottom: 40px;
     width: 100%;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #ffffff;
 }
 
@@ -283,9 +282,8 @@ button:hover{
 }
 
 .listing-content h1 {
-    color: #0f172a; /* Dark color from image */
-    font-weight: 700;
-    font-size: 24px;
+    color: #164A41; /* Dark color from image */
+    font-weight: 600;
     margin: 0 0 8px 0;
 }
 
@@ -442,7 +440,7 @@ select.listing-input-field {
     }
 
     .listing-card:hover {
-        transform: translateY(-5px);
+        scale: 1.01;
         box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     }
 
@@ -560,7 +558,7 @@ select.listing-input-field {
     background-color: white;
     max-width: 900px;
     width: 90%;
-    max-height: 85vh; /* Adjusted height */
+    max-height: 90vh; /* Adjusted height */
     overflow-y: auto; /* Allow scrolling for the whole card if needed */
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     transform: scale(0.95);
@@ -606,7 +604,7 @@ select.listing-input-field {
     display: flex;
     flex-direction: row;
     padding: 30px;
-    gap: 30px;
+    gap: 5px;
     /* REMOVED overflow-y: hidden to prevent cutting off text */
 }
 
@@ -842,15 +840,20 @@ p.subtitle {
     padding-top: 80px; /*height of navbar*/
     padding-bottom: 40px;
     width: 100%;
-    text-align: center;
     justify-content: center;
     align-items: center;
     flex-direction: column;
 }
 .request-content h1{
     color: #164A41;
-    font-weight: 500;
+    font-weight: 600;
+    margin: 0 0 8px 0;
 }
+.request-search{
+    margin-top: 20px;
+    width: 70vw;
+}
+
 .request-filter-divider {
     width: 80%;
     height: 1px;
@@ -858,14 +861,15 @@ p.subtitle {
     margin: 15px 0 15px 0 ;
     border: none;
 }
-.request-filter{
+.request-filter {
     display: flex;
-    flex-direction: row;
+    flex-wrap: wrap; /* allows wrapping if space is small */
+    gap: 8px;        /* space between buttons */
     width: 100%;
-    justify-content: center;
+    justify-content: flex-start; /* aligns items nicely without stretching */
     align-items: center;
-    gap: 13px;
 }
+
 .request-filter p{
     color: #164A41;
 }
@@ -873,24 +877,28 @@ p.subtitle {
     display: none;
 }
 .request-filter label{
-    padding: 6px 12px 6px 12px;
-    background-color: #eeeeee;
+    padding: 6px 8px 6px 8px;
     border-radius: 8px;
     cursor: pointer;
     transition: 0.2s;
     user-select: none;
+    color: rgb(136, 133, 133);
+    box-shadow: 0px 4px 4px rgba(0,0,0,0.1);
 }
 .request-filter label:hover{
     background-color: #d3d3d3;
+    color: #0e2e29;
 }
 .request-filter input[type="radio"]:checked + label{
+    color: #0e2e29;
     background-color: #CFE1B9;
 }
 .request-filter input[type="radio"]:checked:hover + label:hover{
-    color: black;
+    color: #0e2e29;
 }
 
 .request-flex-container{
+    margin-top: 20px;
     width: 60%;
     display: flex;
     justify-content: start;
@@ -900,8 +908,16 @@ p.subtitle {
 .request-card{
     display: flex;
     justify-content: start;
-    transition: 0.3s;
     padding: 5px;
+    border: 1px solid #eeeeee;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 15px;
+    border-radius: 4px;
+    transition: transform 0.2s ease;
+}
+.request-card:hover{
+    transform: scale(1.01);  /* Hover animation */
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 
 .request-card-img-container{
@@ -912,6 +928,7 @@ p.subtitle {
 .request-card-img{
     width: 260px;
     height: 260px;
+    border-radius: 4px;
 }
 .request-card-info-section{
     flex: 7;
@@ -953,13 +970,58 @@ p.subtitle {
 .request-card-status{
     text-align: center;
     flex: 2;
+    min-width: 100px;
+    max-width: 100px;
 }
 .request-card-status p{
     padding: 2px;
     color: white;
     background-color: #F1B24A;
-    border: 1px solid #F1B24A;
     border-radius: 50px;
+}
+.request-card-status p.status-pending {
+    background-color: #F1B24A;
+}
+
+.request-card-status p.status-approved {
+    background-color: #2c6d40;
+}
+
+.request-card-status p.status-rejected {
+    background-color: rgb(177, 40, 40);
+}
+@media (max-width: 900px) {
+  .request-flex-container {
+    width: 70%;
+  }
+
+  .request-card {
+    flex-direction: column;
+  }
+
+  .request-card-img-container {
+    height: auto;
+    width: 100%;
+  }
+
+  .request-card-img {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+  }
+
+  .request-card-info-section {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .request-card-status {
+    text-align: center;
+    padding: 10px 20px;
+    min-width: 150px;
+    max-width: 150px;
+  }
 }
 
 .modal {
@@ -980,14 +1042,12 @@ p.subtitle {
     background-color: white;
     max-width: 900px;
     width: 90%;
-    height: 90vh;  
-    max-height: 70vh;
     overflow-y: auto; /* scroll if content is too tall */
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    transform: scale(0.9);
-    transition: transform 0.3s ease-in-out;
+    transition: transform 0.2s ease-in-out;
     display: flex;
     flex-direction: column;
+    flex:wrap;
 }
 .modal-inner-top{
     display: flex;
@@ -1034,7 +1094,6 @@ p.subtitle {
     flex: 1;
     display: flex;
     flex-direction: row;
-    margin-top: 10px;
     flex-wrap: wrap;
     overflow-y: hidden;
 }
@@ -1047,7 +1106,6 @@ p.subtitle {
     display: flex;
     align-items: center;
     justify-content: center;
-
 }
 .modal-inner-image-container img{
     width: 350px;
@@ -1061,10 +1119,55 @@ p.subtitle {
     overflow: auto;
     max-height: 500px;
 }
+.modal-inner-info-text {
+  margin-bottom: 12px;
+}
+
+.modal-inner-info-text-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #164A41;
+}
+
+.modal-inner-info-text-data {
+  font-size: 1rem;
+  color: #222;
+  padding: 4px 0 8px 0;
+}
 .modal.open{
     opacity: 1;
     z-index: 999;
 }
+@media (max-width: 800px) {
+  .modal-inner-details-section {
+    flex-direction: row;       /* keep row */
+    flex-wrap: nowrap;         /* prevent wrapping */
+    overflow-x: auto;          /* horizontal scroll */
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-inner-image-container,
+  .modal-inner-info-container {
+    flex: 0 0 auto;            /* don’t shrink */
+    max-width: 90%;            /* limit width to prevent crazy stretch */
+    box-sizing: border-box;    /* padding included in width */
+  }
+
+  /* Optional: limit the info container width so text wraps nicely */
+  .modal-inner-info-container {
+    min-width: 200px;          /* don’t get too narrow */
+    white-space: normal;       /* allow text to wrap instead of making container huge */
+  }
+
+  .modal-inner-image-container img {
+    max-width: 100%;           /* keep image inside container */
+    height: auto;
+  }
+}
+
+
+
 /*#endregion*/
 
 /*#region lostpetpage*/
@@ -1074,7 +1177,6 @@ p.subtitle {
     padding-top: 80px; /*height of navbar*/
     padding-bottom: 40px;
     width: 100%;
-    text-align: center;
     justify-content: center;
     align-items: center;
     flex-direction: column;
@@ -1089,6 +1191,8 @@ p.subtitle {
     width: 100%;
     max-width: 1200px; /* optional, keeps layout centered */
     margin: 0 auto;
+    justify-content: center;
+    align-items: center;
 }
 
 .lostpet-listings{
@@ -1099,7 +1203,7 @@ p.subtitle {
 }
 .lostpet-content h1{
     color: #164A41;
-    font-weight: 500;
+    font-weight: 600;
 }
 .lostpet-filter-divider {
     width: 80%;
@@ -1132,6 +1236,9 @@ p.subtitle {
   top: 50%;
   transform: translateY(-50%);
   color: gray;
+}
+.lostpet-search{
+    width: 70vw;
 }
 
 /* PET CARD */
