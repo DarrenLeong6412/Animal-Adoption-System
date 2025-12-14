@@ -1167,3 +1167,138 @@ select.listing-input-field {
 }
 /*Footer End*/
 /*#endregion*/
+
+/*#idk what region should i call this*/
+/* Hide auth-dependent UI until Firebase auth state is ready */
+.auth-loading .auth-ui {
+  visibility: hidden; /* keeps layout, no jump */
+}
+/*#endregion*/
+
+/*#region auth pages (login / signup)*/
+.auth-page {
+  min-height: 100vh;
+  background: #eeeeee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 20px 40px; /* space for fixed navbar if added later */
+}
+
+
+.auth-card {
+  width: 100%;
+  max-width: 520px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+  padding: 28px;
+}
+
+.auth-title {
+  color: #164A41;
+  font-weight: 700;
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-form label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 6px;
+}
+
+.auth-form input,
+.auth-form select,
+.auth-form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.auth-form textarea {
+  resize: vertical;
+}
+
+.auth-form input:focus,
+.auth-form select:focus,
+.auth-form textarea:focus {
+  border-color: #94a3b8;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.auth-submit {
+  width: 100%;
+  border-radius: 12px;
+  padding: 12px;
+  background: #164A41;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.auth-submit:hover {
+  background: #ffffff;
+  color: #164A41;
+  border: 1px solid #164A41;
+}
+
+.auth-footer {
+  margin-top: 14px;
+  font-size: 14px;
+  color: #475569;
+  text-align: center;
+}
+
+.auth-footer a {
+  color: #164A41;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* make long signup form nicer */
+.auth-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .auth-card {
+    padding: 20px;
+  }
+  .auth-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+/*#endregion*/
