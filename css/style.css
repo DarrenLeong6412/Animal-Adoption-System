@@ -442,6 +442,7 @@ select.listing-input-field {
     .listing-card:hover {
         scale: 1.01;
         box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        cursor: pointer;
     }
 
     .listing-card-img-container{
@@ -530,23 +531,6 @@ select.listing-input-field {
     }
 
     /* ... (Keep your existing CSS above) ... */
-
-/* --- CORRECTED MODAL CSS --- */
-.modal {
-    background-color: rgba(0,0,0,0.4);
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    transition: all 0.2s ease-in-out;
-    z-index: -1;
-    opacity: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-}
 
 .modal.open {
     opacity: 1;
@@ -665,7 +649,7 @@ select.listing-input-field {
 
 /*#region addListingPage*/
 /* Add Listing Specific Body */
-.add-listing-body {
+.add-listing-parent {
     background-color: #f3f4f6;
     padding: 100px 20px 40px; /* Added top padding for Navbar clearance */
     display: flex;
@@ -819,17 +803,30 @@ p.subtitle {
 }
 
 .btn-submit { 
-    background: #3c6e48; 
+    background: #164A41; 
     color: white; 
 }
 
 .btn-submit:hover { 
-    background: #2f5738; 
+    background: #d0e0d3; 
+    color: #164A41;
 }
 
 .btn:disabled { 
     opacity: 0.7; 
     cursor: not-allowed; 
+}
+/*#endregion*/
+
+/*#region adoptionform*/
+.adoptionForm-parent{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 100px;
+    padding-bottom: 20px;
+    width: 100%;
+    background-color: #eeeeee;
 }
 /*#endregion*/
 
@@ -916,7 +913,7 @@ p.subtitle {
     transition: transform 0.2s ease;
 }
 .request-card:hover{
-    transform: scale(1.01);  /* Hover animation */
+    /*transform: scale(1.01);  /* Hover animation */
     box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 

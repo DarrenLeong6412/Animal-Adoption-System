@@ -199,7 +199,7 @@ function showModalContent(id) {
         </div>
 
         <div class="modal-inner-info-text">
-            <p class="modal-inner-info-text-title">location</p>
+            <p class="modal-inner-info-text-title">Location</p>
             <p class="modal-inner-info-text-data">${req.location}</p>
         </div>
 

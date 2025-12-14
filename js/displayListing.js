@@ -18,6 +18,7 @@ const db = getFirestore(app);
 
 // Global store
 let allListings = [];
+let selectedAnimalId = null;
 
 async function loadAnimals() {
     const grid = document.getElementById("listingGrid");
@@ -134,6 +135,8 @@ window.openModalById = function(id) {
     const data = allListings.find(a => a.id === id);
     if (!data) return;
 
+    selectedAnimalId = id;
+
     // Create text for the Paw Icon (e.g., "Dog • Golden Retriever")
     const breedText = data.breed ? `${data.type} • ${data.breed}` : data.type;
 
@@ -148,5 +151,16 @@ window.openModalById = function(id) {
         data.description || "No description provided." 
     );
 };
+
+const adoptBtn = document.getElementById("adoptButton");
+
+adoptBtn.addEventListener("click", () => {
+    if (!selectedAnimalId) {
+        alert("No animal selected.");
+        return;
+    }
+
+    window.location.href = `adoptionForm.html?listingID=${selectedAnimalId}`;
+});
 
 loadAnimals();
