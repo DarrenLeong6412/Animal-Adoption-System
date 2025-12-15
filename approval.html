@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PawResQ — Admin Approvals</title>
 
-  <link rel="stylesheet" href="css/style.css"> <!--link to external CSS-->
-  <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script> <!--link for cart and acc icons-->
-  <script>document.documentElement.classList.add("auth-loading");</script>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!--link for google fonts-->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-  
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PawResQ — Admin Approvals</title>
+
+    <link rel="stylesheet" href="css/style.css"> <!--link to external CSS-->
+    <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script>
+    <!--link for cart and acc icons-->
+    <script>document.documentElement.classList.add("auth-loading");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!--link for google fonts-->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+
 </head>
+
 <body class="approval">
 
     <div id="navbar"></div>
@@ -21,47 +25,40 @@
     <div class="request-content">
 
         <div class="listing-flex-container">
-            
+
             <div class="listing-header-row">
                 <div class="listing-title-group">
                     <h1>Admin Approvals</h1>
                     <p></p>
                 </div>
-                
+
             </div>
 
             <div class="listing-filter-card">
-                
+
                 <div class="listing-filter-header">
-                    <i class="fas fa-filter listing-icon-muted"></i>
-                    <span>Filters</span>
+                    <i class="fas fa-layer-group listing-icon-muted"></i>
+                    <span>Categories</span>
                 </div>
 
                 <div class="listing-inputs-grid">
-                    
+
                     <div class="listing-input-group">
-                        <label>Search</label>
-                        <div class="listing-input-wrapper">
-                            <i class="fas fa-search listing-search-icon"></i>
-                            <input type="text" id="searchInput" class="listing-input-field has-icon" placeholder="Search by pet name, species, breed, or location...">
+                        <div class="request-filter category-tabs">
+                            <input type="radio" name="category" id="animalListings" checked>
+                            <label for="animalListings">Animal Listings</label>
+
+                            <input type="radio" name="category" id="adoptionRequests">
+                            <label for="adoptionRequests">Adoption Requests</label>
+
+                            <input type="radio" name="category" id="lostPetReports">
+                            <label for="lostPetReports">Lost Pet Reports</label>
                         </div>
                     </div>
 
-                    <div class="listing-input-group">
-                        <label>Status</label>
-                        <div class="request-filter">
-                            <input type="radio" name="request-filter-button" id="all" checked>
-                            <label for="all">All</label>
-                            <input type="radio" name="request-filter-button" id="pending">
-                            <label for="pending">Pending</label>
-                            <input type="radio" name="request-filter-button" id="approved">
-                            <label for="approved">Approved</label>
-                            <input type="radio" name="request-filter-button" id="rejected">
-                            <label for="rejected">Rejected</label>
-                        </div>
-                    </div>
                 </div>
             </div>
+
 
         </div>
 
@@ -86,11 +83,11 @@
                     <div class="modal-inner-image-container">
                         <img class="modalImg" src="images/no-image.png">
                     </div>
-                    <div class="modal-inner-info-container">                                                
-                                                                                                
+                    <div class="modal-inner-info-container">
+
                     </div>
                 </div>
-                                
+
             </div>
         </div>
 
@@ -103,4 +100,5 @@
     <script type="module" src="javascript/admin.js"></script>
     <script type="module" src="js/auth.js"></script>
 </body>
+
 </html>
