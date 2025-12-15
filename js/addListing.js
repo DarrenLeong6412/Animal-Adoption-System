@@ -20,9 +20,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Global Variables
 let currentUser = null;
-let base64ImageString = ""; // This will hold the converted image URL
+let base64ImageString = ""; 
 
 // 2. CHECK AUTH
 onAuthStateChanged(auth, (user) => {
@@ -34,32 +33,66 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// 3. IMAGE HANDLER (Resize & Convert to Base64)
+// 3. HANDLE "OTHER" ANIMAL TYPE LOGIC
+const typeSelect = document.getElementById('animalType');
+const otherInput = document.getElementById('animalTypeOther');
+
+if (typeSelect && otherInput) {
+    // Toggle Visibility
+    typeSelect.addEventListener('change', () => {
+        if (typeSelect.value === 'Other') {
+            otherInput.style.display = 'block';
+            otherInput.required = true;
+            otherInput.focus();
+        } else {
+            otherInput.style.display = 'none';
+            otherInput.required = false;
+            otherInput.value = ''; 
+        }
+    });
+
+    // Auto-Select Existing Options
+    otherInput.addEventListener('input', () => {
+        const typedVal = otherInput.value.trim().toLowerCase();
+        for (let i = 0; i < typeSelect.options.length; i++) {
+            const optionVal = typeSelect.options[i].value;
+            if (optionVal === "Other") continue;
+
+            if (optionVal.toLowerCase() === typedVal) {
+                typeSelect.value = optionVal;
+                otherInput.style.display = 'none';
+                otherInput.value = '';
+                otherInput.required = false;
+                break;
+            }
+        }
+    });
+}
+
+// 4. IMAGE HANDLER
 const fileInput = document.getElementById('fileInput');
 const previewImg = document.getElementById('previewImg');
 const uploadText = document.getElementById('uploadText');
 
-fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-    // Show preview immediately
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        previewImg.src = event.target.result;
-        previewImg.style.display = 'block';
-        uploadText.style.display = 'none';
-        
-        // Compress image for Firestore (Must be < 1MB)
-        resizeImage(event.target.result, 800, 0.7, (compressedDataUrl) => {
-            base64ImageString = compressedDataUrl;
-            console.log("Image processed. Length:", base64ImageString.length);
-        });
-    };
-    reader.readAsDataURL(file);
-});
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            previewImg.src = event.target.result;
+            previewImg.style.display = 'block';
+            uploadText.style.display = 'none';
+            
+            resizeImage(event.target.result, 800, 0.7, (compressedDataUrl) => {
+                base64ImageString = compressedDataUrl;
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+}
 
-// Helper: Resize Image using Canvas
 function resizeImage(base64Str, maxWidth, quality, callback) {
     const img = new Image();
     img.src = base64Str;
@@ -70,60 +103,76 @@ function resizeImage(base64Str, maxWidth, quality, callback) {
         canvas.height = img.height * scaleSize;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        // Convert to reduced quality JPEG
         const newBase64 = canvas.toDataURL('image/jpeg', quality);
         callback(newBase64);
     };
 }
 
-// 4. SUBMIT FORM
-document.getElementById('addListingForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+// 5. SUBMIT FORM
+const form = document.getElementById('addListingForm');
 
-    if (!currentUser) return alert("You are not logged in.");
-    
-    // Disable button to prevent double click
-    const submitBtn = document.getElementById("submitBtn");
-    submitBtn.innerText = "Saving...";
-    submitBtn.disabled = true;
+if (form) {
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    try {
-        const listingData = {
-            name: document.getElementById("animalName").value,
-            type: document.getElementById("animalType").value,
-            breed: document.getElementById("animalBreed").value,
-            gender: document.getElementById("animalGender").value,
-            age: document.getElementById("animalAge").value,
-            ageUnit: document.getElementById("animalAgeUnit").value,
-            location: document.getElementById("animalLocation").value,
-            vaccinationStatus: document.getElementById("animalVaccination").value,
-            description: document.getElementById("animalDescription").value,
-            
-            // The magic "URL" (actually the image data)
-            imageUrl: base64ImageString || "https://via.placeholder.com/150?text=No+Image",
-            
-            // Connect to User
-            createdBy: currentUser.uid,
-            ownerEmail: currentUser.email,
-            
-            createdAt: serverTimestamp(),
-            status: "Available"
-        };
-
-        // Save to Firestore
-        await addDoc(collection(db, "animals"), listingData);
+        if (!currentUser) return alert("You are not logged in.");
         
-        alert("Success! Animal listed.");
-        window.location.href = "listing.html"; 
+        // Validation: Age
+        const ageValue = document.getElementById("animalAge").value;
+        if (parseInt(ageValue) < 0) {
+            alert("Age cannot be negative.");
+            return; 
+        }
 
-    } catch (error) {
-        console.error(error);
-        if (error.code === 'resource-exhausted') {
-            alert("Error: Image is too big for the database. Please try a simpler photo.");
-        } else {
+        // Determine Final Type
+        let finalType = document.getElementById("animalType").value;
+        if (finalType === "Other") {
+            const customType = document.getElementById("animalTypeOther").value.trim();
+            if (!customType) {
+                alert("Please specify the animal type.");
+                return;
+            }
+            finalType = customType.charAt(0).toUpperCase() + customType.slice(1);
+        }
+
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.innerText = "Saving...";
+        submitBtn.disabled = true;
+
+        try {
+            const listingData = {
+                // User Input Fields
+                name: document.getElementById("animalName").value,
+                type: finalType,
+                breed: document.getElementById("animalBreed").value,
+                gender: document.getElementById("animalGender").value,
+                age: ageValue,
+                ageUnit: "Months", 
+                location: document.getElementById("animalLocation").value,
+                vaccinationStatus: document.getElementById("animalVaccination").value,
+                description: document.getElementById("animalDescription").value,
+                imageUrl: base64ImageString || "https://via.placeholder.com/150?text=No+Image",
+                
+                // System Fields
+                createdBy: currentUser.uid,
+                ownerEmail: currentUser.email,
+                
+                // --- NEW FIELDS FOR APPROVAL & DATE ---
+                createdAt: serverTimestamp(), // Auto-server time
+                status: "Pending",            // Needs approval
+                approvedBy: null              // Admin ID (starts empty)
+            };
+
+            await addDoc(collection(db, "animals"), listingData);
+            
+            alert("Listing submitted successfully! It will appear after admin approval.");
+            window.location.href = "listing.html"; 
+
+        } catch (error) {
+            console.error(error);
+            submitBtn.innerText = "Submit Listing";
+            submitBtn.disabled = false;
             alert("Error saving: " + error.message);
         }
-        submitBtn.innerText = "Submit Listing";
-        submitBtn.disabled = false;
-    }
-});
+    });
+}

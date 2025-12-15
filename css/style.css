@@ -530,8 +530,6 @@ select.listing-input-field {
         text-align: center;
     }
 
-    /* ... (Keep your existing CSS above) ... */
-
 .modal.open {
     opacity: 1;
     z-index: 999;
@@ -634,6 +632,15 @@ select.listing-input-field {
     color: #164A41;
     width: 20px;
     text-align: center;
+}
+
+/* New About Header Style */
+#modalAboutTitle {
+    color: #0d3b25; /* Matches theme dark green */
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 25px;
+    margin-bottom: 8px;
 }
 
 /* Mobile Responsive */
