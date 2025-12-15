@@ -23,14 +23,20 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+const container = document.querySelector(".request-flex-container");
+const filterButtons = document.querySelectorAll('input[name="request-filter-button"]');
+
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     await loadRequests(user.uid); // only load requests for this user
   } else {
     console.log("No user logged in");
+    alert("You must be logged in to view your adoption requests.");
+    window.location.href = "login.html";
+    return;
   }
 });
-
 
 let requests = []; //create request empty array for current user requests
 let allRequests = []; //empty array for all requests
@@ -105,9 +111,6 @@ async function loadRequests(currentUserID) {
   renderRequests(requests);
 }
 
-const container = document.querySelector(".request-flex-container");
-const filterButtons = document.querySelectorAll('input[name="request-filter-button"]');
-
 // INITIAL RENDER
 renderRequests(requests);
 window.openModal = openModal;
@@ -116,6 +119,16 @@ window.closeModal = closeModal;
 // ---------- RENDER CARDS ----------
 function renderRequests(list) {
   container.innerHTML = "";
+
+  if (list.length === 0) {
+    container.innerHTML += `
+      <div class="request-content">
+        <p>No animals match your filters</p>
+      </div>
+    `;;
+    return;
+  }
+
   list.forEach(req => {
     // Add the status class dynamically
     const statusClass = `status-${req.status.toLowerCase().replace(/\s/g, '-')}`;
@@ -185,8 +198,7 @@ function showModalContent(id) {
 
   modalInfoContainer.innerHTML = `
         <div class="mdal-inner-info-text">
-            <p class="modal-inner-info-text-title">Animal Name</p>
-            <p class="modal-inner-info-text-data">${req.name}</p>
+            <h2 id="modalName">${req.name}</p>
         </div>
         <div class="modal-inner-info-text">
             <p class="modal-inner-info-text-title">Type</p>
