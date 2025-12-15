@@ -27,10 +27,15 @@ const auth = getAuth(app);
 const container = document.querySelector(".request-flex-container");
 const filterButtons = document.querySelectorAll('input[name="request-filter-button"]');
 
+let isLoading = true;
+renderRequests([]);
+
 onAuthStateChanged(auth, async (user) => {
   if (user) {
+
     await loadRequests(user.uid); // only load requests for this user
-  } else {
+  } 
+  else {
     console.log("No user logged in");
     alert("You must be logged in to view your adoption requests.");
     window.location.href = "login.html";
@@ -51,6 +56,7 @@ async function loadRequests(currentUserID) {
     console.log("no requests found");
     requests = [];
     userRequests = [];
+    isLoading = false;
     renderRequests([]);
     return;
   }
@@ -108,11 +114,10 @@ async function loadRequests(currentUserID) {
 
   requests = allRequests.filter(r => r.user_ID === currentUserID);
   // 6. Render once, after data is ready
+  isLoading = false;
   renderRequests(requests);
 }
 
-// INITIAL RENDER
-renderRequests(requests);
 window.openModal = openModal;
 window.closeModal = closeModal;
 
@@ -120,19 +125,27 @@ window.closeModal = closeModal;
 function renderRequests(list) {
   container.innerHTML = "";
 
+  if (isLoading) {
+    container.innerHTML += `
+      <div class="request-content">
+        <p>Loading requests...</p>
+      </div>
+    `;
+    return;
+  }
+
   if (list.length === 0) {
     container.innerHTML += `
       <div class="request-content">
         <p>No animals match your filters</p>
       </div>
-    `;;
+    `;
     return;
   }
 
   list.forEach(req => {
     // Add the status class dynamically
     const statusClass = `status-${req.status.toLowerCase().replace(/\s/g, '-')}`;
-
     container.innerHTML += `
       <div class="request-card">
         <div class="request-card-img-container">
