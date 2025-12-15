@@ -316,11 +316,15 @@ onAuthStateChanged(auth, async (user) => {
       console.error("Error loading profile:", err);
     }
   }
+
+
   const authBtnDesktop = document.getElementById("authBtnDesktop");
   const authBtnSidebar = document.getElementById("authBtnSidebar");
 
   const logoutIconDesktop = document.getElementById("logoutIconDesktop");
   const logoutIconSidebar = document.getElementById("logoutIconSidebar");
+  const profileIconDesktop = document.getElementById("profileIconDesktop");
+  const profileIconSidebar = document.getElementById("profileIconSidebar");
 
   const doLogout = async (e) => {
     e.preventDefault();
@@ -343,6 +347,15 @@ onAuthStateChanged(auth, async (user) => {
       logoutIconSidebar.onclick = doLogout;
     }
 
+    if (profileIconDesktop) {
+      logoutIconDesktop.style.display = "";
+    }
+    if (profileIconSidebar) {
+      logoutIconSidebar.style.display = "";
+    }
+
+
+
   } else {
     // logged out -> show login/signup, hide logout icon
     if (authBtnDesktop) authBtnDesktop.style.display = "";
@@ -350,6 +363,9 @@ onAuthStateChanged(auth, async (user) => {
 
     if (logoutIconDesktop) logoutIconDesktop.style.display = "none";
     if (logoutIconSidebar) logoutIconSidebar.style.display = "none";
+
+    if (profileIconDesktop) profileIconDesktop.style.display = "none";
+    if (profileIconSidebar) profileIconSidebar.style.display = "none";
   }
   document.documentElement.classList.remove("auth-loading");
 
