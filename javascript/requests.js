@@ -28,6 +28,9 @@ onAuthStateChanged(auth, async (user) => {
     await loadRequests(user.uid); // only load requests for this user
   } else {
     console.log("No user logged in");
+    container.innerHTML += `
+      <p>Log in to view adoption requests.</p>
+    `;
   }
 });
 
@@ -185,8 +188,7 @@ function showModalContent(id) {
 
   modalInfoContainer.innerHTML = `
         <div class="mdal-inner-info-text">
-            <p class="modal-inner-info-text-title">Animal Name</p>
-            <p class="modal-inner-info-text-data">${req.name}</p>
+            <h2 id="modalName">${req.name}</p>
         </div>
         <div class="modal-inner-info-text">
             <p class="modal-inner-info-text-title">Type</p>
