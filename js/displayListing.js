@@ -1,7 +1,6 @@
 // js/displayListing.js
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -15,17 +14,11 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Global store
 let allListings = [];
-let currentUser = null;
-
-// 1. Wait for Auth
-onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    loadAnimals(); 
-});
+let selectedAnimalId = null;
 
 async function loadAnimals() {
     const grid = document.getElementById("listingGrid");
@@ -35,36 +28,22 @@ async function loadAnimals() {
         const querySnapshot = await getDocs(collection(db, "animals"));
         
         if (querySnapshot.empty) {
-            grid.innerHTML = '<p>No animals found.</p>';
+            grid.innerHTML = '<p>No animals found. Add one!</p>';
             return;
         }
 
         allListings = [];
         querySnapshot.forEach((doc) => {
             let data = doc.data();
-            data.id = doc.id;
-            
-            // --- DATE FORMATTING LOGIC ---
-            if (data.createdAt && data.createdAt.seconds) {
-                // Convert Firestore Timestamp to JS Date
-                const dateObj = new Date(data.createdAt.seconds * 1000);
-                // Format: "15 Dec 2025"
-                data.formattedDate = dateObj.toLocaleDateString("en-GB", {
-                    day: 'numeric', month: 'short', year: 'numeric'
-                });
-            } else {
-                data.formattedDate = "Date Unknown";
-            }
-
+            data.id = doc.id; 
             allListings.push(data);
         });
 
-        // 2. Filter & Render
-        filterAndRender(); 
+        renderGrid(allListings);
         setupFilters();
 
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error loading animals:", error);
         grid.innerHTML = '<p style="color:red;">Error loading data.</p>';
     }
 }
@@ -74,47 +53,22 @@ function renderGrid(dataList) {
     grid.innerHTML = ""; 
 
     if (dataList.length === 0) {
-        grid.innerHTML = '<p style="text-align:center; width:100%; padding:20px;">No matching animals found.</p>';
+        grid.innerHTML = '<p style="text-align:center; width:100%; padding:20px;">No animals match your filters.</p>';
         return;
     }
 
     dataList.forEach((animal) => {
-        
-        // --- VISIBILITY RULES ---
-        const isOwner = currentUser && (currentUser.uid === animal.createdBy);
-        const isApproved = animal.status === "Approved";
-
-        // Show card ONLY if: It is Approved OR Current User is the Creator
-        if (!isApproved && !isOwner) {
-            return; 
-        }
-
-        // Badge Logic
-        let badgeClass = "status-approved"; 
-        let statusText = animal.status || "Available"; 
-        
-        if (animal.status === "Pending") {
-            badgeClass = "status-pending"; 
-        }
-
-        // Breed Text
+        // Construct readable breed string
         const breedDisplay = animal.breed ? `${animal.type} • ${animal.breed}` : animal.type;
 
         const cardHTML = `
             <div class="listing-card" onclick="openModalById('${animal.id}')">
                 <div class="listing-card-img-container">
                     <img src="${animal.imageUrl}" alt="${animal.name}" class="listing-card-img">
-                    <div class="listing-card-status">
-                        <p class="${badgeClass}">${statusText}</p>
-                    </div>
+                    <div class="listing-card-status"><p>${animal.status || 'Available'}</p></div>
                 </div>
                 <div class="listing-card-info-section">
-                    
-                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom: 5px;">
-                        <p class="listing-card-animal-name" style="margin:0;">${animal.name}</p>
-                        <span style="font-size:11px; color:#888; font-weight:500;">${animal.formattedDate}</span>
-                    </div>
-                    
+                    <p class="listing-card-animal-name">${animal.name}</p>
                     <p>${breedDisplay} • ${animal.age} Months • ${animal.gender}</p>
                     
                     <div class="listing-card-details-row">
@@ -151,27 +105,24 @@ function filterAndRender() {
     const genderVal = document.getElementById("filterGender").value;
 
     const filteredData = allListings.filter(animal => {
-        // 1. Search
         const nameMatch = animal.name.toLowerCase().includes(searchText);
         const breedMatch = (animal.breed || "").toLowerCase().includes(searchText);
         const searchPass = nameMatch || breedMatch;
 
-        // 2. Age
         let agePass = true;
-        if (ageVal !== "") agePass = parseInt(animal.age) == parseInt(ageVal);
+        if (ageVal !== "") {
+            agePass = parseInt(animal.age) == parseInt(ageVal);
+        }
 
-        // 3. Type (Includes "Other" Logic)
         let typePass = true;
-        const standardTypes = ["Dog", "Cat", "Bird", "Rabbit"]; 
-        if (typeVal === "Other") {
-            typePass = !standardTypes.includes(animal.type);
-        } else if (typeVal !== "All") {
+        if (typeVal !== "All") {
             typePass = animal.type === typeVal;
         }
 
-        // 4. Gender
         let genderPass = true;
-        if (genderVal !== "All") genderPass = animal.gender === genderVal;
+        if (genderVal !== "All") {
+            genderPass = animal.gender === genderVal;
+        }
 
         return searchPass && agePass && typePass && genderPass;
     });
@@ -184,8 +135,13 @@ window.openModalById = function(id) {
     const data = allListings.find(a => a.id === id);
     if (!data) return;
 
+    selectedAnimalId = id;
+
+    // Create text for the Paw Icon (e.g., "Dog • Golden Retriever")
     const breedText = data.breed ? `${data.type} • ${data.breed}` : data.type;
 
+    // Pass data to listing.html function
+    // 1. Name, 2. Image, 3. Breed(for Icon), 4. Location, 5. Vaccine, 6. Description(for Bottom)
     showAnimalDetails(
         data.name, 
         data.imageUrl, 
@@ -195,3 +151,16 @@ window.openModalById = function(id) {
         data.description || "No description provided." 
     );
 };
+
+const adoptBtn = document.getElementById("adoptButton");
+
+adoptBtn.addEventListener("click", () => {
+    if (!selectedAnimalId) {
+        alert("No animal selected.");
+        return;
+    }
+
+    window.location.href = `adoptionForm.html?listingID=${selectedAnimalId}`;
+});
+
+loadAnimals();

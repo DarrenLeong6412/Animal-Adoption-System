@@ -1,26 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>PawResQ — Listing</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script>
-    <script>document.documentElement.classList.add("auth-loading");</script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
-        rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PawResQ — Listing</title> <link rel="stylesheet" href="css/style.css"> 
+  <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script>   
+  <script>document.documentElement.classList.add("auth-loading");</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Added a small style for the new About Header */
+    #modalAboutTitle {
+        color: #0d3b25; /* Matches your theme dark green */
+        font-size: 18px;
+        font-weight: 700;
+        margin-top: 25px;
+        margin-bottom: 8px;
+    }
+  </style>
 </head>
-
 <body class="listing">
 
     <div id="navbar"></div>
 
     <div class="listing-content">
         <div class="listing-flex-container">
-
+            
             <div class="listing-header-row">
                 <div class="listing-title-group">
                     <h1>Animals for Adoption</h1>
@@ -42,8 +49,7 @@
                         <label>Search</label>
                         <div class="listing-input-wrapper">
                             <i class="fas fa-search listing-search-icon"></i>
-                            <input type="text" id="filterSearch" class="listing-input-field has-icon"
-                                placeholder="Name or breed...">
+                            <input type="text" id="filterSearch" class="listing-input-field has-icon" placeholder="Name or breed...">
                         </div>
                     </div>
                     <div class="listing-input-group">
@@ -56,7 +62,7 @@
                             <option value="All">All Types</option>
                             <option value="Dog">Dog</option>
                             <option value="Cat">Cat</option>
-                            <option value="Rabbit">Rabbit</option>
+                            <option value="Bird">Bird</option>
                             <option value="Other">Other</option>
                         </select>
                     </div>
@@ -86,7 +92,7 @@
 
             <div class="modal-inner-top">
                 <div class="modal-inner-top-title">
-                    <h1 id="modalTitle">Animal Details</h1>
+                    <h1 id="modalTitle">Animal Details</h1> 
                 </div>
                 <div class="modal-inner-top-exit">
                     <a onclick="closeAnimalModal()"><i class="fa-solid fa-x"></i></a>
@@ -99,7 +105,7 @@
                 </div>
                 <div class="modal-inner-info-container">
                     <h2 id="modalName">Name</h2>
-
+                    
                     <div class="modal-detail-item">
                         <i class="fas fa-paw"></i>
                         <span id="modalBreed">Breed Info</span>
@@ -121,32 +127,32 @@
                         Loading description...
                     </p>
 
-                    <button id="adoptButton" class="btn-add-listing" style="margin-top: 20px; width: 100%;">Adopt Me</button>
+                    <button id="adoptButton" class="btn-add-listing" style="margin-top: 20px; width: 100%;">Adopt Me</button></
                 </div>
             </div>
-
+            
         </div>
     </div>
-    </div>
 
-    <div id="footer"></div>
     <script>
         var modal = document.getElementById("animalModal");
 
-
+        // ✅ Updated Function: Now accepts 'fullDesc' and updates the new "About" header
         function showAnimalDetails(name, image, breed, loc, vaccine, fullDesc) {
             document.getElementById('modalTitle').innerText = name + "'s Details";
             document.getElementById('modalName').innerText = name;
             document.getElementById('modalImg').src = image;
-
+            
             // Map data to specific IDs
-            document.getElementById('modalBreed').innerText = breed;
+            document.getElementById('modalBreed').innerText = breed;       // Paw Icon = Breed
             document.getElementById('modalLoc').innerText = loc;
             document.getElementById('modalVaccine').innerText = vaccine;
 
-
+            // Update the "About Max" Header
             document.getElementById('modalAboutTitle').innerText = "About " + name;
-            document.getElementById('modalFullDesc').innerText = fullDesc;
+            
+            // Update the Description Text
+            document.getElementById('modalFullDesc').innerText = fullDesc; 
 
             modal.classList.add("open");
         }
@@ -155,20 +161,17 @@
             modal.classList.remove("open");
         }
 
-        window.onclick = function (event) {
+        window.onclick = function(event) {
             if (event.target == modal) {
                 closeAnimalModal();
             }
         }
     </script>
-
-
-
+    
     <script src="javascript/script.js"></script>
     <script src="javascript/template-loader.js"></script>
     <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/displayListing.js"></script>
 
 </body>
-
 </html>

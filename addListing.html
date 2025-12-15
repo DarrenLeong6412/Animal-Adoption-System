@@ -10,109 +10,117 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 </head>
+
+</head>
 <body class="add-listing-body">
 
     <div id="navbar"></div>
 
     <div class="add-listing-parent">
 
-        <div class="add-listing-container">
-            <div class="add-listing-header">
-                <a href="listing.html" class="back-link">← Back</a>
-                <h2>Create Animal Listing</h2>
-                <p class="subtitle">Help a stray animal find their forever home</p>
-            </div>
-
-            <form id="addListingForm">
-                
-                <div class="section-title">Basic Information</div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Animal Name <span class="required">*</span></label>
-                        <input type="text" id="animalName" placeholder="e.g. Buddy" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Animal Type <span class="required">*</span></label>
-                        <select id="animalType">
-                            <option value="Dog">Dog</option>
-                            <option value="Cat">Cat</option>
-                            <option value="Rabbit">Rabbit</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <input type="text" id="animalTypeOther" placeholder="Please specify (e.g. Hamster)" style="display: none; margin-top: 10px;">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Breed</label>
-                        <input type="text" id="animalBreed" placeholder="e.g. Golden Retriever">
-                    </div>
-                    <div class="form-group">
-                        <label>Gender <span class="required">*</span></label>
-                        <select id="animalGender">
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Age (Months) <span class="required">*</span></label>
-                        <input type="number" id="animalAge" placeholder="e.g. 2" min="0" required>
-                    </div>
-                </div>
-
-                <div class="section-title">Location & Health</div>
-                
-                <div class="form-group">
-                    <label>Temporary Shelter Location <span class="required">*</span></label>
-                    <input type="text" id="animalLocation" placeholder="e.g., Downtown Shelter, Main Street" required>
-                </div>
-
-                <br>
-                <div class="form-group">
-                    <label>Vaccination Status <span class="required">*</span></label>
-                    <select id="animalVaccination">
-                        <option value="Unknown">Unknown</option>
-                        <option value="Vaccinated">Vaccinated</option>
-                        <option value="Not Vaccinated">Not Vaccinated</option>
-                    </select>
-                </div>
-
-                <br>
-                <div class="form-group">
-                    <label>Description <span class="required">*</span></label>
-                    <textarea id="animalDescription" placeholder="Describe the animal's personality, behavior..." required></textarea>
-                </div>
-
-                <div class="section-title">Animal Photo</div>
-                <div class="form-group">
-                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
-                    <div class="image-preview-container" onclick="document.getElementById('fileInput').click()">
-                        <div id="uploadText">
-                            Click to upload image<br>
-                            <span style="font-size: 12px; color: #9ca3af;">(Max size auto-resized to fit database)</span>
-                        </div>
-                        <img id="previewImg" src="" alt="Preview">
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button type="button" class="btn btn-cancel" onclick="window.history.back()">Cancel</button>
-                    <button type="submit" class="btn btn-submit" id="submitBtn">Submit Listing</button>
-                </div>
-            </form>
-        </div>
+<div class="add-listing-container">
+    <div class="add-listing-header">
+        <a href="listing.html" class="back-link">← Back</a>
+        <h2>Create Animal Listing</h2>
+        <p class="subtitle">Help a stray animal find their forever home</p>
     </div>
 
-    <div id="footer"></div>
+    <form id="addListingForm">
+        
+        <div class="section-title">Basic Information</div>
 
-    <script src="javascript/script.js"></script>
-    <script src="javascript/template-loader.js"></script>
-    <script type="module" src="js/addListing.js"></script>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Animal Name <span class="required">*</span></label>
+                <input type="text" id="animalName" placeholder="e.g. Buddy" required>
+            </div>
+            <div class="form-group">
+                <label>Animal Type <span class="required">*</span></label>
+                <select id="animalType">
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                    <option value="Bird">Bird</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Breed</label>
+                <input type="text" id="animalBreed" placeholder="e.g. Golden Retriever">
+            </div>
+            <div class="form-group">
+                <label>Gender <span class="required">*</span></label>
+                <select id="animalGender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Age <span class="required">*</span></label>
+                <input type="number" id="animalAge" placeholder="e.g. 2" required>
+            </div>
+            <div class="form-group">
+                <label>Age Unit <span class="required">*</span></label>
+                <select id="animalAgeUnit">
+                    <option value="Months">Months</option>
+                    <option value="Years">Years</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section-title">Location & Health</div>
+        
+        <div class="form-group">
+            <label>Temporary Shelter Location <span class="required">*</span></label>
+            <input type="text" id="animalLocation" placeholder="e.g., Downtown Shelter, Main Street" required>
+        </div>
+
+        <br>
+        <div class="form-group">
+            <label>Vaccination Status <span class="required">*</span></label>
+            <select id="animalVaccination">
+                <option value="Unknown">Unknown</option>
+                <option value="Vaccinated">Vaccinated</option>
+                <option value="Not Vaccinated">Not Vaccinated</option>
+            </select>
+        </div>
+
+        <br>
+        <div class="form-group">
+            <label>Description <span class="required">*</span></label>
+            <textarea id="animalDescription" placeholder="Describe the animal's personality, behavior..." required></textarea>
+        </div>
+
+        <div class="section-title">Animal Photo</div>
+        <div class="form-group">
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            <div class="image-preview-container" onclick="document.getElementById('fileInput').click()">
+                <div id="uploadText">
+                    Click to upload image<br>
+                    <span style="font-size: 12px; color: #9ca3af;">(Max size auto-resized to fit database)</span>
+                </div>
+                <img id="previewImg" src="" alt="Preview">
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button type="button" class="btn btn-cancel" onclick="window.history.back()">Cancel</button>
+            <button type="submit" class="btn btn-submit" id="submitBtn">Submit Listing</button>
+        </div>
+    </form>
+</div>
+</div>
+
+<div id="footer"></div>
+
+<script src="javascript/script.js"></script>
+<script src="javascript/template-loader.js"></script>
+<script type="module" src="js/addListing.js"></script>
 
 </body>
 </html>
