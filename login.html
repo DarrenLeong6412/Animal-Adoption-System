@@ -2,25 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Log In</title>
+
   <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Prevent auth flicker -->
+  <script>
+    document.documentElement.classList.add("auth-loading");
+  </script>
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-  <h1>Log In</h1>
 
-  <form id="loginForm">
-    <label>Email</label>
-    <input type="email" id="loginEmail" required />
+<body class="auth-page">
 
-    <label>Password</label>
-    <input type="password" id="loginPassword" required />
+  <div class="auth-card auth-ui">
+    <h1 class="auth-title">Log In</h1>
+    <p class="auth-subtitle">Welcome back! Please enter your details.</p>
 
-    <button type="submit">Log In</button>
-  </form>
+    <form id="loginForm" class="auth-form">
+      <label for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" required />
 
-  <p>Don’t have an account yet? <a href="signup.html">Sign up here</a></p>
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" required />
 
-  <!-- change to module -->
+      <button type="submit" class="auth-submit">Log In</button>
+    </form>
+
+    <p class="auth-footer">
+      Don’t have an account yet?
+      <a href="signup.html">Sign up here</a>
+    </p>
+  </div>
+
+  <!-- Firebase Auth -->
   <script type="module" src="js/auth.js"></script>
+
 </body>
 </html>

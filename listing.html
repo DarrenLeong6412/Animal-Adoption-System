@@ -1,133 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>My Site — Home</title>
-
-  <link rel="stylesheet" href="css/style.css"> <!--link to external CSS-->
-  <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script> <!--link for cart and acc icons-->
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!--link for google fonts-->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-  
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PawResQ — Listing</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script>
+    <script>document.documentElement.classList.add("auth-loading");</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
 </head>
+
 <body class="listing">
 
     <div id="navbar"></div>
 
     <div class="listing-content">
         <div class="listing-flex-container">
-            
+
             <div class="listing-header-row">
                 <div class="listing-title-group">
                     <h1>Animals for Adoption</h1>
                     <p>Find your perfect companion and give them a forever home</p>
                 </div>
-                <button class="btn-add-listing">
+                <button class="btn-add-listing" onclick="window.location.href='addListing.html'">
                     <i class="fas fa-plus"></i> Add Listing
                 </button>
             </div>
 
             <div class="listing-filter-card">
-                
                 <div class="listing-filter-header">
                     <i class="fas fa-filter listing-icon-muted"></i>
                     <span>Filters</span>
                 </div>
 
                 <div class="listing-inputs-grid">
-                    
                     <div class="listing-input-group">
                         <label>Search</label>
                         <div class="listing-input-wrapper">
                             <i class="fas fa-search listing-search-icon"></i>
-                            <input type="text" class="listing-input-field has-icon" placeholder="Name or breed...">
+                            <input type="text" id="filterSearch" class="listing-input-field has-icon"
+                                placeholder="Name or breed...">
                         </div>
                     </div>
-
                     <div class="listing-input-group">
                         <label>Age (Months)</label>
-                        <input type="number" class="listing-input-field" placeholder="e.g. 24" min="0">
+                        <input type="number" id="filterAge" class="listing-input-field" placeholder="e.g. 24" min="0">
                     </div>
-
                     <div class="listing-input-group">
                         <label>Animal Type</label>
-                        <select class="listing-input-field">
-                            <option>All Types</option>
-                            <option>Dog</option>
-                            <option>Cat</option>
-                            <option>Bird</option>
-                            <option>Other</option>
+                        <select id="filterType" class="listing-input-field">
+                            <option value="All">All Types</option>
+                            <option value="Dog">Dog</option>
+                            <option value="Cat">Cat</option>
+                            <option value="Rabbit">Rabbit</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
-
                     <div class="listing-input-group">
                         <label>Animal Gender</label>
-                        <select class="listing-input-field">
-                            <option>Male</option>
-                            <option>Female</option>
-                            <option>Other</option>
+                        <select id="filterGender" class="listing-input-field">
+                            <option value="All">All Genders</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
                         </select>
                     </div>
-
                 </div>
             </div>
-
         </div>
 
         <div class="listing-count-label">
-                Showing 3 animals
-            </div>
+            Showing available animals
+        </div>
 
-            <div class="listing-grid-display">
-
-                    <div class="listing-card" onclick="showAnimalDetails('Max', 'https://placedog.net/400/300?id=12', 'Golden Retriever • 2 years', 'Downtown Shelter', 'Vaccinated')">
-                    <div class="listing-card-img-container">
-                        <img src="https://placedog.net/400/300?id=12" alt="Max" class="listing-card-img">
-                        <div class="listing-card-status"><p>Approved</p></div>
-                    </div>
-                    <div class="listing-card-info-section">
-                        <p class="listing-card-animal-name">Max</p>
-                        <p>Golden Retriever • 24 months • male</p>
-                        <div class="listing-card-details-row">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Downtown Shelter</span>
-                        </div>
-                        <div class="listing-card-details-row">
-                            <i class="fas fa-syringe"></i>
-                            <span>Vaccinated</span>
-                        </div>
-                    </div>
-                </div>
-
-                 <div class="listing-card" onclick="showAnimalDetails('Charlie', 'https://placedog.net/400/300?id=45', 'Beagle Mix • 3 years', 'Westside Care', 'Vaccinated')">
-                    <div class="listing-card-img-container">
-                        <img src="https://placedog.net/400/300?id=45" alt="Charlie" class="listing-card-img">
-                        <div class="listing-card-status"><p>Approved</p></div>
-                    </div>
-                    <div class="listing-card-info-section">
-                        <p class="listing-card-animal-name">Charlie</p>
-                        <p>Beagle Mix • 36 months • male</p>
-                        <div class="listing-card-details-row">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Westside Care</span>
-                        </div>
-                        <div class="listing-card-details-row">
-                            <i class="fas fa-syringe"></i>
-                            <span>Vaccinated</span>
-                        </div>
-                    </div>
-                </div>
-            </div> </div>
+        <div id="listingGrid" class="listing-grid-display">
+            <p style="text-align: center; color: #666; padding: 20px;">Loading animals from database...</p>
+        </div>
     </div>
-   <div class="modal" id="animalModal">
+
+    <div class="modal" id="animalModal">
         <div class="modal-inner">
 
             <div class="modal-inner-top">
                 <div class="modal-inner-top-title">
-                    <h1 id="modalTitle">Animal Details</h1> 
+                    <h1 id="modalTitle">Animal Details</h1>
                 </div>
                 <div class="modal-inner-top-exit">
                     <a onclick="closeAnimalModal()"><i class="fa-solid fa-x"></i></a>
@@ -140,10 +99,10 @@
                 </div>
                 <div class="modal-inner-info-container">
                     <h2 id="modalName">Name</h2>
-                    
+
                     <div class="modal-detail-item">
                         <i class="fas fa-paw"></i>
-                        <span id="modalDesc">Description</span>
+                        <span id="modalBreed">Breed Info</span>
                     </div>
 
                     <div class="modal-detail-item">
@@ -156,32 +115,39 @@
                         <span id="modalVaccine">Vaccine</span>
                     </div>
 
-                    <p style="margin-top: 20px; color: #666; line-height: 1.5; font-size: 14px;">
-                        This animal is currently available for adoption. Please click the button below to start the application process.
+                    <h3 id="modalAboutTitle">About Animal</h3>
+
+                    <p id="modalFullDesc" style="color: #555; line-height: 1.6; font-size: 14px; margin-top: 0;">
+                        Loading description...
                     </p>
 
-                    <button class="btn-add-listing" style="margin-top: 15px;">Adopt Me</button>
+                    <button id="adoptButton" class="btn-add-listing" style="margin-top: 20px; width: 100%;">Adopt Me</button>
                 </div>
             </div>
-            
+
         </div>
+    </div>
     </div>
 
     <div id="footer"></div>
-
     <script>
         var modal = document.getElementById("animalModal");
 
-        function showAnimalDetails(name, image, desc, loc, vaccine) {
-            // 1. Fill the modal with the data
+
+        function showAnimalDetails(name, image, breed, loc, vaccine, fullDesc) {
             document.getElementById('modalTitle').innerText = name + "'s Details";
             document.getElementById('modalName').innerText = name;
             document.getElementById('modalImg').src = image;
-            document.getElementById('modalDesc').innerText = desc;
+
+            // Map data to specific IDs
+            document.getElementById('modalBreed').innerText = breed;
             document.getElementById('modalLoc').innerText = loc;
             document.getElementById('modalVaccine').innerText = vaccine;
 
-            // 2. Add the 'open' class
+
+            document.getElementById('modalAboutTitle').innerText = "About " + name;
+            document.getElementById('modalFullDesc').innerText = fullDesc;
+
             modal.classList.add("open");
         }
 
@@ -189,20 +155,20 @@
             modal.classList.remove("open");
         }
 
-        // Close if clicked outside
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             if (event.target == modal) {
                 closeAnimalModal();
             }
         }
     </script>
-    
 
 
-    <div id="footer"></div>
 
     <script src="javascript/script.js"></script>
     <script src="javascript/template-loader.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/displayListing.js"></script>
 
 </body>
+
 </html>

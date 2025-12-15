@@ -442,6 +442,7 @@ select.listing-input-field {
     .listing-card:hover {
         scale: 1.01;
         box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        cursor: pointer;
     }
 
     .listing-card-img-container{
@@ -528,25 +529,6 @@ select.listing-input-field {
         width: 16px; 
         text-align: center;
     }
-
-    /* ... (Keep your existing CSS above) ... */
-
-/* --- CORRECTED MODAL CSS --- */
-.modal {
-    background-color: rgba(0,0,0,0.4);
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    transition: all 0.2s ease-in-out;
-    z-index: -1;
-    opacity: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-}
 
 .modal.open {
     opacity: 1;
@@ -652,6 +634,15 @@ select.listing-input-field {
     text-align: center;
 }
 
+/* New About Header Style */
+#modalAboutTitle {
+    color: #0d3b25; /* Matches theme dark green */
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 25px;
+    margin-bottom: 8px;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .modal-inner-details-section {
@@ -663,6 +654,188 @@ select.listing-input-field {
 }
 /*#endregion*/
 
+/*#region addListingPage*/
+/* Add Listing Specific Body */
+.add-listing-parent {
+    background-color: #f3f4f6;
+    padding: 100px 20px 40px; /* Added top padding for Navbar clearance */
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* Card Container */
+.add-listing-container {
+    background: white;
+    width: 100%;
+    max-width: 700px;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    height: fit-content;
+}
+
+/* Headers */
+.add-listing-header { 
+    margin-bottom: 25px; 
+}
+
+.back-link { 
+    text-decoration: none; 
+    color: #555; 
+    font-size: 14px; 
+    display: flex; 
+    align-items: center; 
+    gap: 5px; 
+    margin-bottom: 15px;
+}
+
+.add-listing-header h2 { 
+    margin: 0; 
+    color: #333; 
+    font-weight: 700;
+}
+
+p.subtitle { 
+    color: #666; 
+    margin: 5px 0 0 0; 
+    font-size: 14px; 
+}
+
+/* Form Sections */
+.section-title { 
+    font-size: 16px; 
+    color: #374151; 
+    margin-top: 20px; 
+    margin-bottom: 10px; 
+    font-weight: 600; 
+}
+
+.form-row { 
+    display: flex; 
+    gap: 15px; 
+    margin-bottom: 15px; 
+}
+
+.form-group { 
+    flex: 1; 
+}
+
+.add-listing-container label { 
+    display: block; 
+    font-size: 14px; 
+    color: #4b5563; 
+    margin-bottom: 6px; 
+    font-weight: 500;
+}
+
+.required { 
+    color: #dc2626; 
+}
+
+/* Inputs */
+.add-listing-container input, 
+.add-listing-container select, 
+.add-listing-container textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.add-listing-container input:focus, 
+.add-listing-container select:focus, 
+.add-listing-container textarea:focus { 
+    border-color: #10b981; 
+}
+
+.add-listing-container textarea { 
+    resize: vertical; 
+    height: 80px; 
+}
+
+/* Image Upload Styling */
+.image-preview-container {
+    margin-top: 10px;
+    border: 2px dashed #d1d5db;
+    padding: 20px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    background-color: #fafafa;
+}
+
+.image-preview-container:hover { 
+    border-color: #10b981; 
+    background: #f0fdf4; 
+}
+
+#previewImg { 
+    max-height: 200px; 
+    display: none; 
+    margin: 0 auto; 
+    border-radius: 4px; 
+}
+
+#uploadText { 
+    color: #6b7280; 
+    font-size: 14px; 
+}
+
+/* Form Buttons */
+.button-group { 
+    display: flex; 
+    justify-content: flex-end; 
+    gap: 10px; 
+    margin-top: 30px; 
+}
+
+.btn { 
+    padding: 10px 20px; 
+    border-radius: 6px; 
+    font-size: 14px; 
+    cursor: pointer; 
+    border: none; 
+    font-weight: 500; 
+}
+
+.btn-cancel { 
+    background: white; 
+    border: 1px solid #d1d5db; 
+    color: #374151; 
+}
+
+.btn-submit { 
+    background: #164A41; 
+    color: white; 
+}
+
+.btn-submit:hover { 
+    background: #d0e0d3; 
+    color: #164A41;
+}
+
+.btn:disabled { 
+    opacity: 0.7; 
+    cursor: not-allowed; 
+}
+/*#endregion*/
+
+/*#region adoptionform*/
+.adoptionForm-parent{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 100px;
+    padding-bottom: 20px;
+    width: 100%;
+    background-color: #eeeeee;
+}
+/*#endregion*/
 
 /*#region requestpage*/
 /*My Requests*/
@@ -747,7 +920,7 @@ select.listing-input-field {
     transition: transform 0.2s ease;
 }
 .request-card:hover{
-    transform: scale(1.01);  /* Hover animation */
+    /*transform: scale(1.01);  /* Hover animation */
     box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 
@@ -1166,4 +1339,139 @@ select.listing-input-field {
     padding: 10px 10px 60px 0;
 }
 /*Footer End*/
+/*#endregion*/
+
+/*#idk what region should i call this*/
+/* Hide auth-dependent UI until Firebase auth state is ready */
+.auth-loading .auth-ui {
+  visibility: hidden; /* keeps layout, no jump */
+}
+/*#endregion*/
+
+/*#region auth pages (login / signup)*/
+.auth-page {
+  min-height: 100vh;
+  background: #eeeeee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 20px 40px; /* space for fixed navbar if added later */
+}
+
+
+.auth-card {
+  width: 100%;
+  max-width: 520px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+  padding: 28px;
+}
+
+.auth-title {
+  color: #164A41;
+  font-weight: 700;
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-form label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 6px;
+}
+
+.auth-form input,
+.auth-form select,
+.auth-form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.auth-form textarea {
+  resize: vertical;
+}
+
+.auth-form input:focus,
+.auth-form select:focus,
+.auth-form textarea:focus {
+  border-color: #94a3b8;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.auth-submit {
+  width: 100%;
+  border-radius: 12px;
+  padding: 12px;
+  background: #164A41;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.auth-submit:hover {
+  background: #ffffff;
+  color: #164A41;
+  border: 1px solid #164A41;
+}
+
+.auth-footer {
+  margin-top: 14px;
+  font-size: 14px;
+  color: #475569;
+  text-align: center;
+}
+
+.auth-footer a {
+  color: #164A41;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* make long signup form nicer */
+.auth-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .auth-card {
+    padding: 20px;
+  }
+  .auth-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
 /*#endregion*/

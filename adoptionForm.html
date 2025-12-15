@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PawResQ — Adoption Form</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="adoptionForm-body">
+
+    <div id="navbar"></div>
+
+    <div class="adoptionForm-parent">
+        <div class="add-listing-container">
+            <div class="add-listing-header">
+                <a href="listing.html" class="back-link">← Back</a>
+                <h2>Adoption Form</h2>
+                <p class="subtitle">Let us evaluate whether you suit one another</p>
+            </div>
+
+            <form id="adoptionForm">
+
+                <input type="hidden" id="listingID" name="listingID">
+
+                <div class="section-title">Reason</div>
+
+                <div class="form-group">
+                    <label>Why do you want to adopt this animal?<span class="required">*</span></label>
+                    <textarea id="reason" name="reason"></textarea>
+                </div>
+
+
+                <div class="section-title">Living Environment</div>
+
+                <div class="form-group">
+                    <label>Environment Description<span class="required">*</span></label>
+                    <textarea id="environmentDesc" name="environmentDesc"></textarea>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label>Environment Photo</label>
+
+                    <input type="file" id="environmentPhoto" name="environmentPhoto" accept="image/*" style="display: none;">
+                    <div class="image-preview-container" onclick="document.getElementById('environmentPhoto').click()">
+                        <div id="uploadText">
+                            Click to upload image<br>
+                            <span style="font-size: 12px; color: #9ca3af;">(Max size auto-resized to fit
+                                database)</span>
+                        </div>
+                        <img id="previewImg" src="" alt="Preview">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-cancel" onclick="window.history.back()">Cancel</button>
+                    <button type="submit" class="btn btn-submit" id="submitBtn">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="javascript/script.js"></script>
+    <script src="javascript/template-loader.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="javascript/adoptionForm.js"></script>
+
+</body>
+
+</html>

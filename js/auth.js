@@ -240,8 +240,8 @@ if (loginForm) {
     signInWithEmailAndPassword(auth, email, password)
       .then(() => {
         alert("Login successful!");
-        // 👉 After login, go to profile page
-        window.location.href = "profile.html";
+        
+        window.location.href = "index.html";
       })
       .catch((error) => {
         console.error("Login error:", error);
@@ -316,4 +316,57 @@ onAuthStateChanged(auth, async (user) => {
       console.error("Error loading profile:", err);
     }
   }
+
+
+  const authBtnDesktop = document.getElementById("authBtnDesktop");
+  const authBtnSidebar = document.getElementById("authBtnSidebar");
+
+  const logoutIconDesktop = document.getElementById("logoutIconDesktop");
+  const logoutIconSidebar = document.getElementById("logoutIconSidebar");
+  const profileIconDesktop = document.getElementById("profileIconDesktop");
+  const profileIconSidebar = document.getElementById("profileIconSidebar");
+
+  const doLogout = async (e) => {
+    e.preventDefault();
+    await signOut(auth);
+    alert("Logged out successfully.");
+    window.location.href = "index.html";
+  };
+
+  if (user) {
+    // logged in -> hide login/signup, show logout icon
+    if (authBtnDesktop) authBtnDesktop.style.display = "none";
+    if (authBtnSidebar) authBtnSidebar.style.display = "none";
+
+    if (logoutIconDesktop) {
+      logoutIconDesktop.style.display = "";
+      logoutIconDesktop.onclick = doLogout;
+    }
+    if (logoutIconSidebar) {
+      logoutIconSidebar.style.display = "";
+      logoutIconSidebar.onclick = doLogout;
+    }
+
+    if (profileIconDesktop) {
+      logoutIconDesktop.style.display = "";
+    }
+    if (profileIconSidebar) {
+      logoutIconSidebar.style.display = "";
+    }
+
+
+
+  } else {
+    // logged out -> show login/signup, hide logout icon
+    if (authBtnDesktop) authBtnDesktop.style.display = "";
+    if (authBtnSidebar) authBtnSidebar.style.display = "";
+
+    if (logoutIconDesktop) logoutIconDesktop.style.display = "none";
+    if (logoutIconSidebar) logoutIconSidebar.style.display = "none";
+
+    if (profileIconDesktop) profileIconDesktop.style.display = "none";
+    if (profileIconSidebar) profileIconSidebar.style.display = "none";
+  }
+  document.documentElement.classList.remove("auth-loading");
+
 });

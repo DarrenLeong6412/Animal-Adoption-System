@@ -2,54 +2,85 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sign Up</title>
+
   <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Prevent auth flicker -->
+  <script>
+    document.documentElement.classList.add("auth-loading");
+  </script>
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-  <h1>Create an Account</h1>
 
-  <form id="signupForm">
-    <!-- Email -->
-    <label>Email</label>
-    <input type="email" id="signupEmail" required />
+<body class="auth-page">
 
-    <!-- Password -->
-    <label>Password</label>
-    <input type="password" id="signupPassword" minlength="6" required />
+  <div class="auth-card auth-ui">
+    <h1 class="auth-title">Create an Account</h1>
+    <p class="auth-subtitle">Fill in your details to get started.</p>
 
-    <!-- Full Name (we map this to username for now) -->
-    <label>Full Name</label>
-    <input type="text" id="signupName" required />
+    <form id="signupForm" class="auth-form">
 
-    <!-- Gender -->
-    <label>Gender</label>
-    <select id="signupGender">
-      <option value="">-- Select Gender --</option>
-      <option value="M">Male</option>
-      <option value="F">Female</option>
-      <option value="O">Other</option>
-    </select>
+      <div class="auth-grid-2">
+        <div>
+          <label for="signupEmail">Email</label>
+          <input type="email" id="signupEmail" required />
+        </div>
 
+        <div>
+          <label for="signupPassword">Password</label>
+          <input type="password" id="signupPassword" minlength="6" required />
+        </div>
+      </div>
 
-    <!-- Identification Number -->
-    <label>Identification Number (IC / Passport)</label>
-    <input type="text" id="signupIC" />
+      <label for="signupName">Full Name</label>
+      <input type="text" id="signupName" required />
 
-    <!-- Phone Number -->
-    <label>Phone Number</label>
-    <input type="tel" id="signupPhone" />
+      <div class="auth-grid-2">
+        <div>
+          <label for="signupGender">Gender</label>
+          <select id="signupGender">
+            <option value="">-- Select Gender --</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+            <option value="O">Other</option>
+          </select>
+        </div>
 
-    <!-- Address -->
-    <label>Address</label>
-    <textarea id="signupAddress" rows="3"></textarea>
+        <div>
+          <label for="signupIC">Identification Number (IC / Passport)</label>
+          <input type="text" id="signupIC" />
+        </div>
+      </div>
 
-    <!-- Button -->
-    <button type="submit">Sign Up</button>
-  </form>
+      <div class="auth-grid-2">
+        <div>
+          <label for="signupPhone">Phone Number</label>
+          <input type="tel" id="signupPhone" />
+        </div>
 
-  <p>Already have an account? <a href="login.html">Log in here</a></p>
+        <div>
+          <label for="signupAddress">Address</label>
+          <textarea id="signupAddress" rows="3"></textarea>
+        </div>
+      </div>
 
-  <!-- IMPORTANT: module -->
+      <button type="submit" class="auth-submit">Sign Up</button>
+    </form>
+
+    <p class="auth-footer">
+      Already have an account?
+      <a href="login.html">Log in here</a>
+    </p>
+  </div>
+
+  <!-- Firebase Auth -->
   <script type="module" src="js/auth.js"></script>
+
 </body>
 </html>
