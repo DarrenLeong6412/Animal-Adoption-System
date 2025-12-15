@@ -50,11 +50,7 @@ window.auth = auth;
 window.db   = db;
 
 // ============== "REPOSITORY" LAYER ==============
-function generateUserId() {
-  // VARCHAR(5), format U + 4 digits (U0000–U9999)
-  const num = Math.floor(Math.random() * 10000);
-  return "U" + num.toString().padStart(4, "0");
-}
+//userID generate function removed
 
 async function saveUserProfileToFirestore(firebaseUser, formData) {
   const {
@@ -68,7 +64,7 @@ async function saveUserProfileToFirestore(firebaseUser, formData) {
   const userRef = doc(db, "users", firebaseUser.uid);
 
   const userData = {
-    user_ID: generateUserId(),                 // VARCHAR(5), U+4 digits
+    
     username: fullName || "",
     email: firebaseUser.email,
     password: null,                            // NOT storing plain password
@@ -348,10 +344,10 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     if (profileIconDesktop) {
-      logoutIconDesktop.style.display = "";
+      profileIconDesktop.style.display = "";
     }
     if (profileIconSidebar) {
-      logoutIconSidebar.style.display = "";
+      profileIconSidebar.style.display = "";
     }
 
 
