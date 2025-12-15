@@ -302,12 +302,10 @@ button:hover{
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    display: flex;
-    align-items: center;
     gap: 8px;
     font-size: 14px;
     transition: 0.2s;
-    white-space: nowrap;
+    max-width: 300px;
 }
 
 .btn-add-listing:hover {
@@ -531,121 +529,6 @@ select.listing-input-field {
     }
 
     /* ... (Keep your existing CSS above) ... */
-
-.modal.open {
-    opacity: 1;
-    z-index: 999;
-    pointer-events: auto;
-}
-
-.modal-inner {
-    background-color: white;
-    max-width: 900px;
-    width: 90%;
-    max-height: 90vh; /* Adjusted height */
-    overflow-y: auto; /* Allow scrolling for the whole card if needed */
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    transform: scale(0.95);
-    transition: transform 0.3s ease-in-out;
-    display: flex;
-    flex-direction: column;
-    border-radius: 12px;
-}
-
-.modal.open .modal-inner {
-    transform: scale(1);
-}
-
-.modal-inner-top {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between; /* Fix spacing */
-    padding: 20px 30px;
-    flex-shrink: 0;
-    border-bottom: 1px solid #eee;
-}
-
-.modal-inner-top-title h1 {
-    font-weight: 600;
-    font-size: 24px;
-    margin: 0;
-    color: #164A41;
-}
-
-.modal-inner-top-exit a {
-    padding: 8px;
-    cursor: pointer;
-    font-size: 20px;
-    color: #555;
-}
-
-.modal-inner-top-exit a:hover {
-    color: #d00;
-}
-
-.modal-inner-details-section {
-    display: flex;
-    flex-direction: row;
-    padding: 30px;
-    gap: 5px;
-    /* REMOVED overflow-y: hidden to prevent cutting off text */
-}
-
-/* FIX: Made image container flexible instead of rigid 400px */
-.modal-inner-image-container {
-    flex: 1; 
-    min-width: 300px; /* Minimum width but allows shrinking */
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-}
-
-.modal-inner-image-container img {
-    width: 100%;
-    height: 350px; 
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.modal-inner-info-container {
-    flex: 1;
-    text-align: left;
-}
-
-.modal-inner-info-container h2 {
-    margin-top: 0;
-    color: #333;
-    font-size: 28px;
-    margin-bottom: 15px;
-}
-
-/* ADDED MISSING CSS FOR ICONS/TEXT ROWS */
-.modal-detail-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-    color: #555;
-    font-size: 15px;
-}
-
-.modal-detail-item i {
-    color: #164A41;
-    width: 20px;
-    text-align: center;
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-    .modal-inner-details-section {
-        flex-direction: column;
-    }
-    .modal-inner-image-container img {
-        height: 250px;
-    }
-}
-/*#endregion*/
 
 /*#region addListingPage*/
 /* Add Listing Specific Body */
@@ -1021,6 +904,10 @@ p.subtitle {
   }
 }
 
+/*#endregion*/
+
+/*#region pop up modal */
+
 .modal {
     background-color: rgba(0,0,0,0.3);
     position: fixed;
@@ -1045,6 +932,8 @@ p.subtitle {
     display: flex;
     flex-direction: column;
     flex:wrap;
+    border-radius: 12px;
+    max-height: 70vh;
 }
 .modal-inner-top{
     display: flex;
@@ -1059,10 +948,17 @@ p.subtitle {
     flex: 1;
     text-align: left;
     padding: 6px;
+        flex-direction: row;
+    align-items: center;
+    justify-content: space-between; /* Fix spacing */
+    padding-left: 20px;
+    flex-shrink: 0;
 }
 .modal-inner-top-title h1{
     font-weight: 500;
-    font-size: 30px;
+    font-size: 28px;
+    margin: 0;
+    color: #164A41;
 }
 .modal-inner-top-exit{
     flex: 1;
@@ -1092,7 +988,6 @@ p.subtitle {
     flex: 1;
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
     overflow-y: hidden;
 }
 .modal-inner-image-container{
@@ -1115,7 +1010,26 @@ p.subtitle {
     text-align: left;
     padding: 10px;
     overflow: auto;
-    max-height: 500px;
+    min-height: 0;
+}
+.modal-inner-info-container h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 28px;
+    margin-bottom: 15px;
+}
+.modal-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: #555;
+    font-size: 15px;
+}
+.modal-detail-item i {
+    color: #164A41;
+    width: 20px;
+    text-align: center;
 }
 .modal-inner-info-text {
   margin-bottom: 12px;
@@ -1132,6 +1046,14 @@ p.subtitle {
   color: #222;
   padding: 4px 0 8px 0;
 }
+.modal-environment-photo {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
 .modal.open{
     opacity: 1;
     z-index: 999;
@@ -1476,11 +1398,9 @@ p.subtitle {
     width: 100%;
     gap: 6px;
 }
-
 .category-tabs input[type="radio"] {
     display: none;
 }
-
 .category-tabs label {
     flex: 1;
     text-align: center;
@@ -1490,10 +1410,12 @@ p.subtitle {
     cursor: pointer;
     font-size: 14px;
     transition: all 0.2s ease;
-    background-color: #f5f5f5;
+    background-color: #FFFFFF;
     color: #164A41;
 }
-
+.category-tabs input[type="radio"]:hover {
+    background-color: #eeeeee;
+}
 .category-tabs input[type="radio"]:checked + label {
     background-color: #164A41;
     color: white;

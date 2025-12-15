@@ -34,7 +34,7 @@ onAuthStateChanged(auth, async (user) => {
   if (user) {
 
     await loadRequests(user.uid); // only load requests for this user
-  } 
+  }
   else {
     console.log("No user logged in");
     alert("You must be logged in to view your adoption requests.");
@@ -165,9 +165,9 @@ function renderRequests(list) {
         </div>
       </div>
     `;
-    console.log("Displayed card for request_ID: "+req.id);
+    console.log("Displayed card for request_ID: " + req.id);
   });
-  
+
   container.querySelectorAll(".request-card-view-details").forEach(el => {
     el.addEventListener("click", () => openModal(el.dataset.id));
   });
@@ -210,39 +210,41 @@ function showModalContent(id) {
   modalImage.alt = req.name;
 
   modalInfoContainer.innerHTML = `
-        <div class="mdal-inner-info-text">
-            <h2 id="modalName">${req.name}</p>
-        </div>
-        <div class="modal-inner-info-text">
-            <p class="modal-inner-info-text-title">Type</p>
-            <p class="modal-inner-info-text-data">${req.type}</p>
-        </div>
+    <div class="modal-inner-info-text">
+        <h2 id="modalName">${req.name}</h2>
+    </div>
 
-        <div class="modal-inner-info-text">
-            <p class="modal-inner-info-text-title">Breed/Color</p>
-            <p class="modal-inner-info-text-data">${req.breed}</p>
-        </div>
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-paw"></i>
+        <p class="modal-inner-info-text-title">Type</p>
+        <span>${req.type} • ${req.breed}</span>
+    </div>
 
-        <div class="modal-inner-info-text">
-            <p class="modal-inner-info-text-title">Location</p>
-            <p class="modal-inner-info-text-data">${req.location}</p>
-        </div>
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-map-marker-alt"></i>
+        <p class="modal-inner-info-text-title">Location</p>
+        <span>${req.location}</span>
+    </div>
 
-        <div class="modal-inner-info-text">
-            <p class="modal-inner-info-text-title">Date Applied</p>
-            <p class="modal-inner-info-text-data">${req.dateApplied}</p>
-        </div>
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-calendar-alt"></i>
+        <p class="modal-inner-info-text-title">Date Applied</p>
+        <span>${req.dateApplied}</span>
+    </div>
 
-        <div class="modal-inner-info-text">
-            <p class="modal-inner-info-text-title">Status</p>
-            <p class="modal-inner-info-text-data">${capitalizeStatus(req.status)}</p>
-        </div>
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-info-circle"></i>
+        <p class="modal-inner-info-text-title">Status</p>
+        <span>${capitalizeStatus(req.status)}</span>
+    </div>
 
-        <div class="modal-inner-info-text">
-            <p class="modal-inner-info-text-title">Why do you want to adopt ${req.name}?</p>
-            <p class="modal-inner-info-text-data">${req.reason}</p>
-        </div>
-    `;
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-question-circle"></i>
+        <p class="modal-inner-info-text-title">Why do you want to adopt ${req.name}?</p>
+    </div>
+    <p class="modal-inner-info-text-data">${req.reason}</p>
+`;
+
 }
 
 // ---------- HELPER ----------
@@ -256,33 +258,33 @@ const searchInput = document.getElementById("searchInput"); // make sure your HT
 
 // ---------- LIVE SEARCH ----------
 searchInput.addEventListener("input", () => {
-    const q = searchInput.value.toLowerCase();
+  const q = searchInput.value.toLowerCase();
 
-    const filtered = requests.filter(req =>
-        [req.name, req.type, req.breed, req.location, req.reason].some(
-            field => field.toLowerCase().includes(q)
-        )
-    );
+  const filtered = requests.filter(req =>
+    [req.name, req.type, req.breed, req.location, req.reason].some(
+      field => field.toLowerCase().includes(q)
+    )
+  );
 
-    renderRequests(filtered);
+  renderRequests(filtered);
 });
 
 // ---------- FILTER ----------
 filterButtons.forEach(btn => {
-    btn.addEventListener("change", () => {
-        let value = document.querySelector('input[name="request-filter-button"]:checked').id;
-        value[0].toUpperCase;
-        if (value === "all") {
-          console.log("Show all adoption requests");
-          renderRequests(requests);
-        } else {
-          console.log("Filter for " + value);
-          renderRequests(requests.filter(r => r.status === value));
-        }
-    });
+  btn.addEventListener("change", () => {
+    let value = document.querySelector('input[name="request-filter-button"]:checked').id;
+    value[0].toUpperCase;
+    if (value === "all") {
+      console.log("Show all adoption requests");
+      renderRequests(requests);
+    } else {
+      console.log("Filter for " + value);
+      renderRequests(requests.filter(r => r.status === value));
+    }
+  });
 });
 
 document.querySelectorAll(".request-card-status p").forEach(p => {
-    const status = p.innerText.toLowerCase().replace(/\s/g, "-"); // e.g., 'under review' → 'under-review'
-    p.classList.add(`status-${status}`);
+  const status = p.innerText.toLowerCase().replace(/\s/g, "-"); // e.g., 'under review' → 'under-review'
+  p.classList.add(`status-${status}`);
 });
