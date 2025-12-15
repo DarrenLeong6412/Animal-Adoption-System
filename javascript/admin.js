@@ -109,15 +109,24 @@ async function loadRequests() {
         const animal = animalMap[r.listing_ID] || {};
         const user = userMap[r.user_ID] || {};
 
+        // Date formatting
+        let formattedDate;
+        if (r.dateApplied && r.dateApplied.toDate) {
+            const dateObj = r.dateApplied.toDate();
+            formattedDate = dateObj.toLocaleDateString("en-GB", {
+                day: 'numeric', month: 'short', year: 'numeric'
+            });
+        } else {
+            formattedDate = "Date Unknown";
+        }
+
         return {
             id: r.id,
 
             // request info
             status: r.status ?? "unknown",
             reason: r.reason ?? "—",
-            dateApplied: r.dateApplied
-                ? r.dateApplied.toDate().toLocaleDateString()
-                : "—",
+            dateApplied: formattedDate,
             environmentDesc: r.environmentDesc ?? "—",
             environmentPhoto: r.environmentPhoto ?? "images/no-image.png",
 

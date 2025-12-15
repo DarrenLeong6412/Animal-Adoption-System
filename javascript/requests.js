@@ -96,6 +96,17 @@ async function loadRequests(currentUserID) {
   allRequests = rawRequests.map(r => {
     const animal = animalMap[r.listing_ID] || {};
 
+    // Date formatting
+    let formattedDate;
+    if (r.dateApplied && r.dateApplied.toDate) {
+      const dateObj = r.dateApplied.toDate();
+      formattedDate = dateObj.toLocaleDateString("en-GB", {
+        day: 'numeric', month: 'short', year: 'numeric'
+      });
+    } else {
+      formattedDate = "Date Unknown";
+    }
+
     return {
       id: r.id,                              // request document ID
       user_ID: r.user_ID,
@@ -104,9 +115,7 @@ async function loadRequests(currentUserID) {
       breed: animal.breed ?? "—",
       imageUrl: animal.imageUrl ?? "images/no-image.png",
       location: animal.location ?? "—",
-      dateApplied: r.dateApplied
-        ? r.dateApplied.toDate().toLocaleDateString()
-        : "—",
+      dateApplied: formattedDate,
       status: r.status ?? "unknown",
       reason: r.reason ?? "—"
     };

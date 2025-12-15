@@ -792,7 +792,7 @@ p.subtitle {
     border: 1px solid #eeeeee;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     margin-bottom: 15px;
-    border-radius: 4px;
+    border-radius: 12px;
     transition: transform 0.2s ease;
 }
 .request-card:hover{
@@ -804,6 +804,7 @@ p.subtitle {
     overflow: hidden;
     height: 250px;
     flex: 3;
+    border-radius: 12px;
 }
 .request-card-img{
     width: 260px;
