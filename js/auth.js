@@ -321,11 +321,15 @@ onAuthStateChanged(auth, async (user) => {
       console.error("Error loading profile:", err);
     }
   }
+
+
   const authBtnDesktop = document.getElementById("authBtnDesktop");
   const authBtnSidebar = document.getElementById("authBtnSidebar");
 
   const logoutIconDesktop = document.getElementById("logoutIconDesktop");
   const logoutIconSidebar = document.getElementById("logoutIconSidebar");
+  const profileIconDesktop = document.getElementById("profileIconDesktop");
+  const profileIconSidebar = document.getElementById("profileIconSidebar");
 
   const doLogout = async (e) => {
     e.preventDefault();
