@@ -52,22 +52,21 @@ window.db   = db;
 // ============== "REPOSITORY" LAYER ==============
 //userID generate function removed
 
-async function saveUserProfileToFirestore(firebaseUser, formData) {
+async function saveUserProfileToFirestore(firebaseUser, formData = {}) {
   const {
-    fullName,
-    gender,
-    identificationNumber,
-    phoneNumber,
-    address
+    fullName = "",
+    gender = null,
+    identificationNumber = null,
+    phoneNumber = null,
+    address = null
   } = formData;
 
   const userRef = doc(db, "users", firebaseUser.uid);
 
   const userData = {
-    
     username: fullName || "",
     email: firebaseUser.email,
-    password: null,                            // NOT storing plain password
+    password: null, // NOT storing plain password
     gender: gender || null,
     identification_Number: identificationNumber || null,
     role: "User",
@@ -79,8 +78,9 @@ async function saveUserProfileToFirestore(firebaseUser, formData) {
     firebaseUid: firebaseUser.uid
   };
 
-  await setDoc(userRef, userData);
+  await setDoc(userRef, userData, { merge: true }); // merge helps later profile edits too
 }
+
 
 // ============== "USE CASE" LAYER ==============
 function validateSignupData({
@@ -113,9 +113,12 @@ function validateSignupData({
 
   if (!password || password.length === 0) {
     errors.push("Password is required.");
+  } else if (password.length < 6) {
+    errors.push("Password must be at least 6 characters.");
   } else if (password.length > 255) {
     errors.push("Password must not exceed 255 characters.");
   }
+
 
   if (gender && !["M", "F", "O"].includes(gender)) {
     errors.push("Gender must be M, F, or O.");
@@ -169,59 +172,44 @@ async function registerUserInDatabase(firebaseUser, formData) {
 const signupForm = document.getElementById("signupForm");
 
 if (signupForm) {
-  signupForm.addEventListener("submit", (e) => {
+  signupForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("signupEmail").value;
+    const email = document.getElementById("signupEmail").value.trim().toLowerCase();
     const password = document.getElementById("signupPassword").value;
-    const fullName = document.getElementById("signupName")?.value.trim() || "";
-    const gender = document.getElementById("signupGender")?.value || "";
-    const identificationNumber = document.getElementById("signupIC")?.value.trim() || "";
-    const phoneNumber = document.getElementById("signupPhone")?.value.trim() || "";
-    const address = document.getElementById("signupAddress")?.value.trim() || "";
+    const fullName = document.getElementById("signupName").value.trim();
 
     try {
       validateSignupData({
         fullName,
         email,
         password,
-        gender,
-        identificationNumber,
-        phoneNumber,
-        address
+        // optional fields omitted on purpose (user fills later in profile)
       });
     } catch (err) {
       alert(err.message);
       return;
     }
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(async (userCredential) => {
-        const user = userCredential.user;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-        try {
-          await registerUserInDatabase(user, {
-            fullName,
-            gender,
-            identificationNumber,
-            phoneNumber,
-            address,
-            password
-          });
-
-          alert("Account created successfully!");
-          window.location.href = "login.html";
-        } catch (err) {
-          console.error("Error saving user profile:", err);
-          alert(err.message || "Account created, but failed to save profile.");
-        }
-      })
-      .catch((error) => {
-        console.error("Signup error:", error);
-        alert(error.message);
+      // Save minimal profile now; optional fields stay null
+      await registerUserInDatabase(user, {
+        fullName,
+        password
       });
+
+      alert("Account created successfully!");
+      window.location.href = "login.html";
+    } catch (error) {
+      console.error("Signup error:", error);
+      alert(error.message);
+    }
   });
 }
+
 
 // LOGIN HANDLER (used on login.html)
 const loginForm = document.getElementById("loginForm");
