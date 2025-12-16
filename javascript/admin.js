@@ -249,11 +249,15 @@ function showModalContent(id) {
     const modalImage = modal.querySelector(".modal-inner-image-container img");
     const modalInfoContainer = modal.querySelector(".modal-inner-info-container");
 
-    modalTitle.innerText = req.name;
+    modalTitle.innerText = req.animalName;
     modalImage.src = req.imageUrl;
     modalImage.alt = req.name;
 
     modalInfoContainer.innerHTML = `
+    <div class="modal-inner-top-title>
+        <h1>${req.animalName}</h1>
+    </div>
+
     <div class="modal-inner-info-text">
         <h2 id="modalName">${req.animalName}</h2>
     </div>
