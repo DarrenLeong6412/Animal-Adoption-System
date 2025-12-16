@@ -26,7 +26,11 @@
                 <li><a href="listing.html">ANIMALS</a></li>
                 <li><a href="lostpet.html">LOST PETS</a></li>
                 <li><a href="requests.html">MY REQUESTS</a></li>
-                <li><a href="profile.html">ACCOUNT</a></li>
+                
+                <li class="admin-only auth-ui" style="display:none"><a href="report.html">REPORT</a></li>
+                <li class="admin-only auth-ui" style="display:none"><a href="approval.html">APPROVAL</a></li>
+
+                <li><a href="profile.html" id="profileIconSidebar" class="auth-ui" style="display:none">ACCOUNT</a></li>
                 <li><a href="login.html" id="authBtnSidebar" class="auth-ui">LOGIN</a></li>
                 <li><a href="#" id="logoutIconSidebar" class="auth-ui" style="display:none;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
 
@@ -39,7 +43,9 @@
                 <li><a class="hideOnMobile" href="listing.html">ANIMALS</a></li>
                 <li><a class="hideOnMobile" href="lostpet.html">LOST PETS</a></li>
                 <li><a class="hideOnMobile" href="requests.html">MY REQUESTS</a></li>
-                <li><a class="hideOnMobile" href="profile.html"><i class="fa-solid fa-user"></i></a></li>
+                <li class="admin-only" style="display:none"><a class="hideOnMobile auth-ui" href="report.html">REPORT</a></li>
+                <li class="admin-only" style="display:none"><a class="hideOnMobile auth-ui" href="approval.html">APPROVAL</a></li>
+                <li><a class="hideOnMobile auth-ui" id="profileIconDesktop" href="profile.html"><i class="fa-solid fa-user"></i></a></li>
                 <li><a href="login.html" id="authBtnDesktop" class="hideOnMobile auth-ui">LOGIN</a></li>
                 <li><a href="#" id="logoutIconDesktop" class="hideOnMobile auth-ui" style="display:none;"><i class="fa-solid fa-right-from-bracket"></i></a></li>
 

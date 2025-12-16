@@ -50,11 +50,7 @@ window.auth = auth;
 window.db   = db;
 
 // ============== "REPOSITORY" LAYER ==============
-function generateUserId() {
-  // VARCHAR(5), format U + 4 digits (U0000–U9999)
-  const num = Math.floor(Math.random() * 10000);
-  return "U" + num.toString().padStart(4, "0");
-}
+//userID generate function removed
 
 async function saveUserProfileToFirestore(firebaseUser, formData) {
   const {
@@ -68,7 +64,7 @@ async function saveUserProfileToFirestore(firebaseUser, formData) {
   const userRef = doc(db, "users", firebaseUser.uid);
 
   const userData = {
-    user_ID: generateUserId(),                 // VARCHAR(5), U+4 digits
+    
     username: fullName || "",
     email: firebaseUser.email,
     password: null,                            // NOT storing plain password
@@ -268,6 +264,13 @@ if (logoutBtn) {
 
 // ============== AUTH STATE LISTENER (SESSION) ==============
 // This will run on every page that includes auth.js
+async function getUserRole(uid) {
+  const ref = doc(db, "users", uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return "User";
+  return snap.data().role || "User";
+}
+
 onAuthStateChanged(auth, async (user) => {
   console.log("Auth state changed. Current user:", user?.uid || "null");
 
@@ -278,6 +281,8 @@ onAuthStateChanged(auth, async (user) => {
   const profileGenderEl= document.getElementById("profileGender");
   const profilePhoneEl = document.getElementById("profilePhone");
   const profileAddressEl = document.getElementById("profileAddress");
+  
+
 
   const onProfilePage =
     profileEmailEl ||
@@ -329,27 +334,41 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "index.html";
   };
 
+  const adminEls = document.querySelectorAll(".admin-only");
   if (user) {
-    // logged in -> hide login/signup, show logout icon
+    // normal logged-in UI
     if (authBtnDesktop) authBtnDesktop.style.display = "none";
     if (authBtnSidebar) authBtnSidebar.style.display = "none";
 
-    if (logoutIconDesktop) {
-      logoutIconDesktop.style.display = "";
-      logoutIconDesktop.onclick = doLogout;
-    }
-    if (logoutIconSidebar) {
-      logoutIconSidebar.style.display = "";
-      logoutIconSidebar.onclick = doLogout;
-    }
+    logoutIconDesktop && (logoutIconDesktop.style.display = "");
+    logoutIconSidebar && (logoutIconSidebar.style.display = "");
+
+    logoutIconDesktop && (logoutIconDesktop.onclick = doLogout);
+    logoutIconSidebar && (logoutIconSidebar.onclick = doLogout);
+
+
+    profileIconDesktop && (profileIconDesktop.style.display = "");
+    profileIconSidebar && (profileIconSidebar.style.display = "");
+
+    // role check
+    const role = await getUserRole(user.uid);
+
+    adminEls.forEach(el => {
+     el.style.display = role === "Admin" ? "" : "none";
+    });
 
   } else {
-    // logged out -> show login/signup, hide logout icon
+    // logged out UI
     if (authBtnDesktop) authBtnDesktop.style.display = "";
     if (authBtnSidebar) authBtnSidebar.style.display = "";
 
-    if (logoutIconDesktop) logoutIconDesktop.style.display = "none";
-    if (logoutIconSidebar) logoutIconSidebar.style.display = "none";
+    logoutIconDesktop && (logoutIconDesktop.style.display = "none");
+    logoutIconSidebar && (logoutIconSidebar.style.display = "none");
+
+    profileIconDesktop && (profileIconDesktop.style.display = "none");
+    profileIconSidebar && (profileIconSidebar.style.display = "none");
+
+    adminEls.forEach(el => el.style.display = "none");
   }
   document.documentElement.classList.remove("auth-loading");
 
