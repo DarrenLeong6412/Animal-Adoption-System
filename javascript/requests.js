@@ -156,24 +156,47 @@ function renderRequests(list) {
     // Add the status class dynamically
     const statusClass = `status-${req.status.toLowerCase().replace(/\s/g, '-')}`;
     container.innerHTML += `
-      <div class="request-card">
-        <div class="request-card-img-container">
-          <img class="request-card-img" src="${req.imageUrl}" alt="${req.name}">
-        </div>
-        <div class="request-card-info-section">
-          <div class="request-card-info">
-            <p class="request-card-animal-name">${req.name}</p>
-            <p>${req.breed}</p>
-            <p>${req.location}</p>
-            <p>Date Applied: ${req.dateApplied}</p>
-            <a><p class="request-card-view-details" data-id="${req.id}">View Details</p></a>
-          </div>
-          <div class="request-card-status">
-            <p class="${statusClass}">${capitalizeStatus(req.status)}</p>
-          </div>
-        </div>
+    <a class="request-card-view-details" data-id="${req.id}" cursor:pointer;">
+    <div class="listing-card">
+    
+    <div class="listing-card-img-container">
+      <img
+        src="${req.imageUrl}"
+        alt="${req.name}"
+        class="listing-card-img"
+      />
+
+      <div class="listing-card-status">
+        <p class="${statusClass}">
+          ${capitalizeStatus(req.status)}
+        </p>
       </div>
-    `;
+    </div>
+
+    <div class="listing-card-info-section">
+
+      <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
+        <p class="listing-card-animal-name" style="margin:0;">
+          ${req.name}
+        </p>
+        <span style="font-size:11px; color:#888; font-weight:500;">
+          ${req.dateApplied}
+        </span>
+      </div>
+
+      <p>${req.breed}</p>
+
+      <div class="listing-card-details-row">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>${req.location}</span>
+      </div>
+      
+    </div>
+
+  </div>
+  </a>
+`;
+
     console.log("Displayed card for request_ID: " + req.id);
   });
 

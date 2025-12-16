@@ -99,6 +99,9 @@ function renderGrid(dataList) {
         if (animal.status === "Pending") {
             badgeStyle = "background-color: #ffedd5; color: #9a3412; border: 1px solid #fed7aa;"; 
         }
+        else if (animal.status === "Rejected"){
+            badgeStyle = "background-color: #fee2e2; color: #b91c1c; border: 1px solid #fed7aa;"
+        }
 
         const breedDisplay = animal.breed ? `${animal.type} • ${animal.breed}` : animal.type;
 

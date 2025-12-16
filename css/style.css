@@ -418,7 +418,7 @@ select.listing-input-field {
         flex-direction: row;
         flex-wrap: wrap;
         gap: 25px;
-        width: 100%;
+        width: 60%;
         justify-content: center; /* This centers the cards in the container */
     }
 
@@ -429,7 +429,9 @@ select.listing-input-field {
         justify-content: start;
         transition: 0.3s;
         padding: 0;
-        width: 320px;      
+        max-width: 320px;   
+        min-width: 320px;   
+        width: 100%;
         background-color: white;
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
@@ -477,6 +479,15 @@ select.listing-input-field {
         font-weight: 600;
         margin: 0;
         display: inline-block;
+    }
+
+    .listing-card-status p.status-pending {
+    color: #92400e;
+    background-color: #fef3c7;
+    }
+    .listing-card-status p.status-rejected {
+    color: #92400e;
+    background-color: #fef3c7;
     }
 
     .listing-card-info-section{
@@ -780,10 +791,14 @@ p.subtitle {
 .request-flex-container{
     margin-top: 20px;
     width: 60%;
+
+    max-width: 95vw;
+
     display: flex;
-    justify-content: start;
-    flex-direction: column;
-    max-width: 950px;
+    flex-direction: row;
+    flex-wrap: wrap;     
+    justify-content: center;
+    gap: 25px;
 }
 .request-card{
     display: flex;
@@ -836,17 +851,6 @@ p.subtitle {
 .request-card-info a{
     cursor: pointer;
     text-decoration: none;
-}
-.request-card-info a:hover{
-    color: #F1B24A;
-}
-.request-card-view-details{
-    font-weight: 550;
-    color: #2b592c;
-    text-decoration: underline;
-}
-.request-card-view-details:hover{
-    color: #F1B24A;
 }
 .request-card-status{
     text-align: center;
