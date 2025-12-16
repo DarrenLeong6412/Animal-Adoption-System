@@ -38,7 +38,7 @@ async function loadAnimals() {
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
-            grid.innerHTML = '<p>No animals found. Add one!</p>';
+            grid.innerHTML = '<p>No animals available for adoption right now.</p>';
             return;
         }
 
@@ -73,35 +73,18 @@ function renderGrid(dataList) {
     const grid = document.getElementById("listingGrid");
     grid.innerHTML = ""; 
 
-    if (dataList.length === 0) {
-        grid.innerHTML = '<p style="text-align:center; width:100%; padding:20px;">No matching animals found.</p>';
+    const publicList = dataList.filter(animal => animal.status === "Available");
+
+    if (publicList.length === 0) {
+        grid.innerHTML = '<p style="text-align:center; width:100%; padding:20px;">No animals found matching your criteria.</p>';
         return;
     }
 
-    dataList.forEach((animal) => {
+    publicList.forEach((animal) => {
         
-        // --- VISIBILITY LOGIC (The Fix) ---
-        const isOwner = currentUser && (currentUser.uid === animal.createdBy);
-        
-        // Only "Available" is public. "Pending" is hidden from others.
-        const isPublic = animal.status === "Available";
-
-        if (!isPublic && !isOwner) {
-            return; // Skip this card (Hide from others)
-        }
-
-        // --- BADGE COLOR LOGIC ---
         // Default Green for Available
         let badgeStyle = "background-color: #d1fae5; color: #166534;"; 
-        let statusText = animal.status || "Available";
-
-        // Orange for Pending (Only owner sees this)
-        if (animal.status === "Pending") {
-            badgeStyle = "background-color: #ffedd5; color: #9a3412; border: 1px solid #fed7aa;"; 
-        }
-        else if (animal.status === "Rejected"){
-            badgeStyle = "background-color: #fee2e2; color: #b91c1c; border: 1px solid #fed7aa;"
-        }
+        let statusText = "Available";
 
         const breedDisplay = animal.breed ? `${animal.type} • ${animal.breed}` : animal.type;
 
@@ -128,7 +111,7 @@ function renderGrid(dataList) {
                     </div>
                     <div class="listing-card-details-row">
                         <i class="fas fa-syringe"></i>
-                        <span>${animal.vaccinationStatus}</span>
+                        <span>${animal.vaccinationStatus || 'Not specified'}</span>
                     </div>
                 </div>
             </div>
@@ -157,13 +140,6 @@ function filterAndRender() {
 
     const filteredData = allListings.filter(animal => {
         
-        // --- VISIBILITY CHECK (Apply here too) ---
-        const isOwner = currentUser && (currentUser.uid === animal.createdBy);
-        const isPublic = animal.status === "Available";
-        
-        // If not public and not owner, exclude from search results completely
-        if (!isPublic && !isOwner) return false; 
-
         // 1. Search
         const nameMatch = animal.name.toLowerCase().includes(searchText);
         const breedMatch = (animal.breed || "").toLowerCase().includes(searchText);
@@ -188,6 +164,23 @@ function filterAndRender() {
 
     renderGrid(filteredData);
 }
+
+window.openModalById = function(id) {
+    const data = allListings.find(a => a.id === id);
+    if (!data) return;
+
+    selectedAnimalId = id;
+    const breedText = data.breed ? `${data.type} • ${data.breed}` : data.type;
+
+    showAnimalDetails(
+        data.name, 
+        data.imageUrl, 
+        breedText,           
+        data.location, 
+        data.vaccinationStatus,
+        data.description || "No description provided." 
+    );
+};
 
 window.openModalById = function(id) {
     const data = allListings.find(a => a.id === id);
