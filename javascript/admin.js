@@ -1,6 +1,10 @@
 //console.log("requests.js connected");
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import {
+    runTransaction,
+    updateDoc,
+    query,
+    where,
     getFirestore,
     getDocs,
     collection,
@@ -8,7 +12,6 @@ import {
     getDoc
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-
 
 const firebaseConfig = {
     apiKey: "AIzaSyCy5YAmmb1aTnWiXljQr3yOVsTKmYPAS08",
@@ -26,6 +29,13 @@ const auth = getAuth(app);
 
 const container = document.querySelector(".request-flex-container");
 const categoryButtons = document.querySelectorAll('input[name="approval-category-button"]');
+let currentCategory = "animalListings";
+categoryButtons.forEach(input => {
+    input.addEventListener("change", () => {
+        currentCategory = input.id; // use the input's id
+        renderCategory(currentCategory);
+    });
+});
 
 let isLoading = true;
 
@@ -40,6 +50,65 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 });
+
+async function handleRequestDecision(requestId, animalId, decision) {
+    try {
+        console.log("=== handleRequestDecision ===");
+
+        await runTransaction(db, async (transaction) => {
+            const requestRef = doc(db, "requests", requestId);
+
+            if (decision === "approved") {
+                // Force server-side snapshot
+                const q = query(
+                    collection(db, "requests"),
+                    where("listing_ID", "==", String(animalId)),
+                    where("status", "==", "pending")
+                );
+                const snapshot = await getDocs(q, { source: "server" }); // ok to read server snapshot here
+
+                console.log("Snapshot docs returned:", snapshot.docs.length);
+                snapshot.docs.forEach(docSnap => {
+                    console.log(
+                        "Doc ID:", docSnap.id,
+                        "listing_ID:", docSnap.data().listing_ID,
+                        "status:", docSnap.data().status
+                    );
+                });
+
+                // update all requests atomically within the transaction
+                for (const docSnap of snapshot.docs) {
+                    const ref = doc(db, "requests", docSnap.id);
+                    transaction.update(ref, {
+                        status: docSnap.id === requestId ? "approved" : "rejected"
+                    });
+                    console.log(
+                        docSnap.id === requestId
+                            ? `Request ${docSnap.id} approved`
+                            : `Request ${docSnap.id} rejected`
+                    );
+                }
+            } else {
+                // reject only current request
+                transaction.update(requestRef, { status: "rejected" });
+                console.log(`Request ${requestId} rejected`);
+            }
+        });
+
+        alert(
+            decision === "approved"
+                ? "Request approved successfully."
+                : "Request rejected."
+        );
+
+        await loadRequests();
+        renderCategory(currentCategory);
+
+    } catch (error) {
+        console.error("Error handling decision:", error);
+        alert("Something went wrong. Please try again.");
+    }
+}
 
 let unapprovedRequests = []; //create request empty array for current user requests
 let allRequests = []; //empty array for all requests
@@ -131,6 +200,7 @@ async function loadRequests() {
             environmentPhoto: r.environmentPhoto ?? "images/no-image.png",
 
             // animal info
+            animalId: r.listing_ID ?? "noID",
             animalName: animal.name ?? "Unknown",
             type: animal.type ?? "—",
             breed: animal.breed ?? "—",
@@ -283,6 +353,16 @@ function showModalContent(id) {
     modalImage.src = req.imageUrl;
     modalImage.alt = req.name;
 
+    document.getElementById("modalActions").addEventListener("click", (e) => {
+        if (e.target.dataset.action === "approve") {
+            handleRequestDecision(id, req.animalId, "approved");
+        }
+
+        if (e.target.dataset.action === "reject") {
+            handleRequestDecision(id, req.animalId, "rejected");
+        }
+    });
+
     modalInfoContainer.innerHTML = `
     <div class="modal-inner-top-title>
         <h1>${req.animalName}</h1>
@@ -379,8 +459,9 @@ function showModalContent(id) {
         <p class="modal-inner-info-text-title">Home Environment Photo</p>
     </div>
     <img src="${req.environmentPhoto}" alt="Home Environment" class="modal-environment-photo"/ >
+    
+    
 `;
-
 }
 
 // ZHILIN ADD HERE
@@ -395,26 +476,24 @@ function capitalizeStatus(status) {
 const searchInput = document.getElementById("searchInput"); // make sure your HTML has this
 
 // ---------- CATEGORY SELECTION ----------
-categoryButtons.forEach(btn => {
-    btn.addEventListener("change", () => {
-        let value = document.querySelector('input[name="approval-category-button"]:checked').id;
-        value[0].toUpperCase;
-        if (value === "animalListings") {
-            //function call here for renderListings
-            return;
-        } else if (value === "adoptionRequests") {
-            console.log(value);
-            renderRequests([]);
-            renderRequests(unapprovedRequests);
-        } else if (value === "lostPetReports") {
-            //function call here for lostPetReports
-            console.log(value);
-            return;
-        } else {
-            console.log("no category selected")
-        }
-    });
-});
+function renderCategory(category) {
+    container.innerHTML = ""; // clear previous content
+
+    switch (category) {
+        case "animalListings":
+            //renderAnimalListings();
+            break;
+        case "adoptionRequests":
+            renderRequests(unapprovedRequests); // your function
+            break;
+        case "lostPetReports":
+            //renderLostPetReports();
+            break;
+        default:
+            console.log("no category selected");
+    }
+}
+
 
 document.querySelectorAll(".request-card-status p").forEach(p => {
     const status = p.innerText.toLowerCase().replace(/\s/g, "-"); // e.g., 'under review' → 'under-review'

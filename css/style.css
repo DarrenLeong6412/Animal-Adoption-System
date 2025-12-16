@@ -487,7 +487,7 @@ select.listing-input-field {
     }
     .listing-card-status p.status-rejected {
     color: #b91c1c;
-    background-color: #fef3c7;
+    background-color: #fee2e2;
     }
 
     .listing-card-info-section{
@@ -926,7 +926,7 @@ p.subtitle {
     flex-direction: column;
     flex:wrap;
     border-radius: 12px;
-    max-height: 500px;
+    max-height: 520px;
 }
 .modal-inner-top{
     display: flex;
@@ -1050,6 +1050,41 @@ p.subtitle {
     object-fit: cover;
     border-radius: 8px;
     margin-top: 8px;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 10px 0 10px 0;
+}
+.modal-footer button{
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    gap: 8px;
+    font-size: 14px;
+    transition: 0.2s;
+    max-width: 300px;
+}
+.btn-approve {
+  background-color: #164A41;
+  color: #fff;
+}
+.btn-approve:hover {
+    background-color: #d0e0d3;
+    color: #164A41;
+}
+.btn-reject {
+  background-color: #b91c1c;
+  color: #fff;
+}
+.btn-reject:hover {
+  background-color: #d18282;
+  color: #b91c1c;
 }
 
 .modal.open{
