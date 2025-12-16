@@ -136,6 +136,7 @@ async function loadRequests() {
             breed: animal.breed ?? "—",
             imageUrl: animal.imageUrl ?? "images/no-image.png",
             location: animal.location ?? "—",
+            vaccinationStatus: animal.vaccinationStatus ?? "-",
 
             // user info
             username: user.username ?? "—",
@@ -180,35 +181,64 @@ function renderRequests(list) {
         // Add the status class dynamically
         const statusClass = `status-${req.status.toLowerCase().replace(/\s/g, '-')}`;
         container.innerHTML += `
-      <div class="request-card">
-            <div class="request-card-img-container">
-                <img class="request-card-img" src="${req.imageUrl}" alt="${req.animalName}">
-            </div>
+<a class="request-card-view-details" data-id="${req.id}" style="cursor:pointer;">
+  <div class="listing-card">
 
-            <div class="request-card-info-section">
-                <div class="request-card-info">
-                    <p class="request-card-animal-name">${req.animalName}</p>
+    <div class="listing-card-img-container">
+      <img
+        src="${req.imageUrl}"
+        alt="${req.animalName}"
+        class="listing-card-img"
+      />
 
-                    <p>Submitted By: ${req.username}</p>
-                    <p>Phone No.: ${req.phone_Number}</p>
-                    <p>Email: ${req.email}</p>
-                    <p>Identification No.: ${req.identification_Number}</p>
+      <div class="listing-card-status">
+        <p class="${statusClass}">
+          ${capitalizeStatus(req.status)}
+        </p>
+      </div>
+    </div>
 
-                    <a>
-                        <p class="request-card-view-details" data-id="${req.id}">
-                            View Details
-                        </p>
-                    </a>
-                </div>
+    <div class="listing-card-info-section">
 
-                <div class="request-card-status">
-                    <p class="${statusClass}">
-                        ${capitalizeStatus(req.status)}
-                    </p>
-                </div>
-            </div>
-        </div>
-    `;
+      <!-- Header row -->
+      <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
+        <p class="listing-card-animal-name" style="margin:0;">
+          ${req.animalName}
+        </p>
+        <span style="font-size:11px; color:#888; font-weight:500;">
+          ${req.dateSubmitted ?? ""}
+        </span>
+      </div>
+
+      <!-- Submitted by -->
+      <div class="listing-card-details-row">
+        <i class="fas fa-user"></i>
+        <span>${req.username}</span>
+      </div>
+
+      <!-- Phone -->
+      <div class="listing-card-details-row">
+        <i class="fas fa-phone-alt"></i>
+        <span>${req.phone_Number}</span>
+      </div>
+
+      <!-- Email -->
+      <div class="listing-card-details-row">
+        <i class="fas fa-envelope"></i>
+        <span>${req.email}</span>
+      </div>
+
+      <!-- Identification -->
+      <div class="listing-card-details-row">
+        <i class="fas fa-id-card"></i>
+        <span>${req.identification_Number}</span>
+      </div>
+
+    </div>
+  </div>
+</a>
+`;
+
         console.log("Displayed card for request_ID: " + req.id);
     });
 
@@ -259,85 +289,96 @@ function showModalContent(id) {
     </div>
 
     <div class="modal-inner-info-text">
-        <h2 id="modalName">${req.animalName}</h2>
+        <h3 id="modalName">${req.animalName}</h2>
     </div>
 
     <div class="modal-inner-info-text modal-detail-item">
-    <i class="fas fa-paw"></i>
-    <p class="modal-inner-info-text-title">Type</p>
-    <span>${req.type} • ${req.breed}</span>
-  </div>
+        <i class="fas fa-paw"></i>
+        <p class="modal-inner-info-text-title">Type</p>
+        <span>${req.type} • ${req.breed}</span>
+    </div>
 
-  <div class="modal-inner-info-text modal-detail-item">
-    <i class="fas fa-map-marker-alt"></i>
-    <p class="modal-inner-info-text-title">Location</p>
-    <span>${req.location}</span>
-  </div>
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-map-marker-alt"></i>
+        <p class="modal-inner-info-text-title">Location</p>
+        <span>${req.location}</span>
+    </div>
 
-  <div class="modal-inner-info-text modal-detail-item">
-    <i class="fas fa-calendar-alt"></i>
-    <p class="modal-inner-info-text-title">Date Applied</p>
-    <span>${req.dateApplied}</span>
-  </div>
+    <div class="lmodal-inner-info-text modal-detail-item">
+        <i class="fas fa-syringe"></i>
+        <p class="modal-inner-info-text-title">Vaccination</p>
+        <span>${req.vaccinationStatus}</span>
+    </div>
 
-  <!-- USER INFO -->
-  <div class="modal-inner-info-text modal-detail-item">
-    <i class="fas fa-user"></i>
-    <p class="modal-inner-info-text-title">Submitted By</p>
-    <span>${req.username}</span>
-  </div>
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-calendar-alt"></i>
+        <p class="modal-inner-info-text-title">Date Applied</p>
+        <span>${req.dateApplied}</span>
+    </div>
 
-  <div class="modal-inner-info-text modal-detail-item">
-    <i class="fas fa-id-card"></i>
-    <p class="modal-inner-info-text-title">Identification Number</p>
-    <span>${req.identification_Number}</span>
-  </div>
+    <!-- USER INFO -->
+    <div class="modal-inner-info-text">
+        <h3 id="modalName">Applicant Details</h2>
+    </div>
 
-  <div class="modal-inner-info-text modal-detail-item">
-    <i class="fas fa-phone"></i>
-    <p class="modal-inner-info-text-title">Phone Number</p>
-    <span>${req.phone_Number}</span>
-  </div>
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-user"></i>
+        <p class="modal-inner-info-text-title">Submitted By</p>
+        <span>${req.username}</span>
+    </div>
 
-  <div class="modal-inner-info-text modal-detail-item">
-    <i class="fas fa-envelope"></i>
-    <p class="modal-inner-info-text-title">Email</p>
-    <span>${req.email}</span>
-  </div>
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-id-card"></i>
+        <p class="modal-inner-info-text-title">Identification Number</p>
+        <span>${req.identification_Number}</span>
+    </div>
 
-  <!-- STATUS -->
-  <div class="modal-inner-info-text modal-detail-item">
-    <i class="fas fa-info-circle"></i>
-    <p class="modal-inner-info-text-title">Status</p>
-    <span>${capitalizeStatus(req.status)}</span>
-  </div>
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-phone"></i>
+        <p class="modal-inner-info-text-title">Phone Number</p>
+        <span>${req.phone_Number}</span>
+    </div>
 
-  <!-- REASON -->
-  <div class="modal-inner-info-text modal-detail-item">
-    <i class="fas fa-question-circle"></i>
-    <p class="modal-inner-info-text-title">
-      Why do you want to adopt ${req.animalName}?
-    </p>
-  </div>
-  <p class="modal-inner-info-text-data">${req.reason}</p>
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-envelope"></i>
+        <p class="modal-inner-info-text-title">Email</p>
+        <span>${req.email}</span>
+    </div>
 
-  <!-- ENVIRONMENT DESCRIPTION -->
-  <div class="modal-inner-info-text modal-detail-item">
-    <i class="fas fa-home"></i>
-    <p class="modal-inner-info-text-title">Home Environment Description</p>
-  </div>
-  <p class="modal-inner-info-text-data">${req.environmentDesc}</p>
+    <!-- STATUS -->
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-info-circle"></i>
+        <p class="modal-inner-info-text-title">Status</p>
+        <span>${capitalizeStatus(req.status)}</span>
+    </div>
 
-  <!-- ENVIRONMENT PHOTO -->
-  <div class="modal-inner-info-text modal-detail-item">
-    <i class="fas fa-image"></i>
-    <p class="modal-inner-info-text-title">Home Environment Photo</p>
-  </div>
-  <img 
-    src="${req.environmentPhoto}" 
-    alt="Home Environment"
-    class="modal-environment-photo"
-  />
+    <!-- REASON -->
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-question-circle"></i>
+        <p class="modal-inner-info-text-title">
+        Why do you want to adopt ${req.animalName}?
+        </p>
+    </div>
+    <div class="modal-inner-info-text modal-detail-item">
+        <span>${req.reason}</span>
+    </div>
+
+    <!-- ENVIRONMENT DESCRIPTION -->
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-home"></i>
+        <p class="modal-inner-info-text-title">Home Environment Description</p>
+    </div>
+    
+    <div class="modal-inner-info-text modal-detail-item">
+        <span>${req.environmentDesc}</span>
+    </div>
+
+    <!-- ENVIRONMENT PHOTO -->
+    <div class="modal-inner-info-text modal-detail-item">
+        <i class="fas fa-image"></i>
+        <p class="modal-inner-info-text-title">Home Environment Photo</p>
+    </div>
+    <img src="${req.environmentPhoto}" alt="Home Environment" class="modal-environment-photo"/ >
 `;
 
 }

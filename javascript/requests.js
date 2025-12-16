@@ -115,6 +115,7 @@ async function loadRequests(currentUserID) {
       breed: animal.breed ?? "—",
       imageUrl: animal.imageUrl ?? "images/no-image.png",
       location: animal.location ?? "—",
+      vaccinationStatus: animal.vaccinationStatus ?? "-",
       dateApplied: formattedDate,
       status: r.status ?? "unknown",
       reason: r.reason ?? "—"
@@ -184,7 +185,7 @@ function renderRequests(list) {
         </span>
       </div>
 
-      <p>${req.breed}</p>
+      <span>${req.type} • ${req.breed}</span>
 
       <div class="listing-card-details-row">
         <i class="fas fa-map-marker-alt"></i>
@@ -256,6 +257,12 @@ function showModalContent(id) {
         <i class="fas fa-map-marker-alt"></i>
         <p class="modal-inner-info-text-title">Location</p>
         <span>${req.location}</span>
+    </div>
+
+    <div class="lmodal-inner-info-text modal-detail-item">
+        <i class="fas fa-syringe"></i>
+        <p class="modal-inner-info-text-title">Vaccination</p>
+        <span>${req.vaccinationStatus}</span>
     </div>
 
     <div class="modal-inner-info-text modal-detail-item">

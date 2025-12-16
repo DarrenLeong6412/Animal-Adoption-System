@@ -418,7 +418,7 @@ select.listing-input-field {
         flex-direction: row;
         flex-wrap: wrap;
         gap: 25px;
-        width: 60%;
+        width: 70%;
         justify-content: center; /* This centers the cards in the container */
     }
 
@@ -486,7 +486,7 @@ select.listing-input-field {
     background-color: #fef3c7;
     }
     .listing-card-status p.status-rejected {
-    color: #92400e;
+    color: #b91c1c;
     background-color: #fef3c7;
     }
 
@@ -740,18 +740,6 @@ p.subtitle {
     font-weight: 600;
     margin: 0 0 8px 0;
 }
-.request-search{
-    margin-top: 20px;
-    width: 70vw;
-}
-
-.request-filter-divider {
-    width: 80%;
-    height: 1px;
-    background-color: #164A41;
-    margin: 15px 0 15px 0 ;
-    border: none;
-}
 .request-filter {
     display: flex;
     flex-wrap: wrap; /* allows wrapping if space is small */
@@ -790,7 +778,7 @@ p.subtitle {
 
 .request-flex-container{
     margin-top: 20px;
-    width: 60%;
+    width: 65%;
 
     max-width: 95vw;
 
@@ -1021,6 +1009,11 @@ p.subtitle {
     margin-top: 0;
     color: #333;
     font-size: 28px;
+    margin-bottom: 15px;
+}
+.modal-inner-info-container h3 {
+    margin-top: 0;
+    color: #333;
     margin-bottom: 15px;
 }
 .modal-detail-item {
