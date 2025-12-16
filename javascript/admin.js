@@ -258,75 +258,82 @@ function showModalContent(id) {
         <h2 id="modalName">${req.animalName}</h2>
     </div>
 
-    <div class="modal-inner-info-text">
-        <p class="modal-inner-info-text-title">Type</p>
-        <p class="modal-inner-info-text-data">${req.type}</p>
-    </div>
+    <div class="modal-inner-info-text modal-detail-item">
+    <i class="fas fa-paw"></i>
+    <p class="modal-inner-info-text-title">Type</p>
+    <span>${req.type} • ${req.breed}</span>
+  </div>
 
-    <div class="modal-inner-info-text">
-        <p class="modal-inner-info-text-title">Breed / Color</p>
-        <p class="modal-inner-info-text-data">${req.breed}</p>
-    </div>
+  <div class="modal-inner-info-text modal-detail-item">
+    <i class="fas fa-map-marker-alt"></i>
+    <p class="modal-inner-info-text-title">Location</p>
+    <span>${req.location}</span>
+  </div>
 
-    <div class="modal-inner-info-text">
-        <p class="modal-inner-info-text-title">Location</p>
-        <p class="modal-inner-info-text-data">${req.location}</p>
-    </div>
+  <div class="modal-inner-info-text modal-detail-item">
+    <i class="fas fa-calendar-alt"></i>
+    <p class="modal-inner-info-text-title">Date Applied</p>
+    <span>${req.dateApplied}</span>
+  </div>
 
-    <div class="modal-inner-info-text">
-        <p class="modal-inner-info-text-title">Date Applied</p>
-        <p class="modal-inner-info-text-data">${req.dateApplied}</p>
-    </div>
+  <!-- USER INFO -->
+  <div class="modal-inner-info-text modal-detail-item">
+    <i class="fas fa-user"></i>
+    <p class="modal-inner-info-text-title">Submitted By</p>
+    <span>${req.username}</span>
+  </div>
 
-    <!-- USER INFO -->
-    <div class="modal-inner-info-text">
-        <p class="modal-inner-info-text-title">Submitted By</p>
-        <p class="modal-inner-info-text-data">${req.username}</p>
-    </div>
+  <div class="modal-inner-info-text modal-detail-item">
+    <i class="fas fa-id-card"></i>
+    <p class="modal-inner-info-text-title">Identification Number</p>
+    <span>${req.identification_Number}</span>
+  </div>
 
-    <div class="modal-inner-info-text">
-        <p class="modal-inner-info-text-title">Identification Number</p>
-        <p class="modal-inner-info-text-data">${req.identification_Number}</p>
-    </div>
+  <div class="modal-inner-info-text modal-detail-item">
+    <i class="fas fa-phone"></i>
+    <p class="modal-inner-info-text-title">Phone Number</p>
+    <span>${req.phone_Number}</span>
+  </div>
 
-    <div class="modal-inner-info-text">
-        <p class="modal-inner-info-text-title">Phone Number</p>
-        <p class="modal-inner-info-text-data">${req.phone_Number}</p>
-    </div>
+  <div class="modal-inner-info-text modal-detail-item">
+    <i class="fas fa-envelope"></i>
+    <p class="modal-inner-info-text-title">Email</p>
+    <span>${req.email}</span>
+  </div>
 
-    <div class="modal-inner-info-text">
-        <p class="modal-inner-info-text-title">Email</p>
-        <p class="modal-inner-info-text-data">${req.email}</p>
-    </div>
+  <!-- STATUS -->
+  <div class="modal-inner-info-text modal-detail-item">
+    <i class="fas fa-info-circle"></i>
+    <p class="modal-inner-info-text-title">Status</p>
+    <span>${capitalizeStatus(req.status)}</span>
+  </div>
 
-    <div class="modal-inner-info-text">
-        <p class="modal-inner-info-text-title">Status</p>
-        <p class="modal-inner-info-text-data">${capitalizeStatus(req.status)}</p>
-    </div>
+  <!-- REASON -->
+  <div class="modal-inner-info-text modal-detail-item">
+    <i class="fas fa-question-circle"></i>
+    <p class="modal-inner-info-text-title">
+      Why do you want to adopt ${req.animalName}?
+    </p>
+  </div>
+  <p class="modal-inner-info-text-data">${req.reason}</p>
 
-    <!-- REASON -->
-    <div class="modal-inner-info-text">
-        <p class="modal-inner-info-text-title">
-            Why do you want to adopt ${req.animalName}?
-        </p>
-        <p class="modal-inner-info-text-data">${req.reason}</p>
-    </div>
+  <!-- ENVIRONMENT DESCRIPTION -->
+  <div class="modal-inner-info-text modal-detail-item">
+    <i class="fas fa-home"></i>
+    <p class="modal-inner-info-text-title">Home Environment Description</p>
+  </div>
+  <p class="modal-inner-info-text-data">${req.environmentDesc}</p>
 
-    <!-- ENVIRONMENT DESCRIPTION -->
-    <div class="modal-inner-info-text">
-        <p class="modal-inner-info-text-title">Home Environment Description</p>
-        <p class="modal-inner-info-text-data">${req.environmentDesc}</p>
-    </div>
-
-    <!-- ENVIRONMENT PHOTO -->
-    <div class="modal-inner-info-text">
-        <p class="modal-inner-info-text-title">Home Environment Photo</p>
-        <img 
-            src="${req.environmentPhoto}" 
-            alt="Home Environment"
-            class="modal-environment-photo"
-        />
-    </div>
+  <!-- ENVIRONMENT PHOTO -->
+  <div class="modal-inner-info-text modal-detail-item">
+    <i class="fas fa-image"></i>
+    <p class="modal-inner-info-text-title">Home Environment Photo</p>
+  </div>
+  <img 
+    src="${req.environmentPhoto}" 
+    alt="Home Environment"
+    class="modal-environment-photo"
+  />
 `;
 
 }
