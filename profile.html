@@ -1,84 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" class="auth-loading">
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>My Site — Profile</title>
-
-  <!-- Main CSS -->
-  <link rel="stylesheet" href="css/style.css">
-
-  <!-- Font Awesome -->
-  <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script>
-
-  <!-- Prevent auth flicker -->
-  <script>
-    document.documentElement.classList.add("auth-loading");
-  </script>
-
-  <!-- Google Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>User Profile</title>
 </head>
-
 <body>
+  <h1>Your Profile</h1>
 
-  <!-- NAVBAR -->
-  <div id="navbar"></div>
-
-  <!-- PROFILE PAGE -->
-  <div class="profile-page">
-
-    <div class="profile-card auth-ui">
-
-      <div class="profile-header">
-        <i class="fa-solid fa-user profile-avatar"></i>
-        <div>
-          <h1 id="profileName">User Name</h1>
-          <p id="profileEmail">user@email.com</p>
-        </div>
-      </div>
-
-      <div class="profile-divider"></div>
-
-      <div class="profile-details">
-
-        <div class="profile-row">
-          <span class="label">Gender</span>
-          <span id="profileGender"></span>
-        </div>
-
-        <div class="profile-row">
-          <span class="label">Phone Number</span>
-          <span id="profilePhone"></span>
-        </div>
-
-        <div class="profile-row">
-          <span class="label">Address</span>
-          <span id="profileAddress"></span>
-        </div>
-
-      </div>
-
-      <div class="profile-actions">
-        <button id="logoutBtn" class="profile-logout-btn">
-          <i class="fa-solid fa-right-from-bracket"></i>
-          Log Out
-        </button>
-      </div>
-
-    </div>
-
+  <div id="profileContainer">
+    <p><strong>User ID:</strong> <span id="profileUserId"></span></p>
+    <p><strong>Full Name:</strong> <span id="profileName"></span></p>
+    <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+    <p><strong>Gender:</strong> <span id="profileGender"></span></p>
+    <p><strong>Phone:</strong> <span id="profilePhone"></span></p>
+    <p><strong>Address:</strong> <span id="profileAddress"></span></p>
   </div>
 
-  <!-- FOOTER -->
-  <div id="footer"></div>
+  <button id="logoutBtn">Log Out</button>
 
-  <!-- Scripts -->
-  <script src="javascript/script.js"></script>
-  <script src="javascript/template-loader.js"></script>
+  <!-- Use the same auth.js -->
   <script type="module" src="js/auth.js"></script>
-
 </body>
 </html>
