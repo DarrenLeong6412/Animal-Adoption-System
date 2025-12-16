@@ -342,6 +342,8 @@ function showModalContent(id) {
 
 }
 
+// ZHILIN ADD HERE
+
 // ---------- HELPER ----------
 function capitalizeStatus(status) {
     return status
