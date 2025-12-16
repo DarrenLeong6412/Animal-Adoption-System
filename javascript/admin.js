@@ -5,7 +5,8 @@ import {
     getDocs,
     collection,
     doc,
-    getDoc
+    getDoc,
+    updateDoc,
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
@@ -342,7 +343,201 @@ function showModalContent(id) {
 
 }
 
-// ZHILIN ADD HERE
+// --- ZHILIN ADD HERE ---
+
+let pendingListings = []; 
+
+// 1. Fetch Pending Listings
+async function loadListings() {
+    container.innerHTML = '<div class="request-content"><p>Loading pending listings...</p></div>';
+    
+    try {
+        const querySnapshot = await getDocs(collection(db, "animals"));
+        pendingListings = [];
+
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            if (data.status === "Pending") { 
+                pendingListings.push({ id: docSnap.id, ...data });
+            }
+        });
+
+        
+        pendingListings.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+
+        renderListings(pendingListings);
+
+    } catch (error) {
+        console.error("Error loading listings:", error);
+        container.innerHTML = '<div class="request-content"><p style="color:red">Error loading data.</p></div>';
+    }
+}
+
+// 2. Render Cards 
+function renderListings(list) {
+    container.innerHTML = "";
+
+    if (list.length === 0) {
+        container.innerHTML = `<div class="request-content"><p>No pending animal listings.</p></div>`;
+        return;
+    }
+
+    list.forEach(animal => {
+
+        const imgUrl = animal.imageUrl || 'images/no-image.png';
+        const breedInfo = animal.breed || '-';
+        const typeInfo = animal.type || '-';
+        const ageInfo = animal.age ? `${animal.age} months old` : 'Age N/A';
+        const submitter = animal.ownerEmail || 'Unknown';
+        
+        
+        let createdDate = "Date Unknown";
+        if (animal.createdAt && animal.createdAt.seconds) {
+            createdDate = new Date(animal.createdAt.seconds * 1000).toLocaleDateString("en-GB");
+        }
+
+        container.innerHTML += `
+        <div class="request-card">
+            <div class="request-card-img-container">
+                <img class="request-card-img" src="${imgUrl}" alt="${animal.name}">
+            </div>
+
+            <div class="request-card-info-section">
+                <div class="request-card-info">
+                    <p class="request-card-animal-name">${animal.name}</p>
+
+                    <p>Submitted By: ${submitter}</p>
+                    <p>Type: ${typeInfo}</p>
+                    <p>Breed: ${breedInfo}</p>
+                    <p>Age: ${ageInfo}</p>
+                    <p>Date: ${createdDate}</p>
+
+                    <p class="view-details-link" onclick="openListingModal('${animal.id}')">
+                        View Details
+                    </p>
+                </div>
+
+                <div class="request-card-status">
+                    <p class="status-pending">
+                        Pending
+                    </p>
+                </div>
+            </div>
+        </div>`;
+    });
+}
+
+// 3. Modal Logic 
+window.openListingModal = function(id) {
+    const animal = pendingListings.find(a => a.id === id);
+    if (!animal) return;
+
+    const modal = document.getElementById("modal");
+    const modalImg = modal.querySelector(".modalImg"); 
+    const infoContainer = modal.querySelector(".modal-inner-info-container");
+    const titleElement = modal.querySelector(".modal-inner-top-title h1");
+
+    if (titleElement) titleElement.innerText = animal.name;
+    if (modalImg) modalImg.src = animal.imageUrl || 'images/no-image.png';
+
+    let fullDate = "Unknown";
+    if (animal.createdAt && animal.createdAt.seconds) {
+        fullDate = new Date(animal.createdAt.seconds * 1000).toLocaleDateString("en-GB");
+    }
+
+    infoContainer.innerHTML = `
+        <h2 style="color: #164A41; margin-bottom: 15px;">${animal.name}</h2>
+        
+        <div class="modal-detail-item">
+            <i class="fas fa-paw"></i>
+            <div>
+                <p class="modal-inner-info-text-title">Type</p>
+                <span>${animal.type} • ${animal.breed}</span>
+            </div>
+        </div>
+
+        <div class="modal-detail-item">
+            <i class="fas fa-birthday-cake"></i>
+            <div>
+                <p class="modal-inner-info-text-title">Age</p>
+                <span>${animal.age || 'N/A'} months old</span>
+            </div>
+        </div>
+
+        <div class="modal-detail-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <div>
+                <p class="modal-inner-info-text-title">Location</p>
+                <span>${animal.location || 'No location provided'}</span>
+            </div>
+        </div>
+
+        <div class="modal-detail-item">
+            <i class="fas fa-syringe"></i>
+            <div>
+                <p class="modal-inner-info-text-title">Vaccination Status</p>
+                <span>${animal.vaccinationStatus || 'Not Specified'}</span>
+            </div>
+        </div>
+
+        <div class="modal-detail-item">
+            <i class="fas fa-user"></i>
+            <div>
+                <p class="modal-inner-info-text-title">Submitted By</p>
+                <span>${animal.ownerEmail || 'Unknown'}</span>
+            </div>
+        </div>
+
+        <div class="modal-detail-item">
+            <i class="far fa-calendar-alt"></i>
+            <div>
+                <p class="modal-inner-info-text-title">Created On</p>
+                <span>${fullDate}</span>
+            </div>
+        </div>
+
+        <div class="modal-detail-item" style="align-items:flex-start;">
+            <i class="fas fa-align-left" style="margin-top:5px;"></i>
+            <div>
+                <p class="modal-inner-info-text-title">Description</p>
+                <p style="margin-top: 5px; color: #555; line-height: 1.5;">${animal.description || 'No description provided.'}</p>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+             <button class="modal-btn btn-approve-listing" onclick="updateListingStatus('${animal.id}', 'Available'); closeModal()">
+                Approve Listing
+            </button>
+            <button class="modal-btn btn-reject-listing" onclick="updateListingStatus('${animal.id}', 'Rejected'); closeModal()">
+                Reject Listing
+            </button>
+        </div>
+    `;
+
+    modal.classList.add("open");
+};
+
+// 4. Update Status
+window.updateListingStatus = async function(docId, newStatus) {
+    if (!confirm(`Are you sure you want to mark this listing as ${newStatus}?`)) return;
+
+    try {
+        const animalRef = doc(db, "animals", docId);
+        await updateDoc(animalRef, { status: newStatus });
+        alert("Success! Listing marked as " + newStatus);
+        
+        const modal = document.getElementById("modal");
+        if(modal.classList.contains("open")) closeModal();
+        
+        loadListings();
+    } catch (error) {
+        console.error("Error updating status:", error);
+        alert("Error updating status.");
+    }
+};
+
+
+
 
 // ---------- HELPER ----------
 function capitalizeStatus(status) {
@@ -359,7 +554,7 @@ categoryButtons.forEach(btn => {
         let value = document.querySelector('input[name="approval-category-button"]:checked').id;
         value[0].toUpperCase;
         if (value === "animalListings") {
-            //function call here for renderListings
+            loadListings();
             return;
         } else if (value === "adoptionRequests") {
             console.log(value);
