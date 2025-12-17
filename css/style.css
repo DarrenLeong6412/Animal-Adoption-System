@@ -1399,8 +1399,6 @@ p.subtitle {
 .auth-loading #navbar > ul:not(#sidebar) .auth-ui{
   display: none;
 }
-
-
 /*#endregion*/
 
 /*#region auth pages (login / signup)*/
@@ -1410,7 +1408,7 @@ p.subtitle {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 120px 20px 40px; /* space for fixed navbar if added later */
+  padding: 120px 20px 40px; 
 }
 
 /* ===== Back button for auth pages ===== */
@@ -1662,6 +1660,63 @@ p.subtitle {
 .profile-logout-btn:hover {
   background: #d0e0d3;
   color: #164A41;
+}
+
+.profile-edit{
+  width: 260px;
+  max-width: 60%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+
+.profile-edit:focus{
+  border-color: #94a3b8;
+}
+
+.profile-actions{
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.profile-btn{
+  background: #164A41;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.2s;
+  width: auto;
+}
+
+.profile-btn:hover{
+  background: #d0e0d3;
+  color: #164A41;
+}
+
+.profile-btn-secondary{
+  background: white;
+  color: #164A41;
+  border: 1px solid #164A41;
+}
+
+.profile-btn-secondary:hover{
+  background: #164A41;
+  color: white;
+}
+
+@media (max-width: 600px) {
+  .profile-edit{
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 /* Mobile */
