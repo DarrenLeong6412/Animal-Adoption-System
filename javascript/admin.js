@@ -628,10 +628,6 @@ window.openListingModal = function (category, id) {
 
     // Populate Content (Adoption Style Layout)
     infoContainer.innerHTML = `
-        <div class="modal-inner-top-title">
-            <h1>${animal.name}</h1>
-        </div>
-
         <div class="modal-inner-info-text">
             <h3 id="modalName">${animal.name}</h3>
         </div>
