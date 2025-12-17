@@ -1217,7 +1217,7 @@ p.subtitle {
     margin: 0 0 8px 0;
 }
 
-.lostpet-button-add-listing {
+.lostpet-button-create-report {
     background-color: #164A41;
     color: white;
     border: none;
@@ -1262,67 +1262,182 @@ p.subtitle {
     color: #164A41;
 }
 
-
-/* PET CARD */
-.lostpet-card {
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid #ddd;
+/* Inputs Grid */
+.lostpet-inputs-grid {
     display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.lostpet-input-group {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.lostpet-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.lostpet-input-field {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    transition: 0.2s;
+    box-sizing: border-box;
+    /* Ensures padding doesn't break width */
+}
+
+.lostpet-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #164A41;
+    pointer-events: none;
+}
+
+.lostpet-input-field:focus {
+    border-color: #94a3b8;
+}
+
+.lostpet-input-field.has-icon {
+    padding-left: 35px;
+}
+
+.lostpet-count-label {
+    width: 100%;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+
+/* Card: Vertical Column */
+.lostpet-card {
+    display: flex;
+    flex-direction: column;
     justify-content: start;
     transition: 0.3s;
+    padding: 0;
+    max-width: 320px;
+    min-width: 320px;
+    width: 100%;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    position: relative;
+}
+
+.lostpet-card:hover {
+    scale: 1.01;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
 }
 
 .lostpet-card-img-container {
-    width: 260px;
-    /* fixed width */
-    height: 200px;
-    /* fixed height */
     overflow: hidden;
-    /* hides extra parts of image */
-    border-radius: 10px;
-    flex-shrink: 0;
-    /* prevent flex from squeezing the image */
+    height: 220px;
+    width: 100%;
+    flex: none;
+    position: relative;
 }
 
 .lostpet-card-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* the magic: auto crop + maintain aspect ratio */
-    display: block;
 }
 
-.card .content {
-    padding: 12px;
-}
-
-.lostpet-badge {
+/* Status Badge */
+.lostpet-card-status {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: orange;
-    color: white;
-    padding: 5px 12px;
-    border-radius: 12px;
-    font-size: 12px;
+    top: 15px;
+    right: 15px;
+    z-index: 2;
+    padding: 0;
+    flex: none;
 }
 
-.lostpet-btn {
-    margin: 15px 0 10px 20px;
-    padding: 8px 20px;
+.lostpet-card-status p {
+    padding: 6px 14px;
+    color: #2b592c;
+    background-color: #d1fae5;
     border: none;
-    background-color: #164A41;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: 0.2s;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0;
+    display: inline-block;
 }
 
-.lostpet-btn:hover {
-    background-color: #F1B24A;
+.lostpet-card-status p.status-pending {
+    color: #92400e;
+    background-color: #fef3c7;
+}
+
+.lostpet-card-status p.status-rejected {
+    color: #92400e;
+    background-color: #fef3c7;
+}
+
+.lostpet-card-info-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    align-items: flex-start;
+    flex: 1;
+}
+
+.lostpet-card-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    width: 100%;
+    flex: 1;
+}
+
+.lostpet-card-animal-name {
+    color: #333;
+    font-weight: 700;
+    font-size: 20px !important;
+    margin: 0 0 8px 0;
+    padding: 0;
+}
+
+.lostpet-card-info p {
+    padding: 0;
+    margin-bottom: 12px;
+    color: #666;
+    font-size: 15px;
+}
+
+.lostpet-card-details-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #555;
+    font-size: 14px;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.lostpet-card-details-row i {
+    color: #94a3b8;
+    width: 16px;
+    text-align: center;
 }
 
 /*#endregion*/

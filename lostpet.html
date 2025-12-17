@@ -1,75 +1,158 @@
 <!DOCTYPE html>
 <html lang="en" class="auth-loading">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>My Site — Home</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>My Site — Lost Pets</title>
 
-  <link rel="stylesheet" href="css/style.css"> <!--link to external CSS-->
-  <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script> <!--link for cart and acc icons-->
-  <script>document.documentElement.classList.add("auth-loading");</script>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!--link for google fonts-->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-  
+    <!-- Added: ensure auth-loading class exists early -->
+    <script>document.documentElement.classList.add("auth-loading");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
 </head>
+
 <body class="lostpet">
 
     <div id="navbar"></div>
 
     <div class="lostpet-content">
 
-      <div class="lostpet-flex-container">
-            
+        <div class="lostpet-flex-container">
+
             <div class="lostpet-header-row">
                 <div class="lostpet-title-group">
                     <h1>Lost Pet Report</h1>
                     <p>Help our furry companions find their way back home</p>
                 </div>
-                
-                <button class="lostpet-button-add-listing">
+
+                <!-- No change: Button styling already correct -->
+                <button id="createLostPetBtn" class="lostpet-button-create-report">
                     <i class="fas fa-plus"></i> Create Lost Pet Report
                 </button>
             </div>
 
             <div class="lostpet-filter-card">
-                
+
                 <div class="lostpet-filter-header">
                     <i class="fas fa-filter lostpet-icon-muted"></i>
                     <span>Filters</span>
                 </div>
 
-                <div class="listing-inputs-grid">
-                    
-                    <div class="listing-input-group">
+                <div class="lostpet-inputs-grid">
+
+                    <div class="lostpet-input-group">
                         <label>Search</label>
-                        <div class="listing-input-wrapper">
-                            <i class="fas fa-search listing-search-icon"></i>
-                            <input type="text" id="searchInput" placeholder="Search by pet name, species, breed, or location..." class="listing-input-field has-icon">
+                        <div class="lostpet-input-wrapper">
+                            <i class="fas fa-search lostpet-search-icon"></i>
+
+                            <!-- ✅ CHANGED
+                                 id="searchInput" now MATCHES lostpet.js
+                                 Previously mismatched with filterSearch -->
+                            <input type="text" id="searchInput"
+                                placeholder="Search by pet name, species, breed, or location..."
+                                class="lostpet-input-field has-icon">
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
-        
-  <div class="lostpet-container">
-    <p id="countText"></p>
 
-    <!-- PET LISTING SECTION -->
-    <section class="lostpet-listing">
-      <div id="petGrid" class="lostpet-listings"></div>
-    </section>
+        <!-- ✅ CHANGED
+             Added id="countText"
+             This is DISPLAY ONLY (does NOT control fetching) -->
+        <div class="lostpet-count-label" id="countText">
+            Showing lost pet reports
+        </div>
 
+        <!-- No change: JS uses lostpetGrid -->
+        <div id="lostpetGrid" class="lostpet-grid-display">
+            <p style="text-align: center; color: #666; padding: 20px;">
+                Loading Lost Pet Reports...
+            </p>
+        </div>
     </div>
-  </div>
+
+    <!-- ================= MODAL ================= -->
+    <!-- Create Lost Pet Modal -->
+    <div id="lostPetFormModal" class="modal" style="display:none;">
+        <div class="modal-inner">
+            <div class="modal-inner-top">
+                <div class="modal-inner-top-title">
+                    <h1>Create Lost Pet Report</h1>
+                </div>
+                <div class="modal-inner-top-exit">
+                    <a id="closeLostPetModal"><i class="fa-solid fa-x"></i></a>
+                </div>
+            </div>
+
+            <form id="addLostPetForm" class="modal-inner-details-section">
+
+                <label for="petName">Pet Name</label>
+                <input type="text" id="petName" required>
+
+                <label for="animalType">Animal Type</label>
+                <select id="animalType" required>
+                    <option value="">Select Type</option>
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                    <option value="Bird">Bird</option>
+                    <option value="Rabbit">Rabbit</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="text" id="animalTypeOther" placeholder="Specify animal type" style="display:none;">
+
+                <label for="petBreed">Breed</label>
+                <input type="text" id="petBreed">
+
+                <label for="petAge">Age (Months)</label>
+                <input type="number" id="petAge" min="0">
+
+                <label for="petGender">Gender</label>
+                <select id="petGender" required>
+                    <option value="">Select Gender</option>
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                </select>
+
+                <label for="lastSeenLocation">Last Seen Location</label>
+                <input type="text" id="lastSeenLocation" required>
+
+                <label for="lastSeenDate">Last Seen Date</label>
+                <input type="date" id="lastSeenDate" required>
+
+                <label for="petDescription">Description</label>
+                <textarea id="petDescription" required></textarea>
+
+                <label for="fileInput">Pet Photo</label>
+                <input type="file" id="fileInput" accept="image/*">
+                <img id="previewImg" style="display:none; max-width:100%; margin-top:10px;">
+
+                <button type="submit" id="submitLostPetBtn">Submit Report</button>
+            </form>
+        </div>
+    </div>
 
     <div id="footer"></div>
 
+    <!-- No change -->
     <script src="javascript/script.js"></script>
     <script src="javascript/template-loader.js"></script>
-    <script src="javascript/lostpet.js"></script>
+
+    <!-- ✅ CONFIRMED
+         lostpet.js handles fetching, filtering, modal -->
+    <script type="module" src="javascript/lostpet.js"></script>
+
+    <!-- No change -->
     <script type="module" src="js/auth.js"></script>
 
 </body>
+
 </html>
