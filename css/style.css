@@ -431,6 +431,7 @@ select.listing-input-field {
         padding: 0;
         max-width: 320px;   
         min-width: 320px;   
+        min-height: 360px;
         width: 100%;
         background-color: white;
         border-radius: 12px;
