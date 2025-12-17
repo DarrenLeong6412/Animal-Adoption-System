@@ -10,6 +10,7 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
@@ -234,6 +235,38 @@ if (loginForm) {
   });
 }
 
+// FORGOT PASSWORD HANDLER (login.html)
+const forgotPasswordLink = document.getElementById("forgotPasswordLink");
+
+if (forgotPasswordLink) {
+  forgotPasswordLink.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("loginEmail")?.value.trim().toLowerCase();
+
+    if (!email) {
+      alert("Please enter your email first, then click 'Forgot password?'.");
+      return;
+    }
+
+    // basic email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent! Please check your inbox (and spam).");
+    } catch (error) {
+      console.error("Reset password error:", error);
+      alert(error.message);
+    }
+  });
+}
+
+
 // LOGOUT HANDLER (used on profile.html)
 const logoutBtn = document.getElementById("logoutBtn");
 
@@ -349,6 +382,13 @@ onAuthStateChanged(auth, async (user) => {
      el.style.display = role === "Admin" ? "" : "none";
     });
 
+    if (!user || role !== "Admin") {
+    // REMOVE admin elements entirely from desktop nav
+    document.querySelectorAll('#navbar > ul:not(#sidebar) > li.admin-only').forEach(el => {
+      el.remove();
+    });
+}
+
   } else {
     // logged out UI
     if (authBtnDesktop) authBtnDesktop.style.display = "";
@@ -362,6 +402,7 @@ onAuthStateChanged(auth, async (user) => {
 
     adminEls.forEach(el => el.style.display = "none");
   }
+  
   document.documentElement.classList.remove("auth-loading");
 
 });

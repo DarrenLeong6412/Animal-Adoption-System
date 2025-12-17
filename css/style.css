@@ -92,6 +92,73 @@
     fill: #164A41;
 }
 
+/* Desktop: hide hamburger */
+#navbar ul li.menu-li { display: none; }
+
+.hideOnMobile{
+    padding: 0px;
+   
+}
+/* Mobile */
+@media (max-width: 950px) {
+  /* hide ALL desktop nav items */
+  #navbar ul:not(#sidebar) li.hideOnMobile {
+    display: none !important;
+  }
+
+  /* show hamburger */
+  #navbar ul:not(#sidebar) li.menu-li {
+    display: inline !important;
+  }
+  #navbar ul:not(#sidebar) a.menu-button {
+    display: inline-block !important;
+  }
+}
+
+
+/* ✅ Desktop top nav only */
+#navbar > ul:not(#sidebar){
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+                /* Reduced from 32px for tighter spacing */
+  margin-left: auto;
+  width: auto;
+  padding: 20px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+#navbar > ul:not(#sidebar) > li{
+  margin: 0;
+  list-style: none;
+}
+
+#navbar > ul:not(#sidebar) > li > a{
+  margin: 0;
+  padding: 10px 25px 10px 25px!important;            /* Ensure consistent padding */
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Ensure icons have consistent sizing */
+#navbar > ul:not(#sidebar) > li > a > i {
+  font-size: 16px;           /* Consistent icon size */
+  width: 16px;
+  text-align: center;
+}
+
+/* Remove any extra spacing from auth UI elements */
+#navbar > ul:not(#sidebar) .auth-ui {
+  margin: 0 ;
+  padding: 10px 25px 10px 25px;
+
+}
+
+
+
+
+
 /*Sidebar*/
 #sidebar {
     position: fixed;
@@ -118,15 +185,7 @@
 .menu-button{
     display: none;
 }
-@media(max-width: 950px){
-    .hideOnMobile{
-        display: none;
-    }
-    .menu-button{
-        display: inline;
-    }
 
-}
 /*Navigation Bar End*/
 /*#endregion*/
 
@@ -1336,9 +1395,12 @@ p.subtitle {
 
 /*#idk what region should i call this*/
 /* Hide auth-dependent UI until Firebase auth state is ready */
-.auth-loading .auth-ui {
-  visibility: hidden; /* keeps layout, no jump */
+/* While Firebase auth is not ready, don't reserve space in the top navbar */
+.auth-loading #navbar > ul:not(#sidebar) .auth-ui{
+  display: none;
 }
+
+
 /*#endregion*/
 
 /*#region auth pages (login / signup)*/
@@ -1349,6 +1411,39 @@ p.subtitle {
   align-items: center;
   justify-content: center;
   padding: 120px 20px 40px; /* space for fixed navbar if added later */
+}
+
+/* ===== Back button for auth pages ===== */
+.auth-back-btn{
+  position: fixed;
+  top: 25px;
+  left: 25px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #164A41;
+  background: white;
+  padding: 10px 14px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  transition: 0.2s;
+  z-index: 50;
+}
+
+.auth-link{
+  font-size: 13px;
+  color: #164A41;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-link:hover{
+  text-decoration: underline;
+}
+
+.auth-back-btn:hover{
+  background: #164A41;
+  color: white;
 }
 
 
@@ -1577,3 +1672,4 @@ p.subtitle {
   }
 }
 /*#endregion*/
+
