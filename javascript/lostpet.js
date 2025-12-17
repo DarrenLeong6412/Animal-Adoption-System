@@ -1,24 +1,12 @@
-// =====================================================
-// lostpet.js
-// Public viewing allowed | Login required to create report
-// =====================================================
+// js/lostpet.js
 
-
-// ================= FIREBASE IMPORTS =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  addDoc,
-  query,
-  orderBy,
-  serverTimestamp
+import { 
+  getFirestore, collection, addDoc, getDocs, serverTimestamp, query, orderBy 
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-
-// ================= FIREBASE CONFIG =================
+// ===== FIREBASE CONFIG =====
 const firebaseConfig = {
   apiKey: "AIzaSyCy5YAmmb1aTnWiXljQr3yOVsTKmYPAS08",
   authDomain: "pet-adoption-system-cf9f7.firebaseapp.com",
@@ -29,256 +17,282 @@ const firebaseConfig = {
   measurementId: "G-RZQDCB3V2C"
 };
 
-
-// ================= INITIALIZE FIREBASE =================
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-
-// ================= GLOBAL STATE =================
-let currentUser = null;
+// ===== GLOBAL VARIABLES =====
 let allLostPets = [];
+let currentUser = null;
 let base64Image = "";
 
+// ===== DOM ELEMENTS =====
+const grid = document.getElementById("lostpetGrid");
+const countText = document.getElementById("countText");
+const searchInput = document.getElementById("searchInput");
+const createBtn = document.getElementById("createLostPetBtn");
+const modal = document.getElementById("lostPetFormModal");
+const closeModalBtn = document.getElementById("closeLostPetModal");
+const addLostPetForm = document.getElementById("addLostPetForm");
+const fileInput = document.getElementById("fileInput");
+const previewImg = document.getElementById("previewImg");
 
-// ================= AUTH LISTENER (NO REDIRECT) =================
-function initAuth() {
-  onAuthStateChanged(auth, (user) => {
-    currentUser = user || null;
-  });
-}
+// ===== ANIMAL TYPE OTHER FIELD TOGGLE =====
+const animalTypeSelect = document.getElementById("animalType");
+const animalTypeOtherInput = document.getElementById("animalTypeOther");
 
-
-// ================= IMAGE HANDLER =================
-function initImageUpload() {
-  const fileInput = document.getElementById("fileInput");
-  const previewImg = document.getElementById("previewImg");
-
-  if (!fileInput) return;
-
-  fileInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file || !file.type.startsWith("image/")) {
-      alert("Please upload a valid image file.");
-      return;
+if (animalTypeSelect && animalTypeOtherInput) {
+  animalTypeSelect.addEventListener("change", function() {
+    if (this.value === "Other") {
+      animalTypeOtherInput.style.display = "block";
+      animalTypeOtherInput.required = true;
+    } else {
+      animalTypeOtherInput.style.display = "none";
+      animalTypeOtherInput.required = false;
+      animalTypeOtherInput.value = "";
     }
-
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      previewImg.src = ev.target.result;
-      previewImg.style.display = "block";
-      compressImage(ev.target.result, 800, 0.7, (img) => {
-        base64Image = img;
-      });
-    };
-    reader.readAsDataURL(file);
   });
 }
 
-function compressImage(base64, maxWidth, quality, callback) {
-  const img = new Image();
-  img.src = base64;
-  img.onload = () => {
-    const canvas = document.createElement("canvas");
-    const scale = maxWidth / img.width;
-    canvas.width = maxWidth;
-    canvas.height = img.height * scale;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    callback(canvas.toDataURL("image/jpeg", quality));
-  };
-}
+// =================== AUTH STATE ===================
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+  console.log("Auth state changed:", user ? user.email : "Not logged in");
+});
 
-
-// ================= FETCH LOST PET REPORTS =================
+// =================== FETCH LOST PETS ===================
 async function fetchLostPets() {
-  const grid = document.getElementById("lostpetGrid");
-  grid.innerHTML = "<p style='text-align:center;'>Loading lost pet reports...</p>";
+  grid.innerHTML = "<p style='text-align:center; color:#666; padding:40px;'>Loading lost pet reports...</p>";
 
   try {
     const q = query(collection(db, "lostPets"), orderBy("date_Reported", "desc"));
     const snapshot = await getDocs(q);
 
     allLostPets = snapshot.docs.map(doc => ({
-      id: doc.id,
+      lostpet_id: doc.id,
       ...doc.data()
     }));
 
+    console.log("Fetched lost pets:", allLostPets.length);
     renderLostPets(allLostPets);
-
-  } catch (error) {
-    console.error(error);
-    grid.innerHTML = "<p style='color:red;'>Failed to load lost pet reports.</p>";
+  } catch (err) {
+    console.error("Error fetching lost pets:", err);
+    grid.innerHTML = "<p style='color:red; text-align:center; padding:40px;'>Error loading lost pets. Please try again.</p>";
   }
 }
 
-
-// ================= RENDER LOST PET CARDS =================
+// =================== RENDER LOST PETS ===================
 function renderLostPets(list) {
-  const grid = document.getElementById("lostpetGrid");
   grid.innerHTML = "";
-
+  
   if (list.length === 0) {
-    grid.innerHTML = "<p style='text-align:center;'>No lost pet reports found.</p>";
+    grid.innerHTML = "<p style='text-align:center; color:#666; padding:40px;'>No lost pet reports found.</p>";
+    countText.innerText = "Showing 0 reports";
     return;
   }
 
   list.forEach(pet => {
-    grid.innerHTML += `
+    const cardHTML = `
       <div class="lostpet-card">
         <div class="lostpet-card-img-container">
-          <img src="${pet.photo}" alt="${pet.name}" class="lostpet-card-img">
-          <div class="lostpet-card-status status-${pet.status}">
-            ${pet.status}
+          <img src="${pet.photo || 'images/default-pet.jpg'}" alt="${pet.name}" class="lostpet-card-img">
+          <div class="lostpet-card-status">
+            <p class="${pet.status === 'Lost' ? '' : 'status-pending'}">${pet.status || 'Lost'}</p>
           </div>
         </div>
-
         <div class="lostpet-card-info-section">
-          <p class="lostpet-card-animal-name">${pet.name}</p>
-          <p>${pet.animal_type} • ${pet.breed || "Unknown"} • ${pet.gender}</p>
-          <p><strong>Last Seen:</strong> ${pet.last_seen_Location}</p>
+          <div class="lostpet-card-info">
+            <p class="lostpet-card-animal-name">${pet.name}</p>
+            <p>${pet.animal_type} • ${pet.breed || "Unknown"} • ${pet.gender}</p>
+            <p><strong>Last seen:</strong> ${pet.last_seen_Location}</p>
+            <p><strong>Date:</strong> ${pet.last_seen_Date}</p>
+          </div>
         </div>
       </div>
     `;
+    grid.innerHTML += cardHTML;
   });
+
+  countText.innerText = `Showing ${list.length} report${list.length !== 1 ? "s" : ""}`;
 }
 
-
-// ================= SEARCH FILTER =================
-function initSearch() {
-  const searchInput = document.getElementById("searchInput");
-  if (!searchInput) return;
-
+// =================== LIVE SEARCH ===================
+if (searchInput) {
   searchInput.addEventListener("input", () => {
-    const q = searchInput.value.toLowerCase();
+    const queryText = searchInput.value.toLowerCase();
     const filtered = allLostPets.filter(pet =>
-      [
-        pet.name,
-        pet.animal_type,
-        pet.breed,
-        pet.gender,
-        pet.last_seen_Location
-      ].some(field => field?.toLowerCase().includes(q))
+      [pet.name, pet.animal_type, pet.breed, pet.gender, pet.last_seen_Location]
+        .some(field => field?.toLowerCase().includes(queryText))
     );
+
     renderLostPets(filtered);
   });
 }
 
-
-// ================= FORM VALIDATION =================
-function validateLostPetForm(data) {
-  if (!data.name || data.name.length < 2) return "Invalid pet name.";
-  if (!data.animal_type) return "Animal type is required.";
-  if (!data.gender) return "Gender is required.";
-  if (!data.last_seen_Location || data.last_seen_Location.length < 3)
-    return "Invalid last seen location.";
-  if (!data.last_seen_Date) return "Last seen date is required.";
-  if (!data.description || data.description.length < 10)
-    return "Description must be at least 10 characters.";
-  if (!base64Image) return "Pet photo is required.";
-  return null;
-}
-
-
-// ================= CREATE LOST PET REPORT =================
-async function createLostPetReport() {
-
-  // 🔐 Login check ONLY here
-  if (!currentUser) {
-    alert("Please login to submit a lost pet report.");
-    window.location.href = "login.html";
-    return;
-  }
-
-  const petData = {
-    name: document.getElementById("petName").value.trim(),
-    animal_type: document.getElementById("animalType").value,
-    breed: document.getElementById("petBreed").value.trim(),
-    age: parseInt(document.getElementById("petAge").value) || null,
-    gender: document.getElementById("petGender").value,
-    description: document.getElementById("petDescription").value.trim(),
-    last_seen_Location: document.getElementById("lastSeenLocation").value.trim(),
-    last_seen_Date: document.getElementById("lastSeenDate").value,
-    photo: base64Image
-  };
-
-  const error = validateLostPetForm(petData);
-  if (error) {
-    alert(error);
-    return;
-  }
-
-  try {
-    await addDoc(collection(db, "lostPets"), {
-      ...petData,
-      user_ID: currentUser.uid,
-      status: "Lost",
-      verified_By: null,
-      date_Reported: serverTimestamp()
-    });
-
-    alert("Lost pet report submitted successfully.");
-    window.location.href = "lostpet.html";
-
-  } catch (error) {
-    console.error(error);
-    alert("Failed to submit report.");
-  }
-}
-
-// ================= MODAL HANDLING =================
-function initCreateLostPetButton() {
-  const btn = document.getElementById("createLostPetBtn");
-  const modal = document.getElementById("lostPetFormModal");
-  const closeBtn = document.getElementById("closeLostPetModal");
-
-  if (!btn || !modal || !closeBtn) return;
-
-  // Open modal
-  btn.addEventListener("click", () => {
+// =================== CREATE LOST PET MODAL ===================
+if (createBtn) {
+  createBtn.addEventListener("click", () => {
+    console.log("Create button clicked, user:", currentUser);
+    
     if (!currentUser) {
-      alert("Please login to create a lost pet report.");
+      alert("Please login first to create a lost pet report.");
       window.location.href = "login.html";
       return;
     }
-    modal.style.display = "block";
+    
+    modal.classList.add("open");
   });
+}
 
-  // Close modal
-  closeBtn.addEventListener("click", () => {
-    modal.style.display = "none";
-    document.getElementById("addLostPetForm").reset();
-    document.getElementById("previewImg").style.display = "none";
+// Close modal
+if (closeModalBtn) {
+  closeModalBtn.addEventListener("click", () => {
+    modal.classList.remove("open");
+    addLostPetForm.reset();
+    previewImg.style.display = "none";
     base64Image = "";
-  });
-
-  // Close modal when clicking outside
-  window.addEventListener("click", (e) => {
-    if (e.target === modal) {
-      modal.style.display = "none";
-      document.getElementById("addLostPetForm").reset();
-      document.getElementById("previewImg").style.display = "none";
-      base64Image = "";
+    
+    // Reset animal type other field
+    if (animalTypeOtherInput) {
+      animalTypeOtherInput.style.display = "none";
+      animalTypeOtherInput.required = false;
     }
   });
 }
 
-// ================= FORM SUBMIT =================
-function initFormSubmit() {
-  const form = document.getElementById("addLostPetForm");
-  if (!form) return;
+// Close modal when clicking outside
+window.addEventListener("click", (event) => {
+  if (event.target === modal) {
+    modal.classList.remove("open");
+    addLostPetForm.reset();
+    previewImg.style.display = "none";
+    base64Image = "";
+  }
+});
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    createLostPetReport();
+// =================== IMAGE UPLOAD ===================
+if (fileInput) {
+  fileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload a valid image file (JPG, PNG).");
+      fileInput.value = "";
+      return;
+    }
+
+    // Check file size (limit to 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image size must be less than 2MB.");
+      fileInput.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      previewImg.src = event.target.result;
+      previewImg.style.display = "block";
+      base64Image = event.target.result;
+    };
+    reader.readAsDataURL(file);
   });
 }
 
-// ================= INIT ALL =================
-initAuth();
-initImageUpload();
-initFormSubmit();
+// =================== SUBMIT LOST PET REPORT ===================
+if (addLostPetForm) {
+  addLostPetForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    if (!currentUser) {
+      alert("Please login first.");
+      window.location.href = "login.html";
+      return;
+    }
+
+    const name = document.getElementById("petName").value.trim();
+    const ageInput = document.getElementById("petAge").value;
+    const age = ageInput ? parseInt(ageInput) : null;
+    const gender = document.getElementById("petGender").value;
+    let animal_type = document.getElementById("animalType").value;
+    
+    // Handle "Other" animal type
+    if (animal_type === "Other") {
+      const otherType = document.getElementById("animalTypeOther").value.trim();
+      if (!otherType) {
+        alert("Please specify the animal type.");
+        return;
+      }
+      animal_type = otherType;
+    }
+    
+    const breed = document.getElementById("petBreed").value.trim();
+    const description = document.getElementById("petDescription").value.trim();
+    const last_seen_Location = document.getElementById("lastSeenLocation").value.trim();
+    const last_seen_Date = document.getElementById("lastSeenDate").value;
+
+    // Validation
+    if (!name || !animal_type || !gender || !description || !last_seen_Location || !last_seen_Date) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    if (!base64Image) {
+      alert("Please upload a photo of the pet.");
+      return;
+    }
+
+    // Disable submit button to prevent double submission
+    const submitBtn = document.getElementById("submitLostPetBtn");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+
+    try {
+      await addDoc(collection(db, "lostPets"), {
+        user_id: currentUser.uid,
+        name,
+        age,
+        gender,
+        animal_type,
+        breed: breed || null,
+        description,
+        photo: base64Image,
+        last_seen_Location,
+        last_seen_Date,
+        status: "Lost",
+        verified_By: null,
+        date_Reported: serverTimestamp()
+      });
+
+      alert("Lost pet report submitted successfully!");
+      modal.classList.remove("open");
+      addLostPetForm.reset();
+      previewImg.style.display = "none";
+      base64Image = "";
+      
+      // Reset animal type other field
+      if (animalTypeOtherInput) {
+        animalTypeOtherInput.style.display = "none";
+        animalTypeOtherInput.required = false;
+      }
+
+      // Re-enable submit button
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Report";
+
+      // Refresh the list
+      fetchLostPets();
+    } catch (err) {
+      console.error("Error submitting report:", err);
+      alert("Failed to submit report. Please try again.");
+      
+      // Re-enable submit button
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Report";
+    }
+  });
+}
+
+// =================== INITIAL LOAD ===================
 fetchLostPets();
-initSearch();
-initCreateLostPetButton();

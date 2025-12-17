@@ -1168,6 +1168,7 @@ p.subtitle {
 
 /*#region lostpetpage*/
 /*Lost Pet Reports*/
+/* ===== LOST PET CONTENT AREA ===== */
 .lostpet-content {
     display: flex;
     padding-top: 80px;
@@ -1235,8 +1236,8 @@ p.subtitle {
     width: fit-content        
 }
 
-.lostpet-button-add-listing:hover {
-    background-color: #d0e0d3;
+.lostpet-button-create-report:hover {
+    background-color: #0d352e;
 }
 
 .lostpet-filter-card {
@@ -1262,7 +1263,6 @@ p.subtitle {
     color: #164A41;
 }
 
-/* Inputs Grid */
 .lostpet-inputs-grid {
     display: flex;
     gap: 20px;
@@ -1293,7 +1293,6 @@ p.subtitle {
     outline: none;
     transition: 0.2s;
     box-sizing: border-box;
-    /* Ensures padding doesn't break width */
 }
 
 .lostpet-search-icon {
@@ -1322,15 +1321,23 @@ p.subtitle {
     margin-top: 15px;
 }
 
-/* Card: Vertical Column */
+/* ===== GRID DISPLAY (MISSING CLASS) ===== */
+.lostpet-grid-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+}
+
+/* ===== CARD STYLES ===== */
 .lostpet-card {
     display: flex;
     flex-direction: column;
     justify-content: start;
     transition: 0.3s;
     padding: 0;
-    max-width: 320px;
-    min-width: 320px;
     width: 100%;
     background-color: white;
     border-radius: 12px;
@@ -1359,7 +1366,6 @@ p.subtitle {
     object-fit: cover;
 }
 
-/* Status Badge */
 .lostpet-card-status {
     position: absolute;
     top: 15px;
@@ -1438,6 +1444,68 @@ p.subtitle {
     color: #94a3b8;
     width: 16px;
     text-align: center;
+}
+
+/* ===== LOST PET FORM SPECIFIC MODAL STYLES ===== */
+/* Override modal-inner height for form */
+#lostPetFormModal .modal-inner {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Form layout inside modal */
+#addLostPetForm.modal-inner-details-section {
+    flex-direction: column;
+    padding: 24px;
+    gap: 16px;
+}
+
+#addLostPetForm .modal-inner-image-container,
+#addLostPetForm .modal-inner-info-container {
+    max-width: 100%;
+    min-width: 100%;
+    max-height: none;
+    min-height: auto;
+    padding: 0;
+}
+
+#addLostPetForm .modal-inner-image-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#addLostPetForm .modal-inner-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#addLostPetForm label {
+    font-weight: 600;
+    color: #334155;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+#addLostPetForm textarea {
+    min-height: 100px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+#addLostPetForm button[type="submit"] {
+    margin-top: 16px;
+    width: 100%;
+}
+
+#addLostPetForm #previewImg {
+    max-width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
 }
 
 /*#endregion*/
