@@ -500,6 +500,7 @@ async function loadListings() {
 }
 
 // 2. Render Cards 
+// 2. Render Cards (Updated to match Adoption Request UI)
 function renderListings(list) {
     container.innerHTML = "";
 
@@ -509,51 +510,81 @@ function renderListings(list) {
     }
 
     list.forEach(animal => {
-
+        // Prepare Data
         const imgUrl = animal.imageUrl || 'images/no-image.png';
         const breedInfo = animal.breed || '-';
         const typeInfo = animal.type || '-';
         const ageInfo = animal.age ? `${animal.age} months old` : 'Age N/A';
         const submitter = animal.ownerEmail || 'Unknown';
-
-
+        
+        // Date Format
         let createdDate = "Date Unknown";
         if (animal.createdAt && animal.createdAt.seconds) {
             createdDate = new Date(animal.createdAt.seconds * 1000).toLocaleDateString("en-GB");
         }
 
+        // Determine status class
+        const statusClass = `status-${animal.status.toLowerCase()}`;
+
+        // HTML Structure matched exactly to "renderRequests"
         container.innerHTML += `
-            <div class="request-card">
-                <div class="request-card-img-container">
-                    <img class="request-card-img" src="${imgUrl}" alt="${animal.name}">
-                </div>
+        <a onclick="openListingModal('${animal.id}')" style="cursor:pointer;">
+            <div class="listing-card">
 
-                <div class="request-card-info-section">
-                    <div class="request-card-info">
-                        <p class="request-card-animal-name">${animal.name}</p>
-
-                        <p>Submitted By: ${submitter}</p>
-                        <p>Type: ${typeInfo}</p>
-                        <p>Breed: ${breedInfo}</p>
-                        <p>Age: ${ageInfo}</p>
-                        <p>Date: ${createdDate}</p>
-
-                        <p class="view-details-link" onclick="openListingModal('${animal.id}')">
-                            View Details
-                        </p>
-                    </div>
-
-                    <div class="request-card-status">
-                        <p class="status-pending">
-                            Pending
+                <div class="listing-card-img-container">
+                    <img 
+                        src="${imgUrl}" 
+                        alt="${animal.name}" 
+                        class="listing-card-img"
+                    />
+                    
+                    <div class="listing-card-status">
+                        <p class="${statusClass}">
+                            ${animal.status}
                         </p>
                     </div>
                 </div>
-            </div>`;
+
+                <div class="listing-card-info-section">
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
+                        <p class="listing-card-animal-name" style="margin:0;">
+                            ${animal.name}
+                        </p>
+                        <span style="font-size:11px; color:#888; font-weight:500;">
+                            ${createdDate}
+                        </span>
+                    </div>
+
+                    <div class="listing-card-details-row">
+                        <i class="fas fa-user"></i>
+                        <span>${submitter}</span>
+                    </div>
+
+                    <div class="listing-card-details-row">
+                        <i class="fas fa-paw"></i>
+                        <span>${typeInfo}</span>
+                    </div>
+
+                    <div class="listing-card-details-row">
+                        <i class="fas fa-dna"></i>
+                        <span>${breedInfo}</span>
+                    </div>
+
+                    <div class="listing-card-details-row">
+                        <i class="fas fa-birthday-cake"></i>
+                        <span>${ageInfo}</span>
+                    </div>
+
+                </div>
+            </div>
+        </a>
+        `;
     });
 }
 
 // 3. Modal Logic 
+// 3. Modal Logic (Updated to match Adoption Request Style)
 window.openListingModal = function (id) {
     const animal = pendingListings.find(a => a.id === id);
     if (!animal) return;
@@ -563,82 +594,80 @@ window.openListingModal = function (id) {
     const infoContainer = modal.querySelector(".modal-inner-info-container");
     const titleElement = modal.querySelector(".modal-inner-top-title h1");
 
+    // Set Image and Title
     if (titleElement) titleElement.innerText = animal.name;
     if (modalImg) modalImg.src = animal.imageUrl || 'images/no-image.png';
 
+    // Format Date
     let fullDate = "Unknown";
     if (animal.createdAt && animal.createdAt.seconds) {
         fullDate = new Date(animal.createdAt.seconds * 1000).toLocaleDateString("en-GB");
     }
 
+    // Populate Content (Adoption Style Layout)
     infoContainer.innerHTML = `
-            <h2 style="color: #164A41; margin-bottom: 15px;">${animal.name}</h2>
-            
-            <div class="modal-detail-item">
-                <i class="fas fa-paw"></i>
-                <div>
-                    <p class="modal-inner-info-text-title">Type</p>
-                    <span>${animal.type} • ${animal.breed}</span>
-                </div>
-            </div>
+        <div class="modal-inner-top-title">
+            <h1>${animal.name}</h1>
+        </div>
 
-            <div class="modal-detail-item">
-                <i class="fas fa-birthday-cake"></i>
-                <div>
-                    <p class="modal-inner-info-text-title">Age</p>
-                    <span>${animal.age || 'N/A'} months old</span>
-                </div>
-            </div>
+        <div class="modal-inner-info-text">
+            <h3 id="modalName">${animal.name}</h3>
+        </div>
 
-            <div class="modal-detail-item">
-                <i class="fas fa-map-marker-alt"></i>
-                <div>
-                    <p class="modal-inner-info-text-title">Location</p>
-                    <span>${animal.location || 'No location provided'}</span>
-                </div>
-            </div>
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="fas fa-paw"></i>
+            <p class="modal-inner-info-text-title">Type</p>
+            <span>${animal.type} • ${animal.breed}</span>
+        </div>
 
-            <div class="modal-detail-item">
-                <i class="fas fa-syringe"></i>
-                <div>
-                    <p class="modal-inner-info-text-title">Vaccination Status</p>
-                    <span>${animal.vaccinationStatus || 'Not Specified'}</span>
-                </div>
-            </div>
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="fas fa-birthday-cake"></i>
+            <p class="modal-inner-info-text-title">Age</p>
+            <span>${animal.age || 'N/A'} months old</span>
+        </div>
 
-            <div class="modal-detail-item">
-                <i class="fas fa-user"></i>
-                <div>
-                    <p class="modal-inner-info-text-title">Submitted By</p>
-                    <span>${animal.ownerEmail || 'Unknown'}</span>
-                </div>
-            </div>
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <p class="modal-inner-info-text-title">Location</p>
+            <span>${animal.location || 'No location provided'}</span>
+        </div>
 
-            <div class="modal-detail-item">
-                <i class="far fa-calendar-alt"></i>
-                <div>
-                    <p class="modal-inner-info-text-title">Created On</p>
-                    <span>${fullDate}</span>
-                </div>
-            </div>
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="fas fa-syringe"></i>
+            <p class="modal-inner-info-text-title">Vaccination</p>
+            <span>${animal.vaccinationStatus || 'Not Specified'}</span>
+        </div>
 
-            <div class="modal-detail-item" style="align-items:flex-start;">
-                <i class="fas fa-align-left" style="margin-top:5px;"></i>
-                <div>
-                    <p class="modal-inner-info-text-title">Description</p>
-                    <p style="margin-top: 5px; color: #555; line-height: 1.5;">${animal.description || 'No description provided.'}</p>
-                </div>
-            </div>
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="far fa-calendar-alt"></i>
+            <p class="modal-inner-info-text-title">Created On</p>
+            <span>${fullDate}</span>
+        </div>
 
-            <div class="modal-actions">
-                <button class="modal-btn btn-approve-listing" onclick="updateListingStatus('${animal.id}', 'Available'); closeModal()">
-                    Approve Listing
-                </button>
-                <button class="modal-btn btn-reject-listing" onclick="updateListingStatus('${animal.id}', 'Rejected'); closeModal()">
-                    Reject Listing
-                </button>
-            </div>
-        `;
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="fas fa-user"></i>
+            <p class="modal-inner-info-text-title">Submitted By</p>
+            <span>${animal.ownerEmail || 'Unknown'}</span>
+        </div>
+
+        <div class="modal-inner-info-text modal-detail-item" style="margin-top: 15px;">
+            <i class="fas fa-align-left"></i>
+            <p class="modal-inner-info-text-title">Description</p>
+        </div>
+        
+        <div class="modal-inner-info-text modal-detail-item">
+            <span style="line-height: 1.5; color: #555;">${animal.description || 'No description provided.'}</span>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+            <button class="modal-btn btn-approve-listing" onclick="updateListingStatus('${animal.id}', 'Available'); closeModal()">
+                Approve Listing
+            </button>
+            <button class="modal-btn btn-reject-listing" onclick="updateListingStatus('${animal.id}', 'Rejected'); closeModal()">
+                Reject Listing
+            </button>
+        </div>
+    `;
 
     modal.classList.add("open");
 };
