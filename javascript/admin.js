@@ -54,57 +54,77 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 //
-async function handleRequestDecision(requestId, animalId, decision) {
+async function handleRequestDecision(category, requestId, animalId, decision) {
     try {
-        console.log("=== handleRequestDecision ===");
+        console.log("Decison made under the category: " + category);
 
-        await runTransaction(db, async (transaction) => {
-            const requestRef = doc(db, "requests", requestId);
+        if (category === "requests") {
 
-            if (decision === "approved") {
-                // Force server-side snapshot
-                const q = query(
-                    collection(db, "requests"),
-                    where("listing_ID", "==", String(animalId)),
-                    where("status", "==", "pending")
-                );
-                const snapshot = await getDocs(q, { source: "server" }); // ok to read server snapshot here
+            await runTransaction(db, async (transaction) => {
 
-                console.log("Snapshot docs returned:", snapshot.docs.length);
-                snapshot.docs.forEach(docSnap => {
-                    console.log(
-                        "Doc ID:", docSnap.id,
-                        "listing_ID:", docSnap.data().listing_ID,
-                        "status:", docSnap.data().status
+                const requestRef = doc(db, "requests", requestId);
+
+                if (decision === "approved") {
+                    // Force server-side snapshot
+                    const q = query(
+                        collection(db, "requests"),
+                        where("listing_ID", "==", String(animalId)),
+                        where("status", "==", "pending")
                     );
-                });
+                    const snapshot = await getDocs(q, { source: "server" }); // ok to read server snapshot here
 
-                // update all requests atomically within the transaction
-                for (const docSnap of snapshot.docs) {
-                    const ref = doc(db, "requests", docSnap.id);
-                    transaction.update(ref, {
-                        status: docSnap.id === requestId ? "approved" : "rejected"
+                    console.log("Snapshot docs returned:", snapshot.docs.length);
+                    snapshot.docs.forEach(docSnap => {
+                        console.log(
+                            "Doc ID:", docSnap.id,
+                            "listing_ID:", docSnap.data().listing_ID,
+                            "status:", docSnap.data().status
+                        );
                     });
-                    console.log(
-                        docSnap.id === requestId
-                            ? `Request ${docSnap.id} approved`
-                            : `Request ${docSnap.id} rejected`
-                    );
+
+                    // update all requests atomically within the transaction
+                    for (const docSnap of snapshot.docs) {
+                        const ref = doc(db, "requests", docSnap.id);
+                        transaction.update(ref, {
+                            status: docSnap.id === requestId ? "approved" : "rejected"
+                        });
+                        console.log(
+                            docSnap.id === requestId
+                                ? `Request ${docSnap.id} approved`
+                                : `Request ${docSnap.id} rejected`
+                        );
+                    }
+                } else {
+                    // reject only current request
+                    transaction.update(requestRef, { status: "rejected" });
+                    console.log(`Request ${requestId} rejected`);
                 }
-            } else {
-                // reject only current request
-                transaction.update(requestRef, { status: "rejected" });
-                console.log(`Request ${requestId} rejected`);
+            });
+
+            alert(
+                decision === "approved"
+                    ? "Request approved successfully."
+                    : "Request rejected."
+            );
+
+            await loadRequests();
+        }
+        else if (category === "listings") {
+
+            if (!confirm(`Are you sure you want to mark this listing as ${decision}?`)) {
+                return;
             }
-        });
 
-        alert(
-            decision === "approved"
-                ? "Request approved successfully."
-                : "Request rejected."
-        );
+            const animalRef = doc(db, "animals", animalId);
+            await updateDoc(animalRef, { status: decision });
 
-        await loadRequests();
+            alert("Success! Listing marked as " + decision);
+
+            const modal = document.getElementById("modal");
+            if (modal.classList.contains("open")) closeModal();
+
+            await loadListings();
+        }
         renderCategory(currentCategory);
 
     } catch (error) {
@@ -229,7 +249,8 @@ window.closeModal = closeModal;
 
 // ---------- RENDER CARDS ----------
 function renderRequests(list) {
-    console.log("renderRequests called")
+
+    const category = "requests";
     container.innerHTML = "";
 
     if (isLoading) {
@@ -279,7 +300,7 @@ function renderRequests(list) {
             ${req.animalName}
             </p>
             <span style="font-size:11px; color:#888; font-weight:500;">
-            ${req.dateApplied ?? "aaa"}
+            ${req.dateApplied ?? "Date"}
             </span>
         </div>
 
@@ -316,15 +337,15 @@ function renderRequests(list) {
     });
 
     container.querySelectorAll(".request-card-view-details").forEach(el => {
-        el.addEventListener("click", () => openModal(el.dataset.id));
+        el.addEventListener("click", () => openModal(category, el.dataset.id));
     });
 }
 
 // ---------- OPEN MODAL ----------
-function openModal(id) {
+function openModal(category, id) {
     const modal = document.getElementById("modal");
     modal.classList.add("open");
-    showModalContent(id); // populate content
+    showModalContent(category, id); // populate content
     console.log("open modal for requestID: " + id);
 }
 
@@ -336,7 +357,7 @@ function closeModal() {
 }
 
 // ---------- MODAL CONTENT ----------
-function showModalContent(id) {
+function showModalContent(category, id) {
 
     // Convert req.id to string to match dataset
     id = String(id);
@@ -356,17 +377,19 @@ function showModalContent(id) {
     modalImage.src = req.imageUrl;
     modalImage.alt = req.name;
 
+    //#region Approve/Reject Button Calls (to be reused for all modules in admin)
     document.getElementById("modalActions").addEventListener("click", (e) => {
         if (e.target.dataset.action === "approve") {
-            handleRequestDecision(id, req.animalId, "approved");
+            handleRequestDecision(category, id, req.animalId, "approved");
             closeModal();
         }
 
         if (e.target.dataset.action === "reject") {
-            handleRequestDecision(id, req.animalId, "rejected");
+            handleRequestDecision(category, id, req.animalId, "rejected");
             closeModal();
         }
     });
+    //#endregion
 
     modalInfoContainer.innerHTML = `
         <div class="modal-inner-top-title>
@@ -501,6 +524,7 @@ async function loadListings() {
 
 // 2. Render Cards 
 function renderListings(list) {
+    const category = "listings";
     container.innerHTML = "";
 
     if (list.length === 0) {
@@ -538,7 +562,7 @@ function renderListings(list) {
                         <p>Age: ${ageInfo}</p>
                         <p>Date: ${createdDate}</p>
 
-                        <p class="view-details-link" onclick="openListingModal('${animal.id}')">
+                        <p class="view-details-link" onclick="openListingModal('${category}','${animal.id}')">
                             View Details
                         </p>
                     </div>
@@ -554,7 +578,7 @@ function renderListings(list) {
 }
 
 // 3. Modal Logic 
-window.openListingModal = function (id) {
+window.openListingModal = function (category, id) {
     const animal = pendingListings.find(a => a.id === id);
     if (!animal) return;
 
@@ -629,40 +653,23 @@ window.openListingModal = function (id) {
                     <p style="margin-top: 5px; color: #555; line-height: 1.5;">${animal.description || 'No description provided.'}</p>
                 </div>
             </div>
-
-            <div class="modal-actions">
-                <button class="modal-btn btn-approve-listing" onclick="updateListingStatus('${animal.id}', 'Available'); closeModal()">
-                    Approve Listing
-                </button>
-                <button class="modal-btn btn-reject-listing" onclick="updateListingStatus('${animal.id}', 'Rejected'); closeModal()">
-                    Reject Listing
-                </button>
-            </div>
         `;
 
     modal.classList.add("open");
+    //#region Approve/Reject Button Calls (to be reused for all modules in admin)
+    document.getElementById("modalActions").addEventListener("click", (e) => {
+        if (e.target.dataset.action === "approve") {
+            handleRequestDecision(category, id, animal.id, "Available");
+            closeModal();
+        }
+
+        if (e.target.dataset.action === "reject") {
+            handleRequestDecision(category, id, animal.id, "Rejected");
+            closeModal();
+        }
+    });
+    //#endregion
 };
-
-// 4. Update Status
-window.updateListingStatus = async function (docId, newStatus) {
-    if (!confirm(`Are you sure you want to mark this listing as ${newStatus}?`)) return;
-
-    try {
-        const animalRef = doc(db, "animals", docId);
-        await updateDoc(animalRef, { status: newStatus });
-        alert("Success! Listing marked as " + newStatus);
-
-        const modal = document.getElementById("modal");
-        if (modal.classList.contains("open")) closeModal();
-
-        loadListings();
-    } catch (error) {
-        console.error("Error updating status:", error);
-        alert("Error updating status.");
-    }
-};
-
-
 
 
 // ---------- HELPER ----------
