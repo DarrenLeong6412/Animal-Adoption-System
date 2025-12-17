@@ -14,7 +14,7 @@
 #navbar{
     position:fixed;
     width: 100%;
-    padding: 30px;
+    padding: 0;
     height: 80px;
     margin: auto;
     display: flex;
@@ -135,8 +135,8 @@
 }
 
 #navbar > ul:not(#sidebar) > li > a{
-  margin: 0;
-  padding: 10px 25px 10px 25px!important;            /* Ensure consistent padding */
+  margin: 20px;
+  padding: 5px 10px 5px 10px;            /* Ensure consistent padding */
   display: inline-flex;
   align-items: center;
 }
@@ -150,8 +150,8 @@
 
 /* Remove any extra spacing from auth UI elements */
 #navbar > ul:not(#sidebar) .auth-ui {
-  margin: 0 ;
-  padding: 10px 25px 10px 25px;
+  margin: 20px;
+  padding: 5px 10px 5px 10px;
 
 }
 
