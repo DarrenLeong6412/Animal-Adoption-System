@@ -551,6 +551,64 @@ select.listing-input-field {
     text-align: center;
 }
 
+/* --- Admin 3-Dot Menu Styles --- */
+.card-menu {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 100; /* Ensure this is higher than the image and other elements */
+}
+
+.menu-icon {
+    background: rgba(255, 255, 255, 0.9);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    color: #333;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+.menu-icon:hover {
+    background: white;
+    color: #164A41;
+}
+
+.menu-dropdown {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 38px;
+    left: 0;
+    background-color: white;
+    min-width: 120px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 200; /* Make sure dropdown is very high */
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.menu-dropdown div {
+    color: #333;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.menu-dropdown div:hover {
+    background-color: #f1f1f1;
+}
+
+
 /*#region addListingPage*/
 /* Add Listing Specific Body */
 .add-listing-parent {
@@ -1113,8 +1171,6 @@ p.subtitle {
   padding: 10px 0 10px 0;
 }
 .modal-footer button{
-    color: white;
-    border: none;
     padding: 12px 20px;
     border-radius: 8px;
     font-weight: 600;
@@ -1127,53 +1183,19 @@ p.subtitle {
 .btn-approve {
   background-color: #164A41;
   color: #fff;
+  border: 1px solid white;
 }
 .btn-approve:hover {
-    background-color: #d0e0d3;
+    background-color: #b5b4b4;
     color: #164A41;
 }
 .btn-reject {
-  background-color: #b91c1c;
-  color: #fff;
+  background-color: white;
+  color: #164A41;
+  border: 1px solid #b5b4b4
 }
 .btn-reject:hover {
-  background-color: #d18282;
-  color: #b91c1c;
-}
-
-.modal-footer {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  padding: 10px 0 10px 0;
-}
-.modal-footer button{
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    gap: 8px;
-    font-size: 14px;
-    transition: 0.2s;
-    max-width: 300px;
-}
-.btn-approve {
-  background-color: #164A41;
-  color: #fff;
-}
-.btn-approve:hover {
-    background-color: #d0e0d3;
-    color: #164A41;
-}
-.btn-reject {
-  background-color: #b91c1c;
-  color: #fff;
-}
-.btn-reject:hover {
-  background-color: #d18282;
-  color: #b91c1c;
+  background-color: #b5b4b4;
 }
 
 .modal.open {
@@ -2143,19 +2165,5 @@ p.subtitle {
     transition: background-color 0.2s;
 }
 
-.btn-approve-listing {
-    background-color: #166534;
-}
 
-.btn-approve-listing:hover {
-    background-color: #14532d;
-}
-
-.btn-reject-listing {
-    background-color: #dc2626;
-}
-
-.btn-reject-listing:hover {
-    background-color: #b91c1c;
-}
 /*#endregion*/

@@ -2,7 +2,17 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { 
+    getFirestore, 
+    collection, 
+    getDocs, 
+    query, 
+    orderBy, 
+    doc, 
+    deleteDoc, 
+    updateDoc, 
+    getDoc 
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCy5YAmmb1aTnWiXljQr3yOVsTKmYPAS08",
@@ -20,13 +30,31 @@ const db = getFirestore(app);
 
 let allListings = [];
 let currentUser = null; 
-let selectedAnimalId = null;
+let isAdmin = false; 
 
-// 1. Wait for Auth
-onAuthStateChanged(auth, (user) => {
+// 1. Wait for Auth & Check Admin Role
+onAuthStateChanged(auth, async (user) => {
     currentUser = user;
+    if (user) {
+        await checkAdminStatus(user.uid);
+    }
     loadAnimals(); 
 });
+
+async function checkAdminStatus(uid) {
+    try {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const role = (userData.role || "").toLowerCase();
+            if (role === "admin") { 
+                isAdmin = true;
+            }
+        }
+    } catch (error) {
+        console.error("Error checking admin status:", error);
+    }
+}
 
 async function loadAnimals() {
     const grid = document.getElementById("listingGrid");
@@ -34,7 +62,6 @@ async function loadAnimals() {
 
     try {
         const q = query(collection(db, "animals"), orderBy("createdAt", "asc"));
-        
         const querySnapshot = await getDocs(q);
         
         if (querySnapshot.empty) {
@@ -47,7 +74,6 @@ async function loadAnimals() {
             let data = doc.data();
             data.id = doc.id;
             
-            // Date Formatting
             if (data.createdAt && data.createdAt.seconds) {
                 const dateObj = new Date(data.createdAt.seconds * 1000);
                 data.formattedDate = dateObj.toLocaleDateString("en-GB", {
@@ -81,30 +107,44 @@ function renderGrid(dataList) {
     }
 
     publicList.forEach((animal) => {
-        
-        // Default Green for Available
         let badgeStyle = "background-color: #d1fae5; color: #166534;"; 
         let statusText = "Available";
-
         const breedDisplay = animal.breed ? `${animal.type} • ${animal.breed}` : animal.type;
 
+        let adminMenu = "";
+        if (isAdmin) {
+            adminMenu = `
+                <div class="card-menu" onclick="event.stopPropagation()">
+                    <div class="menu-icon" onclick="toggleMenu('${animal.id}')">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </div>
+                    <div id="menu-${animal.id}" class="menu-dropdown">
+                        <div onclick="editListing('${animal.id}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </div>
+                        <div onclick="deleteListing('${animal.id}')" style="color: #dc2626;">
+                            <i class="fas fa-trash"></i> Delete
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         const cardHTML = `
-            <div class="listing-card" onclick="openModalById('${animal.id}')">
+            <div class="listing-card" onclick="openModalById('${animal.id}')" style="position: relative;">
                 <div class="listing-card-img-container">
+                    ${adminMenu}
                     <img src="${animal.imageUrl}" alt="${animal.name}" class="listing-card-img">
                     <div class="listing-card-status">
                         <p style="${badgeStyle}">${statusText}</p>
                     </div>
                 </div>
                 <div class="listing-card-info-section">
-                    
                     <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
                         <p class="listing-card-animal-name" style="margin:0;">${animal.name}</p>
                         <span style="font-size:11px; color:#888; font-weight:500;">${animal.formattedDate}</span>
                     </div>
-                    
                     <p>${breedDisplay} • ${animal.age} Months • ${animal.gender}</p>
-                    
                     <div class="listing-card-details-row">
                         <i class="fas fa-map-marker-alt"></i>
                         <span>${animal.location}</span>
@@ -120,16 +160,239 @@ function renderGrid(dataList) {
     });
 }
 
+// --- ADMIN GLOBAL FUNCTIONS ---
+
+window.toggleMenu = function(id) {
+    document.querySelectorAll('.menu-dropdown').forEach(el => {
+        if (el.id !== `menu-${id}`) el.style.display = 'none';
+    });
+    const menu = document.getElementById(`menu-${id}`);
+    if (menu) {
+        menu.style.display = (menu.style.display === "block") ? "none" : "block";
+    }
+};
+
+window.addEventListener('click', (e) => {
+    // Close admin menu
+    if (!e.target.closest('.card-menu')) {
+        document.querySelectorAll('.menu-dropdown').forEach(el => el.style.display = 'none');
+    }
+    
+    // Close Modal on outside click
+    const modal = document.getElementById("animalModal");
+    if (e.target == modal) {
+        window.closeAnimalModal();
+    }
+});
+
+// Modal Close Function
+window.closeAnimalModal = function() {
+    document.getElementById("animalModal").classList.remove("open");
+};
+
+window.deleteListing = async function(id) {
+    if (!confirm("Are you sure you want to delete this listing?")) return;
+    try {
+        await deleteDoc(doc(db, "animals", id));
+        alert("Listing deleted successfully.");
+        loadAnimals(); 
+    } catch (error) {
+        console.error("Error deleting:", error);
+        alert("Failed to delete listing.");
+    }
+};
+
+// DYNAMIC MODAL LOGIC (VIEW vs EDIT)
+// 1. OPEN VIEW MODE (Read Only)
+window.openModalById = function(id) {
+    const data = allListings.find(a => a.id === id);
+    if (!data) return;
+
+    document.getElementById('modalMainTitle').innerText = data.name + "'s Details";
+    document.getElementById('modalImg').src = data.imageUrl || 'images/no-image.png';
+    const container = document.getElementById('modalContentContainer');
+
+    container.innerHTML = `
+        <h2 id="modalName">${data.name}</h2>
+
+        <div class="modal-detail-item">
+            <i class="fas fa-paw"></i>
+            <div>
+                <p class="modal-inner-info-text-title">Type</p>
+                <span>${data.type} • ${data.breed}</span>
+            </div>
+        </div>
+
+        <div class="modal-detail-item">
+            <i class="fas fa-birthday-cake"></i>
+            <div>
+                <p class="modal-inner-info-text-title">Age</p>
+                <span>${data.age} months old • ${data.gender}</span>
+            </div>
+        </div>
+
+        <div class="modal-detail-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <div>
+                <p class="modal-inner-info-text-title">Location</p>
+                <span>${data.location}</span>
+            </div>
+        </div>
+
+        <div class="modal-detail-item">
+            <i class="fas fa-syringe"></i>
+            <div>
+                <p class="modal-inner-info-text-title">Vaccination</p>
+                <span>${data.vaccinationStatus || 'Not Specified'}</span>
+            </div>
+        </div>
+
+        <h3 id="modalAboutTitle" style="color: #0d3b25; font-size: 18px; font-weight: 700; margin-top: 25px; margin-bottom: 8px;">About ${data.name}</h3>
+        
+        <p style="color: #555; line-height: 1.6; font-size: 14px; margin-top: 0;">
+            ${data.description || 'No description provided.'}
+        </p>
+
+        <button id="adoptButton" class="btn-save-changes">
+            Adopt Me
+        </button>
+    `;
+
+    document.getElementById("adoptButton").onclick = function() {
+        window.location.href = `adoptionForm.html?listingID=${data.id}`;
+    };
+
+    document.getElementById("animalModal").classList.add("open");
+};
+
+// 2. OPEN EDIT MODE 
+window.editListing = function(id) {
+    const data = allListings.find(a => a.id === id);
+    if (!data) return;
+
+    document.getElementById('modalMainTitle').innerText = "Edit Listing";
+    document.getElementById('modalImg').src = data.imageUrl || 'images/no-image.png';
+    const container = document.getElementById('modalContentContainer');
+
+    const getOption = (val, current) => `
+        <option value="${val}" ${current === val ? 'selected' : ''}>${val}</option>
+    `;
+
+    container.innerHTML = `
+        <input type="hidden" id="editDocId" value="${data.id}">
+
+        <div class="edit-form-group">
+            <label class="edit-form-label">Animal Name</label>
+            <input type="text" id="editName" class="edit-form-input" value="${data.name}">
+        </div>
+
+        <div class="form-row-split">
+             <div class="edit-form-group form-group-half">
+                <label class="edit-form-label">Type</label>
+                <select id="editType" class="edit-form-input">
+                    ${getOption('Dog', data.type)}
+                    ${getOption('Cat', data.type)}
+                    ${getOption('Rabbit', data.type)}
+                    ${getOption('Bird', data.type)}
+                    ${getOption('Other', data.type)}
+                </select>
+            </div>
+            <div class="edit-form-group form-group-half">
+                <label class="edit-form-label">Breed</label>
+                <input type="text" id="editBreed" class="edit-form-input" value="${data.breed}">
+            </div>
+        </div>
+
+         <div class="form-row-split">
+            <div class="edit-form-group form-group-half">
+                <label class="edit-form-label">Age (Months)</label>
+                <input type="number" id="editAge" class="edit-form-input" min="0" value="${data.age}">
+            </div>
+            <div class="edit-form-group form-group-half">
+                <label class="edit-form-label">Gender</label>
+                <select id="editGender" class="edit-form-input">
+                    ${getOption('Male', data.gender)}
+                    ${getOption('Female', data.gender)}
+                </select>
+            </div>
+        </div>
+
+        <div class="edit-form-group">
+            <label class="edit-form-label">Location</label>
+            <input type="text" id="editLocation" class="edit-form-input" value="${data.location}">
+        </div>
+
+        <div class="edit-form-group">
+            <label class="edit-form-label">Vaccination Status</label>
+            <select id="editVaccine" class="edit-form-input">
+                ${getOption('Vaccinated', data.vaccinationStatus)}
+                ${getOption('Not Vaccinated', data.vaccinationStatus)}
+                ${getOption('Not specified', data.vaccinationStatus)}
+            </select>
+        </div>
+
+        <div class="edit-form-group">
+            <label class="edit-form-label">Description</label>
+            <textarea id="editDescription" class="edit-form-textarea">${data.description}</textarea>
+        </div>
+
+        <button id="saveChangesBtn" class="btn-save-changes">
+            Save Changes
+        </button>
+    `;
+
+    document.getElementById("saveChangesBtn").onclick = handleSaveChanges;
+
+    document.getElementById("animalModal").classList.add("open");
+};
+
+// 3. HANDLE SAVE
+async function handleSaveChanges() {
+    const id = document.getElementById("editDocId").value;
+    const btn = document.getElementById("saveChangesBtn");
+    const newName = document.getElementById('editName').value;
+
+    if (!newName) { alert("Name is required"); return; }
+
+    btn.innerText = "Saving...";
+    btn.disabled = true;
+
+    try {
+        const docRef = doc(db, "animals", id);
+        await updateDoc(docRef, {
+            name: newName,
+            type: document.getElementById('editType').value,
+            breed: document.getElementById('editBreed').value,
+            age: document.getElementById('editAge').value,
+            gender: document.getElementById('editGender').value,
+            location: document.getElementById('editLocation').value,
+            vaccinationStatus: document.getElementById('editVaccine').value,
+            description: document.getElementById('editDescription').value
+        });
+
+        alert("Listing updated successfully!");
+        document.getElementById('animalModal').classList.remove('open');
+        loadAnimals(); 
+    } catch (error) {
+        console.error("Update failed", error);
+        alert("Update failed: " + error.message);
+    } finally {
+        btn.innerText = "Save Changes";
+        btn.disabled = false;
+    }
+}
+
+// --- FILTERS ---
 function setupFilters() {
     const searchInput = document.getElementById("filterSearch");
     const ageInput = document.getElementById("filterAge");
     const typeInput = document.getElementById("filterType");
     const genderInput = document.getElementById("filterGender");
 
-    searchInput.addEventListener("input", filterAndRender);
-    ageInput.addEventListener("input", filterAndRender);
-    typeInput.addEventListener("change", filterAndRender);
-    genderInput.addEventListener("change", filterAndRender);
+    if(searchInput) searchInput.addEventListener("input", filterAndRender);
+    if(ageInput) ageInput.addEventListener("input", filterAndRender);
+    if(typeInput) typeInput.addEventListener("change", filterAndRender);
+    if(genderInput) genderInput.addEventListener("change", filterAndRender);
 }
 
 function filterAndRender() {
@@ -139,23 +402,18 @@ function filterAndRender() {
     const genderVal = document.getElementById("filterGender").value;
 
     const filteredData = allListings.filter(animal => {
-        
-        // 1. Search
         const nameMatch = animal.name.toLowerCase().includes(searchText);
         const breedMatch = (animal.breed || "").toLowerCase().includes(searchText);
         const searchPass = nameMatch || breedMatch;
 
-        // 2. Age
         let agePass = true;
         if (ageVal !== "") agePass = parseInt(animal.age) == parseInt(ageVal);
 
-        // 3. Type
         let typePass = true;
         const standardTypes = ["Dog", "Cat", "Bird", "Rabbit"]; 
         if (typeVal === "Other") typePass = !standardTypes.includes(animal.type);
         else if (typeVal !== "All") typePass = animal.type === typeVal;
 
-        // 4. Gender
         let genderPass = true;
         if (genderVal !== "All") genderPass = animal.gender === genderVal;
 
@@ -165,53 +423,7 @@ function filterAndRender() {
     renderGrid(filteredData);
 }
 
-window.openModalById = function(id) {
-    const data = allListings.find(a => a.id === id);
-    if (!data) return;
 
-    selectedAnimalId = id;
-    const breedText = data.breed ? `${data.type} • ${data.breed}` : data.type;
-
-    showAnimalDetails(
-        data.name, 
-        data.imageUrl, 
-        breedText,           
-        data.location, 
-        data.vaccinationStatus,
-        data.description || "No description provided." 
-    );
-};
-
-window.openModalById = function(id) {
-    const data = allListings.find(a => a.id === id);
-    if (!data) return;
-
-    selectedAnimalId = id;
-    const breedText = data.breed ? `${data.type} • ${data.breed}` : data.type;
-
-    showAnimalDetails(
-        data.name, 
-        data.imageUrl, 
-        breedText,           
-        data.location, 
-        data.vaccinationStatus,
-        data.description || "No description provided." 
-    );
-};
-
-
-
-
-const adoptBtn = document.getElementById("adoptButton");
-adoptBtn.addEventListener("click", () => {
-
-    if (!selectedAnimalId) {
-        alert("No animal selected.");
-        return;
-    }
-    window.location.href = `adoptionForm.html?listingID=${selectedAnimalId}`;
-
-});
 
 loadAnimals();
 

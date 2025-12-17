@@ -146,8 +146,15 @@ if (form) {
         const locVal = document.getElementById("animalLocation").value.trim();
         const descVal = document.getElementById("animalDescription").value.trim();
         
-        if (nameVal.length < 2) {
-            alert("Invalid Name: Animal name must be at least 2 characters.");
+        const nameRegex = /^[a-zA-Z\s]+$/;
+
+        if (nameVal.length < 1) {
+            alert("Invalid Name: Please enter a name.");
+            return;
+        }
+
+        if (!nameRegex.test(nameVal)) {
+            alert("Invalid Name: Name must contain only alphabets (no numbers or symbols).");
             return;
         }
 

@@ -1,7 +1,7 @@
 // js/myListings.js
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, where, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -18,7 +18,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Store listings locally for easy modal access
 let myUserListings = [];
 
 // 1. Wait for Auth
@@ -34,7 +33,7 @@ onAuthStateChanged(auth, (user) => {
 // 2. Load User Listings
 async function loadUserListings(userId) {
     const grid = document.getElementById("myListingsGrid");
-    if(!grid) return; // Safety check
+    if(!grid) return; 
 
     try {
         const q = query(collection(db, "animals"), where("createdBy", "==", userId));
@@ -51,9 +50,22 @@ async function loadUserListings(userId) {
         querySnapshot.forEach((docSnapshot) => {
             const data = docSnapshot.data();
             data.id = docSnapshot.id;
-            myUserListings.push(data); // Save to array
-            
-            // Badge Logic
+            myUserListings.push(data);
+        });
+
+        // Sort: Pending first, then by date
+        myUserListings.sort((a, b) => {
+            const statusOrder = { "Pending": 1, "Available": 2, "Rejected": 3 };
+            const statusA = statusOrder[a.status] || 99;
+            const statusB = statusOrder[b.status] || 99;
+            if (statusA !== statusB) return statusA - statusB;
+            const timeA = a.createdAt && a.createdAt.seconds ? a.createdAt.seconds : 0;
+            const timeB = b.createdAt && b.createdAt.seconds ? b.createdAt.seconds : 0;
+            return timeB - timeA;
+        });
+
+        // Render Grid
+        myUserListings.forEach((data) => {
             let badgeClass = "badge-pending";
             let statusText = "Pending";
 
@@ -69,7 +81,6 @@ async function loadUserListings(userId) {
                 ? new Date(data.createdAt.seconds * 1000).toLocaleDateString("en-GB")
                 : "Date Unknown";
 
-            // Clickable Card HTML
             const cardHTML = `
                 <div onclick="window.openUserListingModal('${data.id}')" class="listing-item-card">
                     <div class="listing-item-img-container">
@@ -95,81 +106,179 @@ async function loadUserListings(userId) {
     }
 }
 
-// 3. Open Modal (Global Function)
+// 3. Open Modal (Dynamic Logic)
 window.openUserListingModal = function(id) {
     const data = myUserListings.find(item => item.id === id);
     if (!data) return;
 
     const modal = document.getElementById("userListingModal");
-    const saveBtn = document.getElementById("btnSaveChanges");
-    const statusEl = document.getElementById("editStatusDisplay");
     
-    // Populate Image & ID
+    // Set Header Image
     document.getElementById("modalEditImg").src = data.imageUrl || 'images/no-image.png';
-    document.getElementById("editDocId").value = data.id;
-
-    // Populate Fields
-    document.getElementById('editName').value = data.name || "";
-    document.getElementById('editType').value = data.type || "";
-    document.getElementById('editBreed').value = data.breed || "";
-    document.getElementById('editAge').value = data.age || "";
-    document.getElementById('editLocation').value = data.location || "";
-    document.getElementById('editDescription').value = data.description || "";
-
-    // Status Styling
-    statusEl.innerText = data.status || "Pending";
-    statusEl.className = "edit-status-text"; // Reset class
-
-    const inputs = ['editName', 'editType', 'editBreed', 'editAge', 'editLocation', 'editDescription'];
-
+    
+    const container = document.querySelector("#userListingModal .modal-inner-info-container");
+    
+    // ============================================================
+    // SCENARIO 1: STATUS IS PENDING -> SHOW EDIT FORM
+    // ============================================================
     if (data.status === "Pending") {
-        statusEl.classList.add("status-text-pending");
-        saveBtn.style.display = "block";
         document.getElementById("modalEditTitle").innerText = "Edit Listing";
         
-        // Enable Inputs
-        inputs.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) {
-                el.removeAttribute("readonly");
-                el.style.backgroundColor = "white";
-                el.style.border = "1px solid #ddd";
-            }
-        });
-    } else {
-        if (data.status === "Available") statusEl.classList.add("status-text-approved");
-        else statusEl.classList.add("status-text-rejected");
+        // Helper for Selects
+        const getOption = (val, current) => `<option value="${val}" ${current === val ? 'selected' : ''}>${val}</option>`;
 
-        saveBtn.style.display = "none";
+        container.innerHTML = `
+            <input type="hidden" id="editDocId" value="${data.id}">
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Animal Name</label>
+                <input type="text" id="editName" class="edit-form-input" value="${data.name}">
+            </div>
+
+            <div class="form-row-split">
+                <div class="edit-form-group form-group-half">
+                    <label class="edit-form-label">Type</label>
+                    <select id="editType" class="edit-form-input">
+                        ${getOption('Dog', data.type)}
+                        ${getOption('Cat', data.type)}
+                        ${getOption('Rabbit', data.type)}
+                        ${getOption('Bird', data.type)}
+                        ${getOption('Other', data.type)}
+                    </select>
+                </div>
+                <div class="edit-form-group form-group-half">
+                    <label class="edit-form-label">Breed</label>
+                    <input type="text" id="editBreed" class="edit-form-input" value="${data.breed}">
+                </div>
+            </div>
+
+            <div class="form-row-split">
+                <div class="edit-form-group form-group-half">
+                    <label class="edit-form-label">Age (Months)</label>
+                    <input type="number" id="editAge" class="edit-form-input" value="${data.age}">
+                </div>
+                <div class="edit-form-group form-group-half">
+                    <label class="edit-form-label">Gender</label>
+                    <select id="editGender" class="edit-form-input">
+                        ${getOption('Male', data.gender)}
+                        ${getOption('Female', data.gender)}
+                    </select>
+                </div>
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Location</label>
+                <input type="text" id="editLocation" class="edit-form-input" value="${data.location}">
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Vaccination Status</label>
+                <select id="editVaccine" class="edit-form-input">
+                    ${getOption('Vaccinated', data.vaccinationStatus)}
+                    ${getOption('Not Vaccinated', data.vaccinationStatus)}
+                    ${getOption('Not specified', data.vaccinationStatus)}
+                </select>
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Description</label>
+                <textarea id="editDescription" class="edit-form-textarea">${data.description}</textarea>
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Current Status</label>
+                <div class="edit-status-text status-text-pending">Pending</div>
+            </div>
+
+            <button id="btnSaveChanges" class="btn-save-changes" onclick="saveUserListing()">
+                Save Changes
+            </button>
+        `;
+    } 
+    else {
         document.getElementById("modalEditTitle").innerText = "View Details";
         
-        // Disable Inputs (Read-only mode)
-        inputs.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) {
-                el.setAttribute("readonly", true);
-                el.style.backgroundColor = "#f9fafb";
-                el.style.border = "none";
-            }
-        });
+        let statusColor = data.status === "Available" ? "#166534" : "#dc2626"; 
+        let statusBg = data.status === "Available" ? "#d1fae5" : "#fee2e2";
+        let displayStatus = data.status === "Available" ? "Approved" : "Rejected";
+
+        container.innerHTML = `
+            <h2 style="color: #164A41; margin-bottom: 15px;">${data.name}</h2>
+
+            <div class="modal-detail-item">
+                <i class="fas fa-paw"></i>
+                <div>
+                    <p class="modal-inner-info-text-title">Type</p>
+                    <span>${data.type} • ${data.breed}</span>
+                </div>
+            </div>
+
+            <div class="modal-detail-item">
+                <i class="fas fa-birthday-cake"></i>
+                <div>
+                    <p class="modal-inner-info-text-title">Age</p>
+                    <span>${data.age} months old • ${data.gender}</span>
+                </div>
+            </div>
+
+            <div class="modal-detail-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                    <p class="modal-inner-info-text-title">Location</p>
+                    <span>${data.location}</span>
+                </div>
+            </div>
+
+            <div class="modal-detail-item">
+                <i class="fas fa-syringe"></i>
+                <div>
+                    <p class="modal-inner-info-text-title">Vaccination</p>
+                    <span>${data.vaccinationStatus || 'Not Specified'}</span>
+                </div>
+            </div>
+
+            <h3 style="color: #0d3b25; font-size: 18px; font-weight: 700; margin-top: 25px; margin-bottom: 8px;">About ${data.name}</h3>
+            
+            <p style="color: #555; line-height: 1.6; font-size: 14px; margin-top: 0;">
+                ${data.description || 'No description provided.'}
+            </p>
+
+            <div style="margin-top: 25px; padding: 12px; background-color: ${statusBg}; color: ${statusColor}; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid ${statusColor};">
+                ${displayStatus}
+            </div>
+
+            
+            <p style="text-align: center; font-size: 12px; color: #888; margin-top: 5px;">
+                *You cannot edit this listing because it has been processed.
+            </p>
+        `;
     }
 
     modal.classList.add("open");
 };
 
-// 4. Close Modal (Global Function)
+// 4. Close Modal
 window.closeUserModal = function() {
     document.getElementById("userListingModal").classList.remove("open");
 };
 
-// 5. Save Changes (Global Function)
+// 5. Save Changes
 window.saveUserListing = async function() {
     const id = document.getElementById("editDocId").value;
     const btn = document.getElementById("btnSaveChanges");
     
-    // Basic Validation
+    // Validation
     const name = document.getElementById('editName').value;
     if(!name) { alert("Name is required"); return; }
+
+    // Double check status before saving (Security)
+    const currentDoc = await getDoc(doc(db, "animals", id));
+    if (currentDoc.exists() && currentDoc.data().status !== "Pending") {
+        alert("This listing is no longer Pending and cannot be edited.");
+        closeUserModal();
+        loadUserListings(auth.currentUser.uid);
+        return;
+    }
 
     btn.innerText = "Saving...";
     btn.disabled = true;
@@ -181,21 +290,23 @@ window.saveUserListing = async function() {
             type: document.getElementById('editType').value,
             breed: document.getElementById('editBreed').value,
             age: document.getElementById('editAge').value,
+            gender: document.getElementById('editGender').value,
             location: document.getElementById('editLocation').value,
+            vaccinationStatus: document.getElementById('editVaccine').value,
             description: document.getElementById('editDescription').value
         });
 
         alert("Listing updated successfully!");
         closeUserModal();
-        
-        // Refresh the list to show new data
         if(auth.currentUser) loadUserListings(auth.currentUser.uid);
 
     } catch (error) {
         console.error("Update failed", error);
         alert("Failed to update listing: " + error.message);
     } finally {
-        btn.innerText = "Save Changes";
-        btn.disabled = false;
+        if(btn) {
+            btn.innerText = "Save Changes";
+            btn.disabled = false;
+        }
     }
 };
