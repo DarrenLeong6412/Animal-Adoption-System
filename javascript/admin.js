@@ -523,7 +523,6 @@ async function loadListings() {
 }
 
 // 2. Render Cards 
-// 2. Render Cards (Updated to match Adoption Request UI)
 function renderListings(list) {
     const category = "listings";
     container.innerHTML = "";
@@ -552,7 +551,7 @@ function renderListings(list) {
 
         // HTML Structure matched exactly to "renderRequests"
         container.innerHTML += `
-        <a onclick="openListingModal('${animal.id}')" style="cursor:pointer;">
+        <a onclick="openListingModal('${category}','${animal.id}')" style="cursor:pointer;">
             <div class="listing-card">
 
                 <div class="listing-card-img-container">
@@ -608,7 +607,7 @@ function renderListings(list) {
 }
 
 // 3. Modal Logic 
-window.openListingModal = function (id) {
+window.openListingModal = function (category, id) {
     const animal = pendingListings.find(a => a.id === id);
     if (!animal) return;
 
