@@ -160,7 +160,7 @@ function renderGrid(dataList) {
     });
 }
 
-// --- ADMIN GLOBAL FUNCTIONS ---
+//ADMIN FUNCTIONS
 
 window.toggleMenu = function(id) {
     document.querySelectorAll('.menu-dropdown').forEach(el => {
@@ -173,12 +173,10 @@ window.toggleMenu = function(id) {
 };
 
 window.addEventListener('click', (e) => {
-    // Close admin menu
     if (!e.target.closest('.card-menu')) {
         document.querySelectorAll('.menu-dropdown').forEach(el => el.style.display = 'none');
     }
     
-    // Close Modal on outside click
     const modal = document.getElementById("animalModal");
     if (e.target == modal) {
         window.closeAnimalModal();
@@ -203,7 +201,7 @@ window.deleteListing = async function(id) {
 };
 
 // DYNAMIC MODAL LOGIC (VIEW vs EDIT)
-// 1. OPEN VIEW MODE (Read Only)
+// 1. OPEN VIEW MODE 
 window.openModalById = function(id) {
     const data = allListings.find(a => a.id === id);
     if (!data) return;
@@ -382,7 +380,7 @@ async function handleSaveChanges() {
     }
 }
 
-// --- FILTERS ---
+// FILTERS 
 function setupFilters() {
     const searchInput = document.getElementById("filterSearch");
     const ageInput = document.getElementById("filterAge");

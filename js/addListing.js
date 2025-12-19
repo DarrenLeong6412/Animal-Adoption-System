@@ -5,7 +5,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// Your Config
+// Config
 const firebaseConfig = {
   apiKey: "AIzaSyCy5YAmmb1aTnWiXljQr3yOVsTKmYPAS08",
   authDomain: "pet-adoption-system-cf9f7.firebaseapp.com",
@@ -39,7 +39,7 @@ const typeSelect = document.getElementById('animalType');
 const otherInput = document.getElementById('animalTypeOther');
 
 if (typeSelect && otherInput) {
-    // Event A: Toggle Input visibility
+    // Toggle Input visibility
     typeSelect.addEventListener('change', () => {
         if (typeSelect.value === 'Other') {
             otherInput.style.display = 'block';
@@ -52,7 +52,7 @@ if (typeSelect && otherInput) {
         }
     });
 
-    // Event B: Auto-detect existing category
+    // Auto-detect existing category
     otherInput.addEventListener('input', () => {
         const typedVal = otherInput.value.trim().toLowerCase();
         for (let i = 0; i < typeSelect.options.length; i++) {
@@ -70,7 +70,7 @@ if (typeSelect && otherInput) {
     });
 }
 
-// 4. IMAGE HANDLER (Resize & Convert to Base64)
+// 4. IMAGE HANDLER 
 const fileInput = document.getElementById('fileInput');
 const previewImg = document.getElementById('previewImg');
 const uploadText = document.getElementById('uploadText');
@@ -80,10 +80,10 @@ if (fileInput) {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Validating File Type (Extra security)
+        // Validating File Type 
         if (!file.type.startsWith('image/')) {
             alert("Please upload a valid image file (JPG, PNG).");
-            fileInput.value = ""; // Clear input
+            fileInput.value = "";
             return;
         }
 
@@ -122,25 +122,22 @@ const form = document.getElementById('addListingForm');
 
 if (form) {
     form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Stop default reload
+        e.preventDefault(); 
 
-        // --- VALIDATION 1: AUTH ---
+        // VALIDATION CHECKING
         if (!currentUser) return alert("You are not logged in.");
 
         const submitBtn = document.getElementById("submitBtn");
 
-        // --- VALIDATION 2: IMAGE REQUIRED ---
+    
         if (!base64ImageString) {
             alert("Photo Required: Please upload a photo of the animal to continue.");
-            // Highlight the box to help user see it
             document.querySelector(".image-preview-container").style.borderColor = "#dc2626";
             return;
         } else {
-            // Reset border color if fixed
             document.querySelector(".image-preview-container").style.borderColor = "#d1d5db";
         }
 
-        // --- VALIDATION 3: TEXT FIELDS ---
         const nameVal = document.getElementById("animalName").value.trim();
         const breedVal = document.getElementById("animalBreed").value.trim();
         const locVal = document.getElementById("animalLocation").value.trim();
@@ -168,7 +165,6 @@ if (form) {
             return;
         }
 
-        // --- VALIDATION 4: AGE LOGIC ---
         const ageInput = document.getElementById("animalAge").value;
         const ageInt = parseInt(ageInput);
 
@@ -176,12 +172,11 @@ if (form) {
             alert("Invalid Age: Age cannot be negative.");
             return; 
         }
-        if (ageInt > 300) { // e.g., 25 years in months
+        if (ageInt > 300) { 
             alert("Invalid Age: Please check the age (value seems too high for months).");
             return;
         }
 
-        // --- VALIDATION 5: ANIMAL TYPE LOGIC ---
         let finalType = document.getElementById("animalType").value;
         
         if (finalType === "Other") {
@@ -190,11 +185,10 @@ if (form) {
                 alert("Missing Type: Please specify the animal type.");
                 return;
             }
-            // Capitalize first letter
             finalType = customType.charAt(0).toUpperCase() + customType.slice(1);
         }
 
-        // --- START SUBMISSION ---
+        // SUBMISSION
         submitBtn.innerText = "Saving...";
         submitBtn.disabled = true;
 
@@ -202,9 +196,9 @@ if (form) {
             const listingData = {
                 name: nameVal,
                 type: finalType, 
-                breed: breedVal || "Unknown", // Default if empty
+                breed: breedVal || "Unknown", 
                 gender: document.getElementById("animalGender").value,
-                age: ageInt.toString(), // Store as string for consistency or int
+                age: ageInt.toString(), 
                 ageUnit: "Months", 
                 location: locVal,
                 vaccinationStatus: document.getElementById("animalVaccination").value,

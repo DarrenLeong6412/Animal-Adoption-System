@@ -53,7 +53,6 @@ async function loadUserListings(userId) {
             myUserListings.push(data);
         });
 
-        // Sort: Pending first, then by date
         myUserListings.sort((a, b) => {
             const statusOrder = { "Pending": 1, "Available": 2, "Rejected": 3 };
             const statusA = statusOrder[a.status] || 99;
@@ -118,9 +117,8 @@ window.openUserListingModal = function(id) {
     
     const container = document.querySelector("#userListingModal .modal-inner-info-container");
     
-    // ============================================================
-    // SCENARIO 1: STATUS IS PENDING -> SHOW EDIT FORM
-    // ============================================================
+   
+    //STATUS IS PENDING - ALLOW EDITING
     if (data.status === "Pending") {
         document.getElementById("modalEditTitle").innerText = "Edit Listing";
         
@@ -271,7 +269,7 @@ window.saveUserListing = async function() {
     const name = document.getElementById('editName').value;
     if(!name) { alert("Name is required"); return; }
 
-    // Double check status before saving (Security)
+    // Double check status before saving 
     const currentDoc = await getDoc(doc(db, "animals", id));
     if (currentDoc.exists() && currentDoc.data().status !== "Pending") {
         alert("This listing is no longer Pending and cannot be edited.");
