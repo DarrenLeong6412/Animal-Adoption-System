@@ -1457,12 +1457,16 @@ p.subtitle {
 }
 
 /* ===== GRID DISPLAY (MISSING CLASS) ===== */
+/*maybe no used*/
 .lostpet-grid-display {
-    display: grid;
+    /*display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 24px;
     width: 100%;
     max-width: 1200px;
+    padding: 20px;*/
+    text-align: center; 
+    color: #666; 
     padding: 20px;
 }
 

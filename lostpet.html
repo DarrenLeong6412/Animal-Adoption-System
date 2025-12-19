@@ -31,7 +31,7 @@
                     <p>Help our furry companions find their way back home</p>
                 </div>
 
-                <button id="createLostPetBtn" class="lostpet-button-create-report">
+                <button id="createLostPetForm" class="lostpet-button-create-report">
                     <i class="fas fa-plus"></i> Create Lost Pet Report
                 </button>
             </div>
@@ -48,7 +48,7 @@
                         <div class="lostpet-input-wrapper">
                             <i class="fas fa-search lostpet-search-icon"></i>
                             <input type="text" id="searchInput"
-                                placeholder="Search by pet name, species, breed, or location..."
+                                placeholder="Search by pet name, animal type, breed, or last seen location."
                                 class="lostpet-input-field has-icon">
                         </div>
                     </div>
@@ -56,26 +56,24 @@
             </div>
         </div>
 
-        <div class="lostpet-count-label" id="countText">
+        <div class="lostpet-count-label" >
             Showing lost pet reports
         </div>
 
-        <div id="lostpetGrid" class="lostpet-grid-display">
-            <p style="text-align: center; color: #666; padding: 20px;">
-                Loading Lost Pet Reports...
-            </p>
+        <div id="lostpet-grid" class="lostpet-grid-display">
+            Loading lost pet reports from database...    
         </div>
     </div>
 
-    <!-- DETAIL VIEW MODAL -->
+    <!-- DETAIL VIEW MODAL (need change)-->
     <div class="modal" id="lostPetDetailModal">
         <div class="modal-inner">
             <div class="modal-inner-top">
                 <div class="modal-inner-top-title">
-                    <h1 id="modalPetName">Pet Details</h1>
+                    <h1 id="modalMainTitle">Lost Pet Details</h1>
                 </div>
                 <div class="modal-inner-top-exit">
-                    <a id="closeDetailModal"><i class="fa-solid fa-x"></i></a>
+                    <a onclick="closePetModal()"><i class="fa-solid fa-x"></i></a>
                 </div>
             </div>
 
@@ -85,7 +83,6 @@
                 </div>
 
                 <div class="modal-inner-info-container" id="modalPetInfo">
-                    <!-- Content populated by JS -->
                 </div>
             </div>
         </div>
@@ -97,6 +94,7 @@
     <script src="javascript/template-loader.js"></script>
     <script type="module" src="javascript/lostpet.js"></script>
     <script type="module" src="js/auth.js"></script>
+    <script type="module" src="javascript/lostPetForm.js"></script>
 
 </body>
     
