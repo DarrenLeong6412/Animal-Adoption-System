@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sign Up</title>
+  <title>My Site — Sign Up</title>
 
   <link rel="stylesheet" href="css/style.css" />
 
@@ -16,9 +16,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  
 </head>
 
 <body class="auth-page">
+  <a href="index.html" class="auth-back-btn">
+    ← Back to Home
+  </a>
 
   <div class="auth-card auth-ui">
     <h1 class="auth-title">Create an Account</h1>
@@ -26,52 +30,18 @@
 
     <form id="signupForm" class="auth-form">
 
-      <div class="auth-grid-2">
-        <div>
-          <label for="signupEmail">Email</label>
-          <input type="email" id="signupEmail" required />
-        </div>
+      <label for="signupName">Name</label>
+      <input type="text" id="signupName" required maxlength="50" />
 
-        <div>
-          <label for="signupPassword">Password</label>
-          <input type="password" id="signupPassword" minlength="6" required />
-        </div>
-      </div>
+      <label for="signupEmail">Email</label>
+      <input type="email" id="signupEmail" required maxlength="100" />
 
-      <label for="signupName">Full Name</label>
-      <input type="text" id="signupName" required />
-
-      <div class="auth-grid-2">
-        <div>
-          <label for="signupGender">Gender</label>
-          <select id="signupGender">
-            <option value="">-- Select Gender --</option>
-            <option value="M">Male</option>
-            <option value="F">Female</option>
-            <option value="O">Other</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="signupIC">Identification Number (IC / Passport)</label>
-          <input type="text" id="signupIC" />
-        </div>
-      </div>
-
-      <div class="auth-grid-2">
-        <div>
-          <label for="signupPhone">Phone Number</label>
-          <input type="tel" id="signupPhone" />
-        </div>
-
-        <div>
-          <label for="signupAddress">Address</label>
-          <textarea id="signupAddress" rows="3"></textarea>
-        </div>
-      </div>
+      <label for="signupPassword">Password</label>
+      <input type="password" id="signupPassword" minlength="6" maxlength="255" required />
 
       <button type="submit" class="auth-submit">Sign Up</button>
     </form>
+
 
     <p class="auth-footer">
       Already have an account?

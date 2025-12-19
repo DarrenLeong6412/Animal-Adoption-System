@@ -32,43 +32,91 @@
 
     <div class="profile-card auth-ui">
 
-      <div class="profile-header">
-        <i class="fa-solid fa-user profile-avatar"></i>
-        <div>
-          <h1 id="profileName">User Name</h1>
-          <p id="profileEmail">user@email.com</p>
-        </div>
+    <div class="profile-header">
+      <div>
+        <h1 id="profileName">User Name</h1>
+        <p id="profileEmail">user@email.com</p>
+      </div>
+    </div>
+
+    <div class="profile-divider"></div>
+
+    <div class="profile-details">
+
+      <!-- Gender -->
+      <div class="profile-row">
+        <span class="label">Gender</span>
+
+        <!-- display -->
+        <span id="profileGender">-</span>
+
+        <!-- edit (hidden until Edit clicked) -->
+        <select id="editGender" class="profile-edit" style="display:none;">
+          <option value="">Select...</option>
+          <option value="M">M</option>
+          <option value="F">F</option>
+          <option value="O">O</option>
+        </select>
       </div>
 
-      <div class="profile-divider"></div>
+      <!-- Phone -->
+      <div class="profile-row">
+        <span class="label">Phone Number</span>
 
-      <div class="profile-details">
+        <span id="profilePhone">-</span>
 
-        <div class="profile-row">
-          <span class="label">Gender</span>
-          <span id="profileGender"></span>
-        </div>
-
-        <div class="profile-row">
-          <span class="label">Phone Number</span>
-          <span id="profilePhone"></span>
-        </div>
-
-        <div class="profile-row">
-          <span class="label">Address</span>
-          <span id="profileAddress"></span>
-        </div>
-
+        <input
+          id="editPhone"
+          class="profile-edit"
+          type="text"
+          maxlength="15"
+          placeholder="e.g. +60 12-345 6789"
+          style="display:none;"
+        />
       </div>
 
-      <div class="profile-actions">
-        <button id="logoutBtn" class="profile-logout-btn">
-          <i class="fa-solid fa-right-from-bracket"></i>
-          Log Out
-        </button>
+      <!-- Address -->
+      <div class="profile-row">
+        <span class="label">Address</span>
+
+        <span id="profileAddress">-</span>
+
+        <textarea
+          id="editAddress"
+          class="profile-edit"
+          maxlength="255"
+          placeholder="Your address..."
+          style="display:none;"
+        ></textarea>
       </div>
+
+      <div class="profile-row">
+        <span class="label">Identification Number</span>
+
+        <span id="profileIdentification">-</span>
+
+        <input
+          id="editIdentification"
+          class="profile-edit"
+          type="text"
+          maxlength="20"
+          placeholder="e.g. 061239072345"
+          style="display:none;"
+        />
+      </div>
+
+
 
     </div>
+
+    <!-- Actions -->
+    <div class="profile-actions">
+      <button id="editProfileBtn" class="profile-btn">Edit</button>
+      <button id="saveProfileBtn" class="profile-btn" style="display:none;">Save</button>
+      <button id="cancelProfileBtn" class="profile-btn profile-btn-secondary" style="display:none;">Cancel</button>
+    </div>
+
+  </div>
 
   </div>
 
