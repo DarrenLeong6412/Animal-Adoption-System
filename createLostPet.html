@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" class="auth-loading">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PawResQ — Create Lost Pet Report</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="lostPetForm-body">
+
+    <div id="navbar"></div>
+
+    <div class="lostPetForm-parent">
+        <div class="add-listing-container">
+            <div class="add-listing-header">
+                <a href="lostpet.html" class="back-link">← Back</a>
+                <h2>Create Lost Pet Report</h2>
+                <p class="subtitle">Help your furry friend find their way back home</p>
+            </div>
+
+            <form id="createLostPetForm">
+
+                <div class="section-title">Pet Information</div>
+
+                <div class="form-group">
+                    <label>Pet Name<span class="required">*</span></label>
+                    <input type="text" id="petName" name="petName" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Animal Type<span class="required">*</span></label>
+                        <select id="animalType" name="animalType" required>
+                            <option value="">Select Type</option>
+                            <option value="Dog">Dog</option>
+                            <option value="Cat">Cat</option>
+                            <option value="Bird">Bird</option>
+                            <option value="Rabbit">Rabbit</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="otherAnimalTypeGroup" style="display:none;">
+                        <label>Specify Animal Type<span class="required">*</span></label>
+                        <input type="text" id="animalTypeOther" name="animalTypeOther" placeholder="e.g., Hamster, Guinea Pig">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Breed</label>
+                        <input type="text" id="petBreed" name="petBreed" placeholder="e.g., Golden Retriever">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Age (Months)</label>
+                        <input type="number" id="petAge" name="petAge" min="0" placeholder="e.g., 24">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Gender<span class="required">*</span></label>
+                    <select id="petGender" name="petGender" required>
+                        <option value="">Select Gender</option>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Description<span class="required">*</span></label>
+                    <textarea id="petDescription" name="petDescription" 
+                        placeholder="Describe your pet's appearance, distinctive features, personality, etc." required></textarea>
+                </div>
+
+                <div class="section-title">Last Seen Information</div>
+
+                <div class="form-group">
+                    <label>Last Seen Location<span class="required">*</span></label>
+                    <input type="text" id="lastSeenLocation" name="lastSeenLocation" 
+                        placeholder="e.g., Near Central Park, 5th Avenue" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Last Seen Date<span class="required">*</span></label>
+                    <input type="date" id="lastSeenDate" name="lastSeenDate" required>
+                </div>
+
+                <div class="section-title">Pet Photo</div>
+
+                <div class="form-group">
+                    <label>Upload Photo<span class="required">*</span></label>
+                    <input type="file" id="petPhoto" name="petPhoto" accept="image/*" style="display: none;" required>
+                    <div class="image-preview-container" onclick="document.getElementById('petPhoto').click()">
+                        <div id="uploadText">
+                            Click to upload pet photo<br>
+                            <span style="font-size: 12px; color: #9ca3af;">(Max size auto-resized to fit database)</span>
+                        </div>
+                        <img id="previewImg" src="" alt="Preview" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-cancel" onclick="window.history.back()">Cancel</button>
+                    <button type="submit" class="btn btn-submit" id="submitBtn">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="javascript/script.js"></script>
+    <script src="javascript/template-loader.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="javascript/lostPetForm.js"></script>
+
+</body>
+
+</html>

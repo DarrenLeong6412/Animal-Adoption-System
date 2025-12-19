@@ -606,6 +606,7 @@ select.listing-input-field {
     width: 16px;
     text-align: center;
 }
+/*#endregion*/
 
 /* --- Admin 3-Dot Menu Styles --- */
 .card-menu {
@@ -1585,10 +1586,11 @@ p.subtitle {
 #lostPetFormModal .modal-inner {
     max-height: 90vh;
     overflow-y: auto;
+    overflow-x : auto;
 }
 
 /* Form layout inside modal */
-#addLostPetForm.modal-inner-details-section {
+#addLostPetForm .modal-inner-details-section {
     flex-direction: column;
     padding: 24px;
     gap: 16px;
@@ -1640,6 +1642,23 @@ p.subtitle {
     margin-top: 10px;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
+}
+
+/* Lost Pet Form Page Styles */
+.lostPetForm-parent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 100px;
+    padding-bottom: 20px;
+    width: 100%;
+    background-color: #eeeeee;
+}
+
+/* Status styling for Found pets */
+.status-found {
+    color: #065f46 !important;
+    background-color: #d1fae5 !important;
 }
 
 /*#endregion*/
