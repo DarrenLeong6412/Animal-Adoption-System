@@ -476,3 +476,20 @@ onAuthStateChanged(auth, async (user) => {
 
   document.documentElement.classList.remove("auth-loading");
 });
+
+document.addEventListener("click", (e) => {
+  if (!e.target.classList.contains("toggle-password")) return;
+
+  const inputId = e.target.getAttribute("data-target");
+  const input = document.getElementById(inputId);
+
+  if (!input) return;
+
+  if (input.type === "password") {
+    input.type = "text";
+    e.target.textContent = "🐵";
+  } else {
+    input.type = "password";
+    e.target.textContent = "🙈";
+  }
+});
