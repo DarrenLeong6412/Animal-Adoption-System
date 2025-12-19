@@ -29,10 +29,28 @@ const searchInput = document.getElementById("searchInput");
 const modal = document.getElementById("lostPetDetailModal");
 const closeModalBtn = document.getElementById("closeDetailModal");
 
-// Auth state
+const createLostPetBtn = document.getElementById("createLostPetBtn");
+
 onAuthStateChanged(auth, (user) => {
   currentUser = user;
+  updateCreateButtonBehavior();
 });
+
+function updateCreateButtonBehavior() {
+  if (createLostPetBtn) {
+    createLostPetBtn.parentElement.onclick = (e) => {
+      e.preventDefault();
+
+      if (!currentUser) {
+        alert("You must be logged in to create a lost pet report.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      window.location.href = "createLostPet.html";
+    };
+  }
+}
 
 // Fetch only APPROVED lost pets
 async function fetchLostPets() {
@@ -192,8 +210,16 @@ function openModal(pet) {
         <i class="fas fa-check-circle"></i> Mark as Found
       </button>
     ` : ''}
+
+    ${isOwner ? `
+      <div class="modal-info-box" style="margin-top: 20px; padding: 15px; background-color: #f0f4f8; border-left: 4px solid #2196F3; border-radius: 4px;">
+        <p style="margin: 0; font-size: 14px; color: #555; line-height: 1.6;">
+          <strong>Note:</strong> You cannot edit the details of this report after submission. If you need to make changes, please contact us at <strong>support@pawresq.com</strong>
+        </p>
+      </div>
+    ` : ''}
   `;
-  
+
   modal.classList.add("open");
 }
 
@@ -210,7 +236,9 @@ window.addEventListener("click", (e) => {
 
 // Mark as Found function
 window.markAsFound = async function(petId) {
-  if (!confirm("Are you sure you want to mark this pet as Found?")) {
+  const confirmMessage = `Are you sure you want to mark this pet as Found?\n\nThis action will update the status from 'Lost' to 'Found' and notify others in the community.`;
+
+  if (!confirm(confirmMessage)) {
     return;
   }
 
@@ -219,9 +247,9 @@ window.markAsFound = async function(petId) {
       status: "Found"
     });
 
-    alert("Pet marked as Found! Thank you for the update.");
+    alert("Pet marked as Found! Thank you for the update. The community has been notified.");
     modal.classList.remove("open");
-    fetchLostPets(); // Refresh the list
+    fetchLostPets();
   } catch (err) {
     console.error("Error marking as found:", err);
     alert("Failed to update status. Please try again.");
