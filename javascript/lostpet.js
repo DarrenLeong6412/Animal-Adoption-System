@@ -41,9 +41,7 @@ async function fetchLostPets() {
 
   try {
     const q = query(
-      collection(db, "lostPets"),
-      where("approvedBy", "==", "Approved"),
-      orderBy("date_Reported", "desc")
+      collection(db, "lostPets")
     );
 
     const snapshot = await getDocs(q);

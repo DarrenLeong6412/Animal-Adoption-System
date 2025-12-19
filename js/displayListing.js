@@ -7,6 +7,7 @@ import {
     collection, 
     getDocs, 
     query, 
+    where,
     orderBy, 
     doc, 
     deleteDoc, 
@@ -193,7 +194,29 @@ window.closeAnimalModal = function() {
 window.deleteListing = async function(id) {
     if (!confirm("Are you sure you want to delete this listing?")) return;
     try {
+        console.log("Deleting animal:", id);
+
+        // find all requests linked to this animal
+        const reqQuery = query(
+            collection(db, "requests"),
+            where("listing_ID", "==", id)
+        );
+
+        const querySnapshot = await getDocs(reqQuery);
+
+        console.log(`Found ${querySnapshot.size} related requests`);
+
+        // Deleting each request
+        const deletePromises = [];
+        querySnapshot.forEach((docSnap) => {
+            console.log("Deleting request:", docSnap.id);
+            deletePromises.push(deleteDoc(doc(db, "requests", docSnap.id)));
+        });
+
+        await Promise.all(deletePromises);
+
         await deleteDoc(doc(db, "animals", id));
+
         alert("Listing deleted successfully.");
         loadAnimals(); 
     } catch (error) {
