@@ -33,24 +33,7 @@ const createLostPetBtn = document.getElementById("createLostPetBtn");
 
 onAuthStateChanged(auth, (user) => {
   currentUser = user;
-  updateCreateButtonBehavior();
 });
-
-function updateCreateButtonBehavior() {
-  if (createLostPetBtn) {
-    createLostPetBtn.parentElement.onclick = (e) => {
-      e.preventDefault();
-
-      if (!currentUser) {
-        alert("You must be logged in to create a lost pet report.");
-        window.location.href = "login.html";
-        return;
-      }
-
-      window.location.href = "createLostPet.html";
-    };
-  }
-}
 
 // Fetch only APPROVED lost pets
 async function fetchLostPets() {
