@@ -20,6 +20,9 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+let adoptionChart = null;
+const yearSelect = document.getElementById("yearSelect");
+
 const tableWrapper = document.getElementById("report-table-wrapper");
 const categoryButtons = document.querySelectorAll('input[name="report-category-button"]');
 let currentCategory = "adoptedAnimals";
@@ -49,6 +52,7 @@ async function renderReport(category) {
     let data = [];
 
     if (category === "adoptedAnimals") {
+
         // 1. Fetch approved requests
         const q = query(collection(db, "requests"), where("status", "==", "approved"));
         const snapshot = await getDocs(q);
@@ -93,12 +97,13 @@ async function renderReport(category) {
 
             return {
                 id: r.id,
-                // request info
                 reason: r.reason ?? "—",
-                dateApplied: r.dateApplied?.toDate ? r.dateApplied.toDate().toLocaleDateString("en-GB") : r.dateApplied ?? "—",
+                dateAppliedRaw: r.dateApplied?.toDate ? r.dateApplied.toDate() : null,
+                dateApplied: r.dateApplied?.toDate
+                    ? r.dateApplied.toDate().toLocaleDateString("en-GB")
+                    : r.dateApplied ?? "—",
                 environmentDesc: r.environmentDesc ?? "—",
                 environmentPhoto: r.environmentPhoto ?? "images/no-image.png",
-                // animal info
                 animalName: animal.name ?? "Unknown",
                 type: animal.type ?? "—",
                 breed: animal.breed ?? "—",
@@ -106,59 +111,6 @@ async function renderReport(category) {
                 location: animal.location ?? "—",
                 status: animal.status ?? "unknown",
                 vaccinationStatus: animal.vaccinationStatus ?? "—",
-                // user info
-                username: user.username ?? "—",
-                identification_Number: user.identification_Number ?? "—",
-                phone_Number: user.phone_Number ?? "—",
-                email: user.email ?? "—"
-            };
-        });
-
-    } else if (category === "resolvedLostPets") {
-        // 1. Fetch found lost pets
-        const q = query(collection(db, "lostPets"), where("status", "==", "Found"));
-        const snapshot = await getDocs(q);
-
-        if (snapshot.empty) {
-            tableWrapper.innerHTML = "<p>No records found.</p>";
-            return;
-        }
-
-        // 2. Map raw lost pets
-        const rawPets = snapshot.docs.map(docSnap => ({
-            id: docSnap.id,
-            ...docSnap.data()
-        }));
-
-        // 3. Collect unique user IDs
-        const userIds = [...new Set(rawPets.map(p => p.user_id).filter(Boolean))];
-
-        // 4. Fetch users
-        const userMap = {};
-        await Promise.all(
-            userIds.map(async (userId) => {
-                const userSnap = await getDoc(doc(db, "users", userId));
-                if (userSnap.exists()) userMap[userId] = userSnap.data();
-            })
-        );
-
-        // 5. Merge pet + user
-        data = rawPets.map(p => {
-            const user = userMap[p.user_id] || {};
-
-            return {
-                id: p.id,
-                name: p.name ?? "Unknown",
-                breed: p.breed ?? "—",
-                age: p.age ?? "—",
-                gender: p.gender ?? "—",
-                lastSeenDate: p.last_seen_Date ?? "—",
-                lastSeenLocation: p.last_seen_Location ?? "—",
-                date_Reported: p.date_Reported?.toDate ? p.date_Reported.toDate().toLocaleDateString("en-GB") : p.date_Reported ?? "—",
-                description: p.description ?? "—",
-                photo: p.photo ?? "images/no-image.png",
-                status: p.status ?? "—",
-                // user info
                 username: user.username ?? "—",
                 identification_Number: user.identification_Number ?? "—",
                 phone_Number: user.phone_Number ?? "—",
@@ -166,8 +118,15 @@ async function renderReport(category) {
             };
         });
     }
+    if (category === "adoptedAnimals" && data.length > 0) {
+        const defaultYear = populateYearDropdown(data);
+        renderQuarterChart(data, defaultYear);
 
-    // 7. Render the table
+        yearSelect.onchange = () => {
+            renderQuarterChart(data, Number(yearSelect.value));
+        };
+    }
+
     renderTable(category, data);
 }
 
@@ -181,56 +140,45 @@ function renderTable(category, data) {
         return;
     }
 
-    let headers = [];
-    if (category === "adoptedAnimals") {
-        headers = ["Animal Name", "Type / Breed", "Date Applied", "Name of Adopter", "Status", "Details"];
-    } else {
-        headers = ["Name", "Breed", "Age", "Gender", "Last Seen Date", "Last Seen Location", "Date Reported", "Reporter Email", "Details"];
-    }
+    const headers = [
+        "Animal Name",
+        "Type / Breed",
+        "Date Applied",
+        "Name of Adopter",
+        "Status",
+        "Details"
+    ];
 
     const table = document.createElement("table");
     table.className = "report-table";
 
-    // Table header
     const thead = document.createElement("thead");
     thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
     table.appendChild(thead);
 
-    // Table body
     const tbody = document.createElement("tbody");
     data.forEach(item => {
         const tr = document.createElement("tr");
-
-        if (category === "adoptedAnimals") {
-            tr.innerHTML = `
-        <td>${item.animalName}</td>
-        <td>${item.type} / ${item.breed}</td>
-        <td>${item.dateApplied}</td>
-        <td>${item.username}</td>
-        <td>${item.status}</td>
-        <td><button class="view-details-btn" data-category="${category}" data-id="${item.id}">View</button></td>
-      `;
-        } else {
-            tr.innerHTML = `
-        <td>${item.name}</td>
-        <td>${item.breed}</td>
-        <td>${item.age}</td>
-        <td>${item.gender}</td>
-        <td>${item.lastSeenDate}</td>
-        <td>${item.lastSeenLocation}</td>
-        <td>${item.date_Reported}</td>
-        <td>${item.reporterEmail}</td>
-        <td><button class="view-details-btn" data-category="${category}" data-id="${item.id}">View</button></td>
-      `;
-        }
-
+        tr.innerHTML = `
+            <td>${item.animalName}</td>
+            <td>${item.type} / ${item.breed}</td>
+            <td>${item.dateApplied}</td>
+            <td>${item.username}</td>
+            <td>${item.status}</td>
+            <td>
+                <button class="view-details-btn"
+                    data-category="${category}"
+                    data-id="${item.id}">
+                    View
+                </button>
+            </td>
+        `;
         tbody.appendChild(tr);
     });
 
     table.appendChild(tbody);
     tableWrapper.appendChild(table);
 
-    // Attach click listeners to all view buttons
     document.querySelectorAll(".view-details-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
             const cat = btn.dataset.category;
@@ -272,14 +220,12 @@ async function showModalContent(category, id) {
 
         const req = docSnap.data();
 
-        // Fetch animal data if available
         let animal = {};
         if (req.listing_ID) {
             const animalSnap = await getDoc(doc(db, "animals", req.listing_ID));
             if (animalSnap.exists()) animal = animalSnap.data();
         }
 
-        // Fetch user/applicant data if available
         let user = {};
         if (req.user_ID) {
             const userSnap = await getDoc(doc(db, "users", req.user_ID));
@@ -290,7 +236,6 @@ async function showModalContent(category, id) {
         modalTitle.innerText = animal.name;
 
         modalInfoContainer.innerHTML = `
-
             <div class="modal-inner-info-text">
                 <h3 id="modalName">${animal.name ?? "Unknown"}</h3>
             </div>
@@ -316,7 +261,9 @@ async function showModalContent(category, id) {
             <div class="modal-inner-info-text modal-detail-item">
                 <i class="fas fa-calendar-alt"></i>
                 <p class="modal-inner-info-text-title">Date Applied</p>
-                <span>${req.dateApplied?.toDate ? req.dateApplied.toDate().toLocaleDateString("en-GB") : req.dateApplied ?? "-"}</span>
+                <span>${req.dateApplied?.toDate
+                ? req.dateApplied.toDate().toLocaleDateString("en-GB")
+                : req.dateApplied ?? "-"}</span>
             </div>
 
             <div class="modal-inner-info-text">
@@ -375,16 +322,80 @@ async function showModalContent(category, id) {
                 <i class="fas fa-image"></i>
                 <p class="modal-inner-info-text-title">Home Environment Photo</p>
             </div>
-            <img src="${req.environmentPhoto ?? "images/no-image.png"}" alt="Home Environment" class="modal-environment-photo"/>
+            <img src="${req.environmentPhoto ?? "images/no-image.png"}"
+                 alt="Home Environment"
+                 class="modal-environment-photo"/>
         `;
     }
-
-    // TODO: add similar structure for resolvedLostPets if needed
 }
 
-function capitalizeStatus(status) {
-    return status
-        .split(" ")
-        .map(w => w[0].toUpperCase() + w.slice(1))
-        .join(" ");
+function buildQuarterData(data, selectedYear) {
+    const quarters = [0, 0, 0, 0];
+
+    data.forEach(item => {
+        if (!item.dateAppliedRaw) return;
+        if (item.dateAppliedRaw.getFullYear() !== selectedYear) return;
+
+        const q = getQuarter(item.dateAppliedRaw);
+        quarters[q - 1]++;
+    });
+
+    return quarters;
+}
+
+
+function populateYearDropdown(data) {
+    const years = new Set();
+
+    data.forEach(item => {
+        if (!item.dateAppliedRaw) return;
+        years.add(item.dateAppliedRaw.getFullYear());
+    });
+
+    yearSelect.innerHTML = "";
+
+    [...years].sort((a, b) => b - a).forEach(year => {
+        const option = document.createElement("option");
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+    });
+
+    return [...years][0];
+}
+
+
+function renderQuarterChart(data, year) {
+    const ctx = document.getElementById("adoptionQuarterChart").getContext("2d");
+    const quarterData = buildQuarterData(data, year);
+
+    if (adoptionChart) {
+        adoptionChart.destroy();
+    }
+
+    adoptionChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: ["Q1", "Q2", "Q3", "Q4"],
+            datasets: [{
+                label: `Animals Adopted in ${year}`,
+                data: quarterData
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
+}
+
+
+function getQuarter(date) {
+    const month = date.getMonth(); // 0–11
+    return Math.floor(month / 3) + 1; // 1–4
 }
