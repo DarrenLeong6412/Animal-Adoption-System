@@ -2045,6 +2045,29 @@ p.subtitle {
 }
 /*#endregion*/
 
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 40px; /* space for eye icon */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+  user-select: none;
+}
+
+.toggle-password:hover {
+  color: #000;
+}
 
 /*#region My Listings Profile Section & Edit Modal*/
 

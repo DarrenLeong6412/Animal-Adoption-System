@@ -70,7 +70,7 @@ async function saveUserProfileToFirestore(firebaseUser, formData = {}) {
     gender: gender || null,
     identification_Number: identificationNumber || null,
     role: "User",
-    phone_Number: phoneNumber || null,
+    phone_Number: phoneNumber,
     address: address || null,
 
     createdAt: new Date().toISOString(),
@@ -107,7 +107,7 @@ function validateSignupData({
   else if (password.length < 6) errors.push("Password must be at least 6 characters.");
   else if (password.length > 255) errors.push("Password must not exceed 255 characters.");
 
-  if (gender && !["M", "F", "O"].includes(gender)) errors.push("Gender must be M, F, or O.");
+  if (gender && !["M", "F", "O"].includes(gender)) errors.push("Gender must be Male, Female, or Other.");
 
   if (identificationNumber) {
     if (identificationNumber.length > 20) errors.push("Identification Number must not exceed 20 characters.");
@@ -115,11 +115,16 @@ function validateSignupData({
     if (!idRegex.test(identificationNumber)) errors.push("Identification Number can only contain letters, numbers, and dashes.");
   }
 
-  if (phoneNumber) {
-    if (phoneNumber.length > 15) errors.push("Phone Number must not exceed 15 characters.");
+  // Phone Number (REQUIRED)
+  if (!phoneNumber || phoneNumber.trim().length === 0) {
+    errors.push("Phone Number is required.");
+  } else {
+    const cleaned = phoneNumber.trim();
+    if (cleaned.length > 15) errors.push("Phone Number must not exceed 15 characters.");
     const phoneRegex = /^[0-9+\-\s]+$/;
-    if (!phoneRegex.test(phoneNumber)) errors.push("Phone Number can only contain digits, spaces, '+', and '-'.");
+    if (!phoneRegex.test(cleaned)) errors.push("Phone Number can only contain digits, spaces, '+', and '-'.");
   }
+
 
   if (address && address.length > 255) errors.push("Address must not exceed 255 characters.");
 
@@ -150,9 +155,11 @@ if (signupForm) {
     const email = document.getElementById("signupEmail").value.trim().toLowerCase();
     const password = document.getElementById("signupPassword").value;
     const fullName = document.getElementById("signupName").value.trim();
+    const phoneNumber = document.getElementById("signupPhone").value.trim();
+
 
     try {
-      validateSignupData({ fullName, email, password });
+      validateSignupData({ fullName, email, phoneNumber, password });
     } catch (err) {
       alert(err.message);
       return;
@@ -162,7 +169,7 @@ if (signupForm) {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      await registerUserInDatabase(user, { fullName, password });
+      await registerUserInDatabase(user, { fullName, password, phoneNumber});
 
       alert("Account created successfully!");
       window.location.href = "login.html";
@@ -352,12 +359,29 @@ onAuthStateChanged(auth, async (user) => {
         const newAddress = editAddressEl?.value?.trim() ?? "";
         const newIdentification = editIdentificationEl?.value?.trim() ?? "";
 
+
         const payload = {
           gender: newGender === "" ? null : newGender,
-          phone_Number: newPhone === "" ? null : newPhone,
+          phone_Number: newPhone.trim(),
           address: newAddress === "" ? null : newAddress,
           identification_Number: newIdentification === "" ? null : newIdentification
         };
+
+        if (!newPhone || newPhone.trim().length === 0) {
+          alert("Phone Number is required.");
+        return;
+        } else {
+          const cleaned = newPhone.trim();
+          if (cleaned.length > 15) {
+            alert("Phone Number must not exceed 15 characters.");
+            return;
+          }
+          const phoneRegex = /^[0-9+\-\s]+$/;
+          if (!phoneRegex.test(cleaned)) {
+            alert("Phone Number can only contain digits, spaces, '+', and '-'.");
+            return;
+          }
+        }
 
         if (payload.phone_Number && payload.phone_Number.length > 15) {
           alert("Phone Number must not exceed 15 characters.");
@@ -451,4 +475,21 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   document.documentElement.classList.remove("auth-loading");
+});
+
+document.addEventListener("click", (e) => {
+  if (!e.target.classList.contains("toggle-password")) return;
+
+  const inputId = e.target.getAttribute("data-target");
+  const input = document.getElementById(inputId);
+
+  if (!input) return;
+
+  if (input.type === "password") {
+    input.type = "text";
+    e.target.textContent = "🐵";
+  } else {
+    input.type = "password";
+    e.target.textContent = "🙈";
+  }
 });

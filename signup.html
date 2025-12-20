@@ -36,8 +36,16 @@
       <label for="signupEmail">Email</label>
       <input type="email" id="signupEmail" required maxlength="100" />
 
+      <label for="signupPhone">Phone Number</label>
+      <input type="tel" id="signupPhone" required maxlength="15" />
+
+
       <label for="signupPassword">Password</label>
+      <div class="password-wrapper">
       <input type="password" id="signupPassword" minlength="6" maxlength="255" required />
+      <span class="toggle-password" data-target="signupPassword">🙈</span>
+      </div>
+
 
       <button type="submit" class="auth-submit">Sign Up</button>
     </form>
