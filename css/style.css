@@ -1480,15 +1480,12 @@ p.subtitle {
 /* ===== GRID DISPLAY (MISSING CLASS) ===== */
 /*maybe no used*/
 .lostpet-grid-display {
-    /*display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 24px;
-    width: 100%;
-    max-width: 1200px;
-    padding: 20px;*/
-    text-align: center;
-    color: #666;
-    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 25px;
+    width: 70%;
+    justify-content: center;
 }
 
 /* ===== CARD STYLES ===== */
@@ -1498,6 +1495,9 @@ p.subtitle {
     justify-content: start;
     transition: 0.3s;
     padding: 0;
+    max-width: 320px;
+    min-width: 320px;
+    min-height: 360px;
     width: 100%;
     background-color: white;
     border-radius: 12px;
