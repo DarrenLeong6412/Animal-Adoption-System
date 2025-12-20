@@ -70,15 +70,14 @@ function isValidPhone(phone = "") {
   const cleaned = normalizePhone(phone);
 
   // allow only digits, spaces, + and -
-  const allowedChars = /^[0-9+\-\s]+$/;
+  const allowedChars = /^[0-9]+$/;
   if (!allowedChars.test(cleaned)) return false;
 
   // must have 7-15 digits (ignore +, -, spaces)
   const digits = cleaned.replace(/\D/g, "");
   if (digits.length < 7 || digits.length > 15) return false;
 
-  // "+" only allowed at start
-  if (cleaned.includes("+") && !cleaned.startsWith("+")) return false;
+  
 
   return true;
 }
@@ -185,7 +184,7 @@ function validateSignupData({
   if (!phoneNumber || String(phoneNumber).trim().length === 0) {
     errors.push("Phone Number is required.");
   } else if (!isValidPhone(phoneNumber)) {
-    errors.push("Phone Number is invalid. Use 7–15 digits; allowed: digits, spaces, '+', '-'.");
+    errors.push("Phone Number is invalid. Use 7–15 digits only.");
   }
 
   // Address
@@ -433,7 +432,7 @@ onAuthStateChanged(auth, async (user) => {
           return;
         }
         if (!isValidPhone(newPhone)) {
-          alert("Phone Number is invalid. Use 7–15 digits; allowed: digits, spaces, '+', '-'.");
+          alert("Phone Number is invalid. Use 7–15 digits only.");
           return;
         }
 
