@@ -47,9 +47,73 @@ try {
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// optional for debugging
+// for debugging
 window.auth = auth;
 window.db = db;
+
+// ============== SIMPLE VALIDATION HELPERS (REUSE EVERYWHERE) ==============
+function normalizeEmail(email = "") {
+  return String(email).trim().toLowerCase();
+}
+
+function isValidEmail(email = "") {
+  const e = normalizeEmail(email);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  return emailRegex.test(e);
+}
+
+function normalizePhone(phone = "") {
+  return String(phone).trim();
+}
+
+function isValidPhone(phone = "") {
+  const cleaned = normalizePhone(phone);
+
+  // allow only digits, spaces, + and -
+  const allowedChars = /^[0-9+\-\s]+$/;
+  if (!allowedChars.test(cleaned)) return false;
+
+  // must have 7-15 digits (ignore +, -, spaces)
+  const digits = cleaned.replace(/\D/g, "");
+  if (digits.length < 7 || digits.length > 15) return false;
+
+  // "+" only allowed at start
+  if (cleaned.includes("+") && !cleaned.startsWith("+")) return false;
+
+  return true;
+}
+
+function normalizeIC(ic = "") {
+  return String(ic).trim().replace(/\s+/g, "");
+}
+
+/*ic validation*/
+function isValidIC(ic = "") {
+  const raw = normalizeIC(ic);
+
+  // must be either 12 digits or dashed format
+  const ic12 = /^\d{12}$/;
+  const icDashed = /^\d{6}-\d{2}-\d{4}$/;
+
+  if (!ic12.test(raw) && !icDashed.test(raw)) return false;
+
+  // convert to 12 digits for date check
+  const digits = raw.replace(/-/g, "");
+
+  const yy = parseInt(digits.slice(0, 2), 10);
+  const mm = parseInt(digits.slice(2, 4), 10);
+  const dd = parseInt(digits.slice(4, 6), 10);
+
+  if (mm < 1 || mm > 12) return false;
+  if (dd < 1 || dd > 31) return false;
+
+  // Basic day-per-month check (including leap year for Feb)
+  const isLeap = (yy % 4 === 0); // simple enough for 2-digit year
+  const daysInMonth = [31, (isLeap ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (dd > daysInMonth[mm - 1]) return false;
+
+  return true;
+}
 
 // ============== "REPOSITORY" LAYER ==============
 async function saveUserProfileToFirestore(firebaseUser, formData = {}) {
@@ -68,9 +132,9 @@ async function saveUserProfileToFirestore(firebaseUser, formData = {}) {
     email: firebaseUser.email,
     password: null, // NOT storing plain password
     gender: gender || null,
-    identification_Number: identificationNumber || null,
+    identification_Number: identificationNumber ? normalizeIC(identificationNumber) : null,
     role: "User",
-    phone_Number: phoneNumber,
+    phone_Number: phoneNumber ? normalizePhone(phoneNumber) : null,
     address: address || null,
 
     createdAt: new Date().toISOString(),
@@ -93,39 +157,38 @@ function validateSignupData({
 }) {
   const errors = [];
 
+  // Full name
   if (!fullName || fullName.trim().length === 0) errors.push("Full Name is required.");
   else if (fullName.length > 50) errors.push("Full Name must not exceed 50 characters.");
 
-  if (!email || email.trim().length === 0) errors.push("Email is required.");
-  else if (email.length > 100) errors.push("Email must not exceed 100 characters.");
-  else {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) errors.push("Email format is invalid.");
-  }
+  // Email
+  if (!email || String(email).trim().length === 0) errors.push("Email is required.");
+  else if (String(email).length > 100) errors.push("Email must not exceed 100 characters.");
+  else if (!isValidEmail(email)) errors.push("Email format is invalid.");
 
+  // Password
   if (!password || password.length === 0) errors.push("Password is required.");
   else if (password.length < 6) errors.push("Password must be at least 6 characters.");
   else if (password.length > 255) errors.push("Password must not exceed 255 characters.");
 
+  // Gender
   if (gender && !["M", "F", "O"].includes(gender)) errors.push("Gender must be Male, Female, or Other.");
 
+  // IC
   if (identificationNumber) {
-    if (identificationNumber.length > 20) errors.push("Identification Number must not exceed 20 characters.");
-    const idRegex = /^[A-Za-z0-9\-]+$/;
-    if (!idRegex.test(identificationNumber)) errors.push("Identification Number can only contain letters, numbers, and dashes.");
+    if (!isValidIC(identificationNumber)) {
+      errors.push("Identification Number (IC) is invalid. Example: 010203-04-1234 or 010203041234.");
+    }
   }
 
-  // Phone Number (REQUIRED)
-  if (!phoneNumber || phoneNumber.trim().length === 0) {
+  // Phone (REQUIRED)
+  if (!phoneNumber || String(phoneNumber).trim().length === 0) {
     errors.push("Phone Number is required.");
-  } else {
-    const cleaned = phoneNumber.trim();
-    if (cleaned.length > 15) errors.push("Phone Number must not exceed 15 characters.");
-    const phoneRegex = /^[0-9+\-\s]+$/;
-    if (!phoneRegex.test(cleaned)) errors.push("Phone Number can only contain digits, spaces, '+', and '-'.");
+  } else if (!isValidPhone(phoneNumber)) {
+    errors.push("Phone Number is invalid. Use 7–15 digits; allowed: digits, spaces, '+', '-'.");
   }
 
-
+  // Address
   if (address && address.length > 255) errors.push("Address must not exceed 255 characters.");
 
   if (errors.length > 0) throw new Error(errors.join("\n"));
@@ -152,14 +215,16 @@ if (signupForm) {
   signupForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("signupEmail").value.trim().toLowerCase();
+    const email = normalizeEmail(document.getElementById("signupEmail").value);
     const password = document.getElementById("signupPassword").value;
     const fullName = document.getElementById("signupName").value.trim();
     const phoneNumber = document.getElementById("signupPhone").value.trim();
 
+    
 
     try {
-      validateSignupData({ fullName, email, phoneNumber, password });
+      
+      validateSignupData({ fullName, email, phoneNumber, password /*, identificationNumber */ });
     } catch (err) {
       alert(err.message);
       return;
@@ -169,7 +234,12 @@ if (signupForm) {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      await registerUserInDatabase(user, { fullName, password, phoneNumber});
+      await registerUserInDatabase(user, {
+        fullName,
+        password,
+        phoneNumber
+        
+      });
 
       alert("Account created successfully!");
       window.location.href = "login.html";
@@ -186,7 +256,7 @@ if (loginForm) {
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("loginEmail").value;
+    const email = normalizeEmail(document.getElementById("loginEmail").value);
     const password = document.getElementById("loginPassword").value;
 
     signInWithEmailAndPassword(auth, email, password)
@@ -207,14 +277,13 @@ if (forgotPasswordLink) {
   forgotPasswordLink.addEventListener("click", async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("loginEmail")?.value.trim().toLowerCase();
+    const email = normalizeEmail(document.getElementById("loginEmail")?.value);
     if (!email) {
       alert("Please enter your email first, then click 'Forgot password?'.");
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!isValidEmail(email)) {
       alert("Please enter a valid email address.");
       return;
     }
@@ -273,7 +342,6 @@ onAuthStateChanged(auth, async (user) => {
     (v === null || v === undefined || String(v).trim() === "" ? "-" : v);
 
   function setEditMode(isEdit) {
-    // include identification in toggle
     const displayEls = [profileGenderEl, profilePhoneEl, profileAddressEl, profileIdentificationEl];
     const editEls = [editGenderEl, editPhoneEl, editAddressEl, editIdentificationEl];
 
@@ -359,42 +427,33 @@ onAuthStateChanged(auth, async (user) => {
         const newAddress = editAddressEl?.value?.trim() ?? "";
         const newIdentification = editIdentificationEl?.value?.trim() ?? "";
 
-
-        const payload = {
-          gender: newGender === "" ? null : newGender,
-          phone_Number: newPhone.trim(),
-          address: newAddress === "" ? null : newAddress,
-          identification_Number: newIdentification === "" ? null : newIdentification
-        };
-
+        // ===== VALIDATION =====
         if (!newPhone || newPhone.trim().length === 0) {
           alert("Phone Number is required.");
-        return;
-        } else {
-          const cleaned = newPhone.trim();
-          if (cleaned.length > 15) {
-            alert("Phone Number must not exceed 15 characters.");
-            return;
-          }
-          const phoneRegex = /^[0-9+\-\s]+$/;
-          if (!phoneRegex.test(cleaned)) {
-            alert("Phone Number can only contain digits, spaces, '+', and '-'.");
-            return;
-          }
-        }
-
-        if (payload.phone_Number && payload.phone_Number.length > 15) {
-          alert("Phone Number must not exceed 15 characters.");
           return;
         }
-        if (payload.address && payload.address.length > 255) {
+        if (!isValidPhone(newPhone)) {
+          alert("Phone Number is invalid. Use 7–15 digits; allowed: digits, spaces, '+', '-'.");
+          return;
+        }
+
+        // IC - validate only if user filled it
+        if (newIdentification && !isValidIC(newIdentification)) {
+          alert("Identification Number (IC) is invalid. Example: 010203-04-1234 or 010203041234.");
+          return;
+        }
+
+        if (newAddress && newAddress.length > 255) {
           alert("Address must not exceed 255 characters.");
           return;
         }
-        if (payload.identification_Number && payload.identification_Number.length > 20) {
-          alert("Identification Number must not exceed 20 characters.");
-          return;
-        }
+
+        const payload = {
+          gender: newGender === "" ? null : newGender,
+          phone_Number: normalizePhone(newPhone),
+          address: newAddress === "" ? null : newAddress,
+          identification_Number: newIdentification === "" ? null : normalizeIC(newIdentification)
+        };
 
         const userRef = doc(db, "users", user.uid);
         await updateDoc(userRef, payload);
@@ -477,6 +536,7 @@ onAuthStateChanged(auth, async (user) => {
   document.documentElement.classList.remove("auth-loading");
 });
 
+// Password visibility toggle
 document.addEventListener("click", (e) => {
   if (!e.target.classList.contains("toggle-password")) return;
 
