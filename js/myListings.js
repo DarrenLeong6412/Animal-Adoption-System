@@ -20,68 +20,82 @@ const auth = getAuth(app);
 
 let myUserListings = [];
 
-// 1. Wait for Auth
+/* ================================
+   AUTH
+================================ */
 onAuthStateChanged(auth, (user) => {
     if (user) {
         loadUserListings(user.uid);
     } else {
         const grid = document.getElementById("myListingsGrid");
-        if(grid) grid.innerHTML = '<p class="my-listings-loading">Please log in to view listings.</p>';
+        if (grid) {
+            grid.innerHTML = '<p class="my-listings-loading">Please log in to view listings.</p>';
+        }
     }
 });
 
-// 2. Load User Listings
+/* ================================
+   LOAD LISTINGS
+================================ */
 async function loadUserListings(userId) {
     const grid = document.getElementById("myListingsGrid");
-    if(!grid) return; 
+    if (!grid) return;
 
     try {
         const q = query(collection(db, "animals"), where("createdBy", "==", userId));
-        const querySnapshot = await getDocs(q);
-        
-        if (querySnapshot.empty) {
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
             grid.innerHTML = '<p class="my-listings-loading">You haven\'t created any listings yet.</p>';
             return;
         }
 
-        grid.innerHTML = "";
         myUserListings = [];
+        grid.innerHTML = "";
 
-        querySnapshot.forEach((docSnapshot) => {
-            const data = docSnapshot.data();
-            data.id = docSnapshot.id;
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            data.id = docSnap.id;
             myUserListings.push(data);
         });
 
-        // Sort: Pending first, then by date
+        // STATUS PRIORITY
         myUserListings.sort((a, b) => {
-            const statusOrder = { "Pending": 1, "Available": 2, "Rejected": 3 };
-            const statusA = statusOrder[a.status] || 99;
-            const statusB = statusOrder[b.status] || 99;
-            if (statusA !== statusB) return statusA - statusB;
-            const timeA = a.createdAt && a.createdAt.seconds ? a.createdAt.seconds : 0;
-            const timeB = b.createdAt && b.createdAt.seconds ? b.createdAt.seconds : 0;
-            return timeB - timeA;
+            const statusOrder = {
+                Pending: 1,
+                Available: 2,
+                Adopted: 3,
+                Rejected: 4
+            };
+
+            const sA = statusOrder[a.status] ?? 99;
+            const sB = statusOrder[b.status] ?? 99;
+
+            if (sA !== sB) return sA - sB;
+
+            const tA = a.createdAt?.seconds || 0;
+            const tB = b.createdAt?.seconds || 0;
+            return tB - tA;
         });
 
-        // Render Grid
         myUserListings.forEach((data) => {
             let badgeClass = "badge-pending";
-            let statusText = "Pending";
+            let statusText = data.status;
 
             if (data.status === "Available") {
                 badgeClass = "badge-approved";
                 statusText = "Approved";
             } else if (data.status === "Rejected") {
                 badgeClass = "badge-rejected";
-                statusText = "Rejected";
+            } else if (data.status === "Adopted") {
+                badgeClass = "badge-adopted";
             }
 
-            const dateStr = data.createdAt && data.createdAt.seconds 
+            const dateStr = data.createdAt?.seconds
                 ? new Date(data.createdAt.seconds * 1000).toLocaleDateString("en-GB")
                 : "Date Unknown";
 
-            const cardHTML = `
+            grid.innerHTML += `
                 <div onclick="window.openUserListingModal('${data.id}')" class="listing-item-card">
                     <div class="listing-item-img-container">
                         <img src="${data.imageUrl || 'images/no-image.png'}" class="listing-item-img">
@@ -97,159 +111,114 @@ async function loadUserListings(userId) {
                     </div>
                 </div>
             `;
-            grid.innerHTML += cardHTML;
         });
 
-    } catch (error) {
-        console.error(error);
-        grid.innerHTML = '<p style="color:red; text-align:center;">Error loading your listings.</p>';
+    } catch (err) {
+        console.error(err);
+        grid.innerHTML = '<p style="color:red;text-align:center;">Error loading your listings.</p>';
     }
 }
 
-// 3. Open Modal (Dynamic Logic)
-window.openUserListingModal = function(id) {
-    const data = myUserListings.find(item => item.id === id);
+/* ================================
+   MODAL
+================================ */
+window.openUserListingModal = function (id) {
+    const data = myUserListings.find(i => i.id === id);
     if (!data) return;
 
     const modal = document.getElementById("userListingModal");
-    
-    // Set Header Image
-    document.getElementById("modalEditImg").src = data.imageUrl || 'images/no-image.png';
-    
-    const container = document.querySelector("#userListingModal .modal-inner-info-container");
-    
-    // ============================================================
-    // SCENARIO 1: STATUS IS PENDING -> SHOW EDIT FORM
-    // ============================================================
+    const container = modal.querySelector(".modal-inner-info-container");
+
+    document.getElementById("modalEditImg").src = data.imageUrl || "images/no-image.png";
+
+    // =========================
+    // EDIT ONLY IF PENDING
+    // =========================
     if (data.status === "Pending") {
         document.getElementById("modalEditTitle").innerText = "Edit Listing";
-        
-        // Helper for Selects
-        const getOption = (val, current) => `<option value="${val}" ${current === val ? 'selected' : ''}>${val}</option>`;
+
+        const opt = (v, c) => `<option value="${v}" ${v === c ? "selected" : ""}>${v}</option>`;
 
         container.innerHTML = `
             <input type="hidden" id="editDocId" value="${data.id}">
 
-            <div class="edit-form-group">
-                <label class="edit-form-label">Animal Name</label>
-                <input type="text" id="editName" class="edit-form-input" value="${data.name}">
-            </div>
+            <label>Name</label>
+            <input id="editName" value="${data.name}">
 
-            <div class="form-row-split">
-                <div class="edit-form-group form-group-half">
-                    <label class="edit-form-label">Type</label>
-                    <select id="editType" class="edit-form-input">
-                        ${getOption('Dog', data.type)}
-                        ${getOption('Cat', data.type)}
-                        ${getOption('Rabbit', data.type)}
-                        ${getOption('Bird', data.type)}
-                        ${getOption('Other', data.type)}
-                    </select>
-                </div>
-                <div class="edit-form-group form-group-half">
-                    <label class="edit-form-label">Breed</label>
-                    <input type="text" id="editBreed" class="edit-form-input" value="${data.breed}">
-                </div>
-            </div>
+            <label>Type</label>
+            <select id="editType">
+                ${opt("Dog", data.type)}
+                ${opt("Cat", data.type)}
+                ${opt("Rabbit", data.type)}
+                ${opt("Bird", data.type)}
+                ${opt("Other", data.type)}
+            </select>
 
-            <div class="form-row-split">
-                <div class="edit-form-group form-group-half">
-                    <label class="edit-form-label">Age (Months)</label>
-                    <input type="number" id="editAge" class="edit-form-input" value="${data.age}">
-                </div>
-                <div class="edit-form-group form-group-half">
-                    <label class="edit-form-label">Gender</label>
-                    <select id="editGender" class="edit-form-input">
-                        ${getOption('Male', data.gender)}
-                        ${getOption('Female', data.gender)}
-                    </select>
-                </div>
-            </div>
+            <label>Breed</label>
+            <input id="editBreed" value="${data.breed}">
 
-            <div class="edit-form-group">
-                <label class="edit-form-label">Location</label>
-                <input type="text" id="editLocation" class="edit-form-input" value="${data.location}">
-            </div>
+            <label>Age (Months)</label>
+            <input type="number" id="editAge" value="${data.age}">
 
-            <div class="edit-form-group">
-                <label class="edit-form-label">Vaccination Status</label>
-                <select id="editVaccine" class="edit-form-input">
-                    ${getOption('Vaccinated', data.vaccinationStatus)}
-                    ${getOption('Not Vaccinated', data.vaccinationStatus)}
-                    ${getOption('Not specified', data.vaccinationStatus)}
-                </select>
-            </div>
+            <label>Gender</label>
+            <select id="editGender">
+                ${opt("Male", data.gender)}
+                ${opt("Female", data.gender)}
+            </select>
 
-            <div class="edit-form-group">
-                <label class="edit-form-label">Description</label>
-                <textarea id="editDescription" class="edit-form-textarea">${data.description}</textarea>
-            </div>
+            <label>Location</label>
+            <input id="editLocation" value="${data.location}">
 
-            <div class="edit-form-group">
-                <label class="edit-form-label">Current Status</label>
-                <div class="edit-status-text status-text-pending">Pending</div>
-            </div>
+            <label>Vaccination</label>
+            <select id="editVaccine">
+                ${opt("Vaccinated", data.vaccinationStatus)}
+                ${opt("Not Vaccinated", data.vaccinationStatus)}
+                ${opt("Not specified", data.vaccinationStatus)}
+            </select>
 
-            <button id="btnSaveChanges" class="btn-save-changes" onclick="saveUserListing()">
-                Save Changes
-            </button>
+            <label>Description</label>
+            <textarea id="editDescription">${data.description}</textarea>
+
+            <div class="edit-status-text status-text-pending">Pending</div>
+
+            <button id="btnSaveChanges" onclick="saveUserListing()">Save Changes</button>
         `;
-    } 
+    }
+    // =========================
+    // VIEW MODE
+    // =========================
     else {
         document.getElementById("modalEditTitle").innerText = "View Details";
-        
-        let statusColor = data.status === "Available" ? "#166534" : "#dc2626"; 
-        let statusBg = data.status === "Available" ? "#d1fae5" : "#fee2e2";
-        let displayStatus = data.status === "Available" ? "Approved" : "Rejected";
+
+        let statusMap = {
+            Available: { text: "Approved", bg: "#d1fae5", color: "#166534" },
+            Adopted: { text: "Adopted", bg: "#e0f2fe", color: "#0369a1" },
+            Rejected: { text: "Rejected", bg: "#fee2e2", color: "#dc2626" }
+        };
+
+        const s = statusMap[data.status];
 
         container.innerHTML = `
-            <h2 style="color: #164A41; margin-bottom: 15px;">${data.name}</h2>
+            <h2>${data.name}</h2>
+            <p>${data.type} • ${data.breed}</p>
+            <p>${data.age} months • ${data.gender}</p>
+            <p>${data.location}</p>
+            <p>${data.vaccinationStatus || "Not specified"}</p>
+            <p>${data.description || "No description"}</p>
 
-            <div class="modal-detail-item">
-                <i class="fas fa-paw"></i>
-                <div>
-                    <p class="modal-inner-info-text-title">Type</p>
-                    <span>${data.type} • ${data.breed}</span>
-                </div>
+            <div style="
+                margin-top:20px;
+                padding:12px;
+                background:${s.bg};
+                color:${s.color};
+                border-radius:8px;
+                font-weight:bold;
+                text-align:center;">
+                ${s.text}
             </div>
 
-            <div class="modal-detail-item">
-                <i class="fas fa-birthday-cake"></i>
-                <div>
-                    <p class="modal-inner-info-text-title">Age</p>
-                    <span>${data.age} months old • ${data.gender}</span>
-                </div>
-            </div>
-
-            <div class="modal-detail-item">
-                <i class="fas fa-map-marker-alt"></i>
-                <div>
-                    <p class="modal-inner-info-text-title">Location</p>
-                    <span>${data.location}</span>
-                </div>
-            </div>
-
-            <div class="modal-detail-item">
-                <i class="fas fa-syringe"></i>
-                <div>
-                    <p class="modal-inner-info-text-title">Vaccination</p>
-                    <span>${data.vaccinationStatus || 'Not Specified'}</span>
-                </div>
-            </div>
-
-            <h3 style="color: #0d3b25; font-size: 18px; font-weight: 700; margin-top: 25px; margin-bottom: 8px;">About ${data.name}</h3>
-            
-            <p style="color: #555; line-height: 1.6; font-size: 14px; margin-top: 0;">
-                ${data.description || 'No description provided.'}
-            </p>
-
-            <div style="margin-top: 25px; padding: 12px; background-color: ${statusBg}; color: ${statusColor}; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid ${statusColor};">
-                ${displayStatus}
-            </div>
-
-            
-            <p style="text-align: center; font-size: 12px; color: #888; margin-top: 5px;">
-                *You cannot edit this listing because it has been processed.
+            <p style="font-size:12px;text-align:center;color:#888;">
+                *This listing can no longer be edited.
             </p>
         `;
     }
@@ -257,56 +226,55 @@ window.openUserListingModal = function(id) {
     modal.classList.add("open");
 };
 
-// 4. Close Modal
-window.closeUserModal = function() {
+/* ================================
+   CLOSE MODAL
+================================ */
+window.closeUserModal = function () {
     document.getElementById("userListingModal").classList.remove("open");
 };
 
-// 5. Save Changes
-window.saveUserListing = async function() {
+/* ================================
+   SAVE
+================================ */
+window.saveUserListing = async function () {
     const id = document.getElementById("editDocId").value;
     const btn = document.getElementById("btnSaveChanges");
-    
-    // Validation
-    const name = document.getElementById('editName').value;
-    if(!name) { alert("Name is required"); return; }
 
-    // Double check status before saving (Security)
-    const currentDoc = await getDoc(doc(db, "animals", id));
-    if (currentDoc.exists() && currentDoc.data().status !== "Pending") {
-        alert("This listing is no longer Pending and cannot be edited.");
+    const name = document.getElementById("editName").value.trim();
+    if (!name) return alert("Name is required");
+
+    const snap = await getDoc(doc(db, "animals", id));
+    if (!snap.exists() || snap.data().status !== "Pending") {
+        alert("Listing is no longer editable.");
         closeUserModal();
         loadUserListings(auth.currentUser.uid);
         return;
     }
 
-    btn.innerText = "Saving...";
     btn.disabled = true;
+    btn.innerText = "Saving...";
 
     try {
-        const docRef = doc(db, "animals", id);
-        await updateDoc(docRef, {
-            name: name,
-            type: document.getElementById('editType').value,
-            breed: document.getElementById('editBreed').value,
-            age: document.getElementById('editAge').value,
-            gender: document.getElementById('editGender').value,
-            location: document.getElementById('editLocation').value,
-            vaccinationStatus: document.getElementById('editVaccine').value,
-            description: document.getElementById('editDescription').value
+        await updateDoc(doc(db, "animals", id), {
+            name,
+            type: editType.value,
+            breed: editBreed.value,
+            age: editAge.value,
+            gender: editGender.value,
+            location: editLocation.value,
+            vaccinationStatus: editVaccine.value,
+            description: editDescription.value
         });
 
-        alert("Listing updated successfully!");
+        alert("Updated successfully");
         closeUserModal();
-        if(auth.currentUser) loadUserListings(auth.currentUser.uid);
+        loadUserListings(auth.currentUser.uid);
 
-    } catch (error) {
-        console.error("Update failed", error);
-        alert("Failed to update listing: " + error.message);
+    } catch (e) {
+        alert("Update failed");
+        console.error(e);
     } finally {
-        if(btn) {
-            btn.innerText = "Save Changes";
-            btn.disabled = false;
-        }
+        btn.disabled = false;
+        btn.innerText = "Save Changes";
     }
 };
