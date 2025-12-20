@@ -69,7 +69,7 @@ function normalizePhone(phone = "") {
 function isValidPhone(phone = "") {
   const cleaned = normalizePhone(phone);
 
-  // allow only digits, spaces, + and -
+  // allow only digits
   const allowedChars = /^[0-9]+$/;
   if (!allowedChars.test(cleaned)) return false;
 
@@ -107,7 +107,7 @@ function isValidIC(ic = "") {
   if (dd < 1 || dd > 31) return false;
 
   // Basic day-per-month check (including leap year for Feb)
-  const isLeap = (yy % 4 === 0); // simple enough for 2-digit year
+  const isLeap = (yy % 4 === 0); 
   const daysInMonth = [31, (isLeap ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   if (dd > daysInMonth[mm - 1]) return false;
 
