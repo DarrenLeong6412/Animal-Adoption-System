@@ -94,7 +94,6 @@ async function renderReport(category) {
             return {
                 id: r.id,
                 // request info
-                status: r.status ?? "unknown",
                 reason: r.reason ?? "—",
                 dateApplied: r.dateApplied?.toDate ? r.dateApplied.toDate().toLocaleDateString("en-GB") : r.dateApplied ?? "—",
                 environmentDesc: r.environmentDesc ?? "—",
@@ -105,6 +104,7 @@ async function renderReport(category) {
                 breed: animal.breed ?? "—",
                 imageUrl: animal.imageUrl ?? "images/no-image.png",
                 location: animal.location ?? "—",
+                status: animal.status ?? "unknown",
                 vaccinationStatus: animal.vaccinationStatus ?? "—",
                 // user info
                 username: user.username ?? "—",
@@ -350,7 +350,7 @@ async function showModalContent(category, id) {
             <div class="modal-inner-info-text modal-detail-item">
                 <i class="fas fa-info-circle"></i>
                 <p class="modal-inner-info-text-title">Status</p>
-                <span>${capitalizeStatus(req.status)}</span>
+                <span>${animal.status}</span>
             </div>
 
             <div class="modal-inner-info-text modal-detail-item">

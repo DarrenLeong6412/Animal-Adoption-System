@@ -63,6 +63,7 @@ async function handleRequestDecision(category, requestId, animalId, decision) {
             await runTransaction(db, async (transaction) => {
 
                 const requestRef = doc(db, "requests", requestId);
+                const animalRef = doc(db, "animals", String(animalId));
 
                 if (decision === "approved") {
                     // Force server-side snapshot
@@ -94,6 +95,8 @@ async function handleRequestDecision(category, requestId, animalId, decision) {
                                 : `Request ${docSnap.id} rejected`
                         );
                     }
+                    transaction.update(animalRef, { status: "Adopted" });
+                    console.log(`Animal ${animalId} status set to Adopted`);
                 } else {
                     // reject only current request
                     transaction.update(requestRef, { status: "rejected" });
@@ -539,7 +542,7 @@ function renderListings(list) {
         const typeInfo = animal.type || '-';
         const ageInfo = animal.age ? `${animal.age} months old` : 'Age N/A';
         const submitter = animal.ownerEmail || 'Unknown';
-        
+
         // Date Format
         let createdDate = "Date Unknown";
         if (animal.createdAt && animal.createdAt.seconds) {
