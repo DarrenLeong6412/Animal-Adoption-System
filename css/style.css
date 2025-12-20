@@ -2297,7 +2297,7 @@ p.subtitle {
 
 /* Save Button */
 .btn-save-changes {
-    width: 100%;
+    width: 95%;
     background-color: #164A41;
     color: white;
     padding: 12px;
@@ -2311,7 +2311,9 @@ p.subtitle {
 }
 
 .btn-save-changes:hover {
-    background-color: #113831;
+    color: #164A41;
+    background-color: #d0e0d3;
+    
 }
 
 .btn-save-changes:disabled {

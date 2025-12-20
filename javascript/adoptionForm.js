@@ -96,6 +96,17 @@ document.getElementById("adoptionForm").addEventListener("submit", async (e) => 
     return;
   }
 
+  const confirmSubmit = confirm(
+    "⚠️ IMPORTANT:\n\n" +
+    "Please make sure all the information you provided is accurate.\n" +
+    "Once submitted, you may not be able to edit your request.\n\n" +
+    "Do you want to proceed with submitting this adoption request?"
+  );
+
+  if (!confirmSubmit) {
+    return; // User clicked Cancel → go back to editing
+  }
+
   const submitBtn = document.getElementById("submitBtn");
   submitBtn.innerText = "Submitting...";
   submitBtn.disabled = true;

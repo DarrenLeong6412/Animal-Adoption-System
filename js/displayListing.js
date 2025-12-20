@@ -2,26 +2,27 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-import { 
-    getFirestore, 
-    collection, 
-    getDocs, 
-    query, 
-    orderBy, 
-    doc, 
-    deleteDoc, 
-    updateDoc, 
-    getDoc 
+import {
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    doc,
+    deleteDoc,
+    updateDoc,
+    where,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCy5YAmmb1aTnWiXljQr3yOVsTKmYPAS08",
-  authDomain: "pet-adoption-system-cf9f7.firebaseapp.com",
-  projectId: "pet-adoption-system-cf9f7",
-  storageBucket: "pet-adoption-system-cf9f7.firebasestorage.app",
-  messagingSenderId: "615748560994",
-  appId: "1:615748560994:web:465de9b90ac9208ec1493b",
-  measurementId: "G-RZQDCB3V2C"
+    apiKey: "AIzaSyCy5YAmmb1aTnWiXljQr3yOVsTKmYPAS08",
+    authDomain: "pet-adoption-system-cf9f7.firebaseapp.com",
+    projectId: "pet-adoption-system-cf9f7",
+    storageBucket: "pet-adoption-system-cf9f7.firebasestorage.app",
+    messagingSenderId: "615748560994",
+    appId: "1:615748560994:web:465de9b90ac9208ec1493b",
+    measurementId: "G-RZQDCB3V2C"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -29,8 +30,8 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let allListings = [];
-let currentUser = null; 
-let isAdmin = false; 
+let currentUser = null;
+let isAdmin = false;
 
 // 1. Wait for Auth & Check Admin Role
 onAuthStateChanged(auth, async (user) => {
@@ -38,7 +39,7 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         await checkAdminStatus(user.uid);
     }
-    loadAnimals(); 
+    loadAnimals();
 });
 
 async function checkAdminStatus(uid) {
@@ -47,7 +48,7 @@ async function checkAdminStatus(uid) {
         if (userDoc.exists()) {
             const userData = userDoc.data();
             const role = (userData.role || "").toLowerCase();
-            if (role === "admin") { 
+            if (role === "admin") {
                 isAdmin = true;
             }
         }
@@ -63,7 +64,7 @@ async function loadAnimals() {
     try {
         const q = query(collection(db, "animals"), orderBy("createdAt", "asc"));
         const querySnapshot = await getDocs(q);
-        
+
         if (querySnapshot.empty) {
             grid.innerHTML = '<p>No animals available for adoption right now.</p>';
             return;
@@ -73,7 +74,7 @@ async function loadAnimals() {
         querySnapshot.forEach((doc) => {
             let data = doc.data();
             data.id = doc.id;
-            
+
             if (data.createdAt && data.createdAt.seconds) {
                 const dateObj = new Date(data.createdAt.seconds * 1000);
                 data.formattedDate = dateObj.toLocaleDateString("en-GB", {
@@ -86,7 +87,7 @@ async function loadAnimals() {
             allListings.push(data);
         });
 
-        filterAndRender(); 
+        filterAndRender();
         setupFilters();
 
     } catch (error) {
@@ -97,7 +98,7 @@ async function loadAnimals() {
 
 function renderGrid(dataList) {
     const grid = document.getElementById("listingGrid");
-    grid.innerHTML = ""; 
+    grid.innerHTML = "";
 
     const publicList = dataList.filter(animal => animal.status === "Available");
 
@@ -162,7 +163,7 @@ function renderGrid(dataList) {
 
 // --- ADMIN GLOBAL FUNCTIONS ---
 
-window.toggleMenu = function(id) {
+window.toggleMenu = function (id) {
     document.querySelectorAll('.menu-dropdown').forEach(el => {
         if (el.id !== `menu-${id}`) el.style.display = 'none';
     });
@@ -178,7 +179,7 @@ window.addEventListener('click', (e) => {
     if (!e.target.closest('.card-menu')) {
         document.querySelectorAll('.menu-dropdown').forEach(el => el.style.display = 'none');
     }
-    
+
     // Close Modal on outside click
     const modal = document.getElementById("animalModal");
     if (e.target == modal) {
@@ -187,16 +188,16 @@ window.addEventListener('click', (e) => {
 });
 
 // Modal Close Function
-window.closeAnimalModal = function() {
+window.closeAnimalModal = function () {
     document.getElementById("animalModal").classList.remove("open");
 };
 
-window.deleteListing = async function(id) {
+window.deleteListing = async function (id) {
     if (!confirm("Are you sure you want to delete this listing?")) return;
     try {
         await deleteDoc(doc(db, "animals", id));
         alert("Listing deleted successfully.");
-        loadAnimals(); 
+        loadAnimals();
     } catch (error) {
         console.error("Error deleting:", error);
         alert("Failed to delete listing.");
@@ -205,7 +206,8 @@ window.deleteListing = async function(id) {
 
 // DYNAMIC MODAL LOGIC (VIEW vs EDIT)
 // 1. OPEN VIEW MODE (Read Only)
-window.openModalById = function(id) {
+window.openModalById = function (id) {
+
     const data = allListings.find(a => a.id === id);
     if (!data) return;
 
@@ -259,15 +261,36 @@ window.openModalById = function(id) {
         </button>
     `;
 
-    document.getElementById("adoptButton").onclick = function() {
-        window.location.href = `adoptionForm.html?listingID=${data.id}`;
+    document.getElementById("adoptButton").onclick = async function () {
+        try {
+            // Create query: requests for this animal with status "pending"
+            const q = query(
+                collection(db, "requests"),
+                where("listing_ID", "==", data.id),
+                where("status", "==", "pending"),
+                where("user_ID", "==", currentUser.uid)
+            );
+
+            const snapshot = await getDocs(q);
+
+            if (!snapshot.empty) {
+                alert("You have already requested to adopt this animal, please wait until a decision has been made for your current request.");
+                return; // Stop further action
+            }
+
+            // No pending requests → proceed
+            window.location.href = `adoptionForm.html?listingID=${data.id}`;
+        } catch (error) {
+            console.error("Error checking pending requests:", error);
+            alert("Unable to check adoption requests. Please try again later.");
+        }
     };
 
     document.getElementById("animalModal").classList.add("open");
 };
 
 // 2. OPEN EDIT MODE 
-window.editListing = function(id) {
+window.editListing = function (id) {
     const data = allListings.find(a => a.id === id);
     if (!data) return;
 
@@ -373,7 +396,7 @@ async function handleSaveChanges() {
 
         alert("Listing updated successfully!");
         document.getElementById('animalModal').classList.remove('open');
-        loadAnimals(); 
+        loadAnimals();
     } catch (error) {
         console.error("Update failed", error);
         alert("Update failed: " + error.message);
@@ -390,10 +413,10 @@ function setupFilters() {
     const typeInput = document.getElementById("filterType");
     const genderInput = document.getElementById("filterGender");
 
-    if(searchInput) searchInput.addEventListener("input", filterAndRender);
-    if(ageInput) ageInput.addEventListener("input", filterAndRender);
-    if(typeInput) typeInput.addEventListener("change", filterAndRender);
-    if(genderInput) genderInput.addEventListener("change", filterAndRender);
+    if (searchInput) searchInput.addEventListener("input", filterAndRender);
+    if (ageInput) ageInput.addEventListener("input", filterAndRender);
+    if (typeInput) typeInput.addEventListener("change", filterAndRender);
+    if (genderInput) genderInput.addEventListener("change", filterAndRender);
 }
 
 function filterAndRender() {
@@ -411,7 +434,7 @@ function filterAndRender() {
         if (ageVal !== "") agePass = parseInt(animal.age) == parseInt(ageVal);
 
         let typePass = true;
-        const standardTypes = ["Dog", "Cat", "Bird", "Rabbit"]; 
+        const standardTypes = ["Dog", "Cat", "Bird", "Rabbit"];
         if (typeVal === "Other") typePass = !standardTypes.includes(animal.type);
         else if (typeVal !== "All") typePass = animal.type === typeVal;
 

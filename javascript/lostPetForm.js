@@ -2,8 +2,8 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-import { 
-  getFirestore, collection, addDoc, serverTimestamp 
+import {
+  getFirestore, collection, addDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -39,7 +39,7 @@ const animalTypeSelect = document.getElementById("animalType");
 const otherGroup = document.getElementById("otherAnimalTypeGroup");
 const animalTypeOtherInput = document.getElementById("animalTypeOther");
 
-animalTypeSelect.addEventListener("change", function() {
+animalTypeSelect.addEventListener("change", function () {
   if (this.value === "Other") {
     otherGroup.style.display = "block";
     animalTypeOtherInput.required = true;
@@ -98,7 +98,7 @@ form.addEventListener("submit", async (e) => {
   const ageInput = document.getElementById("petAge").value;
   const age = ageInput ? parseInt(ageInput) : null;
   const gender = document.getElementById("petGender").value;
-  
+
   let animal_type = document.getElementById("animalType").value;
   if (animal_type === "Other") {
     const otherType = document.getElementById("animalTypeOther").value.trim();
@@ -108,7 +108,7 @@ form.addEventListener("submit", async (e) => {
     }
     animal_type = otherType;
   }
-  
+
   const breed = document.getElementById("petBreed").value.trim();
   const description = document.getElementById("petDescription").value.trim();
   const last_seen_Location = document.getElementById("lastSeenLocation").value.trim();
