@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="auth-loading">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -32,193 +33,277 @@
 
     <div class="profile-card auth-ui">
 
-    <div class="profile-header">
-      <div>
-        <h1 id="profileName">User Name</h1>
-        <p id="profileEmail">user@email.com</p>
-      </div>
-    </div>
-
-    <div class="profile-divider"></div>
-
-    <div class="profile-details">
-
-      <!-- Gender -->
-      <div class="profile-row">
-        <span class="label">Gender</span>
-
-        <!-- display -->
-        <span id="profileGender">-</span>
-
-        <!-- edit (hidden until Edit clicked) -->
-        <select id="editGender" class="profile-edit" style="display:none;">
-          <option value="">Select...</option>
-          <option value="M">Male</option>
-          <option value="F">Female</option>
-          <option value="O">Other</option>
-        </select>
+      <div class="profile-header">
+        <div>
+          <h1 id="profileName">User Name</h1>
+          <p id="profileEmail">user@email.com</p>
+        </div>
       </div>
 
-      <!-- Phone -->
-      <div class="profile-row">
-        <span class="label">Phone Number</span>
+      <div class="profile-divider"></div>
 
-        <span id="profilePhone">-</span>
+      <div class="profile-details">
 
-        <input
-          id="editPhone"
-          class="profile-edit"
-          type="text"
-          maxlength="15"
-          placeholder="e.g. +60 12-345 6789"
-          style="display:none;"
-        />
+        <!-- Gender -->
+        <div class="profile-row">
+          <span class="label">Gender</span>
+
+          <!-- display -->
+          <span id="profileGender">-</span>
+
+          <!-- edit (hidden until Edit clicked) -->
+          <select id="editGender" class="profile-edit" style="display:none;">
+            <option value="">Select...</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+            <option value="O">Other</option>
+          </select>
+        </div>
+
+        <!-- Phone -->
+        <div class="profile-row">
+          <span class="label">Phone Number</span>
+
+          <span id="profilePhone">-</span>
+
+          <input id="editPhone" class="profile-edit" type="text" maxlength="15" placeholder="e.g. +60 12-345 6789"
+            style="display:none;" />
+        </div>
+
+        <!-- Address -->
+        <div class="profile-row">
+          <span class="label">Address</span>
+
+          <span id="profileAddress">-</span>
+
+          <textarea id="editAddress" class="profile-edit" maxlength="255" placeholder="Your address..."
+            style="display:none;"></textarea>
+        </div>
+
+        <div class="profile-row">
+          <span class="label">Identification Number</span>
+
+          <span id="profileIdentification">-</span>
+
+          <input id="editIdentification" class="profile-edit" type="text" maxlength="20" placeholder="e.g. 061239072345"
+            style="display:none;" />
+        </div>
+
+
+
       </div>
 
-      <!-- Address -->
-      <div class="profile-row">
-        <span class="label">Address</span>
-
-        <span id="profileAddress">-</span>
-
-        <textarea
-          id="editAddress"
-          class="profile-edit"
-          maxlength="255"
-          placeholder="Your address..."
-          style="display:none;"
-        ></textarea>
+      <!-- Actions -->
+      <div class="profile-actions">
+        <button id="editProfileBtn" class="profile-btn">Edit</button>
+        <button id="saveProfileBtn" class="profile-btn" style="display:none;">Save</button>
+        <button id="cancelProfileBtn" class="profile-btn profile-btn-secondary" style="display:none;">Cancel</button>
       </div>
-
-      <div class="profile-row">
-        <span class="label">Identification Number</span>
-
-        <span id="profileIdentification">-</span>
-
-        <input
-          id="editIdentification"
-          class="profile-edit"
-          type="text"
-          maxlength="20"
-          placeholder="e.g. 061239072345"
-          style="display:none;"
-        />
-      </div>
-
-
 
     </div>
-
-    <!-- Actions -->
-    <div class="profile-actions">
-      <button id="editProfileBtn" class="profile-btn">Edit</button>
-      <button id="saveProfileBtn" class="profile-btn" style="display:none;">Save</button>
-      <button id="cancelProfileBtn" class="profile-btn profile-btn-secondary" style="display:none;">Cancel</button>
-    </div>
-
-  </div>
 
   </div>
 
   <!-- ZHILIN DO HERE -->
-   <div class="my-listings-wrapper">
+  <div class="my-listings-wrapper">
     <div class="profile-card" style="width: 100%; box-sizing: border-box;">
-        <div class="my-listings-header">
-            <h2 class="my-listings-title">My Listings</h2>
-            <p class="my-listings-subtitle">Manage animals you have submitted for adoption.</p>
-        </div>
-        <div id="myListingsGrid" class="my-listings-grid">
-            <p class="my-listings-loading">Loading your listings...</p>
-        </div>
+      <div class="my-listings-header">
+        <h2 class="my-listings-title">My Listings</h2>
+        <p class="my-listings-subtitle">Manage animals you have submitted for adoption.</p>
+      </div>
+      <div id="myListingsGrid" class="my-listings-grid">
+        <p class="my-listings-loading">Loading your listings...</p>
+      </div>
     </div>
   </div>
 
   <div class="modal" id="userListingModal">
     <div class="modal-inner">
+      <div class="modal-inner-top">
+        <div class="modal-inner-top-title">
+          <h1 id="modalEditTitle">Manage Listing</h1>
+        </div>
+        <div class="modal-inner-top-exit">
+          <a onclick="closeUserModal()"><i class="fa-solid fa-x"></i></a>
+        </div>
+      </div>
+
+      <div class="modal-inner-details-section">
+        <div class="modal-inner-image-container">
+          <img id="modalEditImg" src="" class="modalImg" style="object-fit: cover;">
+        </div>
+
+        <div class="modal-inner-info-container">
+          <input type="hidden" id="editDocId">
+
+          <div class="edit-form-group">
+            <label class="edit-form-label">Animal Name</label>
+            <input type="text" id="editName" class="edit-form-input">
+          </div>
+
+          <div class="form-row-split">
+            <div class="edit-form-group form-group-half">
+              <label class="edit-form-label">Type</label>
+              <select id="editType" class="edit-form-input">
+                <option value="Dog">Dog</option>
+                <option value="Cat">Cat</option>
+                <option value="Rabbit">Rabbit</option>
+                <option value="Bird">Bird</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="edit-form-group form-group-half">
+              <label class="edit-form-label">Breed</label>
+              <input type="text" id="editBreed" class="edit-form-input">
+            </div>
+          </div>
+
+          <div class="form-row-split">
+            <div class="edit-form-group form-group-half">
+              <label class="edit-form-label">Age (Months)</label>
+              <input type="number" id="editAge" class="edit-form-input" min="0">
+            </div>
+            <div class="edit-form-group form-group-half">
+              <label class="edit-form-label">Gender</label>
+              <select id="editGender" class="edit-form-input">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="edit-form-group">
+            <label class="edit-form-label">Location</label>
+            <input type="text" id="editLocation" class="edit-form-input">
+          </div>
+
+          <div class="edit-form-group">
+            <label class="edit-form-label">Vaccination Status</label>
+            <select id="editVaccine" class="edit-form-input">
+              <option value="Vaccinated">Vaccinated</option>
+              <option value="Not Vaccinated">Not Vaccinated</option>
+              <option value="Not specified">Not specified</option>
+            </select>
+          </div>
+
+          <div class="edit-form-group">
+            <label class="edit-form-label">Description</label>
+            <textarea id="editDescription" class="edit-form-textarea"></textarea>
+          </div>
+
+          <div class="edit-form-group">
+            <label class="edit-form-label">Current Status</label>
+            <div id="editStatusDisplay" class="edit-status-text"></div>
+          </div>
+
+          <button id="btnSaveChanges" class="btn-save-changes" onclick="saveUserListing()">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- DARREN DO HERE -->
+  <div class="my-lostpets-wrapper">
+    <div class="profile-card" style="width: 100%; box-sizing: border-box;">
+      <div class="my-lostpets-header">
+        <h2 class="my-lostpets-title">My Lost Pets</h2>
+        <p class="my-lostpets-subtitle">Manage lost pets you have created.</p>
+      </div>
+      <div id="myLostpetsGrid" class="my-lostpets-grid">
+        <p class="my-lostpets-loading">Loading your lostpets...</p>
+      </div>
+    </div>
+
+    <div id="myLostPetscard" class="my-lostpets-card">
+    </div>
+
+    <div class="modal" id="myPetModal">
+      <div class="modal-inner">
         <div class="modal-inner-top">
-            <div class="modal-inner-top-title">
-                <h1 id="modalEditTitle">Manage Listing</h1>
-            </div>
-            <div class="modal-inner-top-exit">
-                <a onclick="closeUserModal()"><i class="fa-solid fa-x"></i></a>
-            </div>
+          <div class="modal-inner-top-title">
+            <h1 id="modalTitle">Manage Lost Pets</h1>
+          </div>
+          <div class="modal-inner-top-exit">
+            <a onclick="closeMyPetModal()"><i class="fa-solid fa-x"></i></a>
+          </div>
         </div>
 
         <div class="modal-inner-details-section">
-            <div class="modal-inner-image-container">
-                <img id="modalEditImg" src="" class="modalImg" style="object-fit: cover;">
+          <div class="modal-inner-image-container">
+            <img id="petPhoto" src="images/no-image.png" alt="Pet Image"
+              style="object-fit: cover; width:100%; max-height:200px;">
+          </div>
+
+          <div class="modal-inner-info-container">
+            <input type="hidden" id="modalPetId">
+
+            <div class="edit-form-group">
+              <label class="edit-form-label">Animal Name</label>
+              <input type="text" id="petName" class="edit-form-input">
             </div>
 
-            <div class="modal-inner-info-container">
-                <input type="hidden" id="editDocId">
-
-                <div class="edit-form-group">
-                    <label class="edit-form-label">Animal Name</label>
-                    <input type="text" id="editName" class="edit-form-input">
-                </div>
-
-                <div class="form-row-split">
-                    <div class="edit-form-group form-group-half">
-                        <label class="edit-form-label">Type</label>
-                        <select id="editType" class="edit-form-input">
-                            <option value="Dog">Dog</option>
-                            <option value="Cat">Cat</option>
-                            <option value="Rabbit">Rabbit</option>
-                            <option value="Bird">Bird</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="edit-form-group form-group-half">
-                        <label class="edit-form-label">Breed</label>
-                        <input type="text" id="editBreed" class="edit-form-input">
-                    </div>
-                </div>
-
-                <div class="form-row-split">
-                    <div class="edit-form-group form-group-half">
-                        <label class="edit-form-label">Age (Months)</label>
-                        <input type="number" id="editAge" class="edit-form-input" min="0">
-                    </div>
-                    <div class="edit-form-group form-group-half">
-                        <label class="edit-form-label">Gender</label>
-                        <select id="editGender" class="edit-form-input">
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="edit-form-group">
-                    <label class="edit-form-label">Location</label>
-                    <input type="text" id="editLocation" class="edit-form-input">
-                </div>
-
-                <div class="edit-form-group">
-                    <label class="edit-form-label">Vaccination Status</label>
-                    <select id="editVaccine" class="edit-form-input">
-                        <option value="Vaccinated">Vaccinated</option>
-                        <option value="Not Vaccinated">Not Vaccinated</option>
-                        <option value="Not specified">Not specified</option>
-                    </select>
-                </div>
-
-                <div class="edit-form-group">
-                    <label class="edit-form-label">Description</label>
-                    <textarea id="editDescription" class="edit-form-textarea"></textarea>
-                </div>
-
-                <div class="edit-form-group">
-                    <label class="edit-form-label">Current Status</label>
-                    <div id="editStatusDisplay" class="edit-status-text"></div>
-                </div>
-
-                <button id="btnSaveChanges" class="btn-save-changes" onclick="saveUserListing()">
-                    Save Changes
-                </button>
+            <div class="form-row-split">
+              <div class="edit-form-group form-group-half">
+                <label class="edit-form-label">Type</label>
+                <select id="animalType" class="edit-form-input">
+                  <option value="Dog">Dog</option>
+                  <option value="Cat">Cat</option>
+                  <option value="Rabbit">Rabbit</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="edit-form-group form-group-half">
+                <label class="edit-form-label">Breed</label>
+                <input type="text" id="breed" class="edit-form-input">
+              </div>
             </div>
+
+            <div class="form-row-split">
+              <div class="edit-form-group form-group-half">
+                <label class="edit-form-label">Age (Months)</label>
+                <input type="number" id="age" class="edit-form-input" min="0">
+              </div>
+              <div class="edit-form-group form-group-half">
+                <label class="edit-form-label">Gender</label>
+                <select id="gender" class="edit-form-input">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="edit-form-group">
+              <label class="edit-form-label">Last Seen Location</label>
+              <input type="text" id="lastSeenLocation" class="edit-form-input">
+            </div>
+
+            <div class="edit-form-group">
+              <label class="edit-form-label">Last Seen Date</label>
+              <input type="date" id="lastSeenDate" class="edit-form-input">
+            </div>
+
+            <div class="edit-form-group">
+              <label class="edit-form-label">Description</label>
+              <textarea id="description" class="edit-form-textarea"></textarea>
+            </div>
+
+            <div class="edit-form-group">
+              <label class="edit-form-label">Verification Status</label>
+              <input type="text" id="verificationStatus" class="edit-form-input" disabled>
+            </div>
+
+            <button id="saveBtn" class="btn-save-changes" onclick="saveMyPetChanges()">
+              Save Changes
+            </button>
+          </div>
         </div>
+      </div>
     </div>
-</div>
+
+  </div>
 
   <!-- FOOTER -->
   <div id="footer"></div>
@@ -227,7 +312,12 @@
   <script src="javascript/script.js"></script>
   <script src="javascript/template-loader.js"></script>
   <script type="module" src="js/auth.js"></script>
-  <script type="module" src="js/myListings.js"></script> </body>
+  <script type="module" src="js/myListings.js"></script>
+  <script type="module" src="js/myLostpets.js"></script>
+</body>
 
 </body>
+
+</body>
+
 </html>
