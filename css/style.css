@@ -7,6 +7,17 @@
 
 .body {
     width: 100%;
+    height: 100%;
+}
+
+#user-body {
+    background: linear-gradient(135deg,
+    #eef7f3 0%,
+    #d7efe6 45%,
+    #ffe7c4 100%
+  );
+    background-attachment: fixed;
+
 }
 
 /*#region navigation bar*/
@@ -1789,7 +1800,7 @@ p.subtitle {
 /*#region auth pages (login / signup)*/
 .auth-page {
     min-height: 100vh;
-    background: #eeeeee;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1952,14 +1963,18 @@ p.subtitle {
 /*#region profile page*/
 
 .profile-page {
-    background-color: #eeeeee;
-    min-height: 100vh;
-    padding: 120px 20px 40px;
+    background: transparent;
+    min-height: auto;
+    padding: 120px 20px 24px;
     /* navbar clearance */
     display: flex;
     justify-content: center;
     align-items: flex-start;
 }
+
+
+
+
 
 .profile-card {
     width: 100%;
@@ -2149,7 +2164,7 @@ p.subtitle {
 .my-listings-wrapper {
     max-width: 700px;
     width: 100%;
-    margin: -30px auto 50px auto;
+    margin: 18px auto;
     position: relative;
     z-index: 10;
 }
@@ -2188,7 +2203,7 @@ p.subtitle {
 .my-lostpets-wrapper {
     max-width: 700px;
     width: 100%;
-    margin: -30px auto 50px auto;
+    margin: 18px auto;
     position: relative;
     z-index: 10;
 }
