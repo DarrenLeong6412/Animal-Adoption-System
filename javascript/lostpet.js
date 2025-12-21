@@ -103,7 +103,10 @@ function renderGrid(dataList) {
   const grid = document.getElementById("lostpet-grid");
   grid.innerHTML = "";
 
-  const publicList = dataList.filter(lostPet => lostPet.status === "Lost");
+  // Only show pets that are approved and still lost
+  const publicList = dataList.filter(lostPet => 
+      lostPet.verification_status === "Approved" && lostPet.status === "Lost"
+  );
 
   if (publicList.length === 0) {
     grid.innerHTML = '<p style="text-align:center; width:100%; padding:20px;">No Lost Pets found matching your criteria.</p>';
@@ -118,65 +121,57 @@ function renderGrid(dataList) {
     let adminMenu = "";
     if (isAdmin) {
       adminMenu = `
-                <div class="card-menu" onclick="event.stopPropagation()">
-                    <div class="menu-icon" onclick="toggleMenu('${lostPet.id}')">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </div>
-                    <div id="menu-${lostPet.id}" class="menu-dropdown">
-                        <div onclick="editLostPet('${lostPet.id}')">
-                            <i class="fas fa-edit"></i> Edit
-                        </div>
-                        <div onclick="deleteLostPet('${lostPet.id}')" style="color: #dc2626;">
-                            <i class="fas fa-trash"></i> Delete
-                        </div>
-                    </div>
-                </div>
-            `;
+        <div class="card-menu" onclick="event.stopPropagation()">
+          <div class="menu-icon" onclick="toggleMenu('${lostPet.id}')">
+            <i class="fas fa-ellipsis-v"></i>
+          </div>
+          <div id="menu-${lostPet.id}" class="menu-dropdown">
+            <div onclick="editLostPet('${lostPet.id}')">
+              <i class="fas fa-edit"></i> Edit
+            </div>
+            <div onclick="deleteLostPet('${lostPet.id}')" style="color: #dc2626;">
+              <i class="fas fa-trash"></i> Delete
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     const cardHTML = `
-  <div class="lostpet-card" onclick="openModalById('${lostPet.id}')" style="position: relative;">
-    
-    <div class="lostpet-card-img-container">
-      ${adminMenu}
-      <img src="${lostPet.photo}" alt="${lostPet.name}" class="lostpet-card-img">
-      
-      <div class="lostpet-card-status">
-        <p style="${badgeStyle}">${statusText}</p>
+      <div class="lostpet-card" onclick="openModalById('${lostPet.id}')" style="position: relative;">
+        <div class="lostpet-card-img-container">
+          ${adminMenu}
+          <img src="${lostPet.photo}" alt="${lostPet.name}" class="lostpet-card-img">
+          <div class="lostpet-card-status">
+            <p style="${badgeStyle}">${statusText}</p>
+          </div>
+        </div>
+        <div class="lostpet-card-info-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
+            <p class="lostpet-card-animal-name" style="margin:0;">
+              ${lostPet.name}
+            </p>
+            <span style="font-size:11px; color:#888; font-weight:500;">
+              ${lostPet.formattedDate || "Date Unknown"}
+            </span>
+          </div>
+          <p>
+            ${lostPet.animal_type}
+            ${lostPet.breed ? " • " + lostPet.breed : ""}
+            ${lostPet.age ? " • " + lostPet.age + " Months" : ""}
+            ${lostPet.gender ? " • " + lostPet.gender : ""}
+          </p>
+          <div class="lostpet-card-details-row">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>${lostPet.last_seen_Location}</span>
+          </div>
+        </div>
       </div>
-    </div>
-
-    <div class="lostpet-card-info-section">
-      
-      <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
-        <p class="lostpet-card-animal-name" style="margin:0;">
-          ${lostPet.name}
-        </p>
-        <span style="font-size:11px; color:#888; font-weight:500;">
-          ${lostPet.formattedDate || "Date Unknown"}
-        </span>
-      </div>
-
-      <p>
-        ${lostPet.animal_type}
-        ${lostPet.breed ? " • " + lostPet.breed : ""}
-        ${lostPet.age ? " • " + lostPet.age + " Months" : ""}
-        ${lostPet.gender ? " • " + lostPet.gender : ""}
-      </p>
-
-      <div class="lostpet-card-details-row">
-        <i class="fas fa-map-marker-alt"></i>
-        <span>${lostPet.last_seen_Location}</span>
-      </div>
-
-    </div>
-  </div>
-`;
-
+    `;
     grid.innerHTML += cardHTML;
-
   });
 }
+
 
 window.toggleMenu = function (id) {
   document.querySelectorAll('.menu-dropdown').forEach(el => {
