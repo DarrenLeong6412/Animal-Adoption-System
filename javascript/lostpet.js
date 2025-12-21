@@ -39,6 +39,12 @@ onAuthStateChanged(auth, async (user) => {
   loadLostPets();
 });
 
+async function getUserById(uid) {
+  const userRef = doc(db, "users", uid);
+  const snap = await getDoc(userRef);
+  return snap.exists() ? snap.data() : null;
+}
+
 async function checkAdminStatus(uid) {
   try {
     const userDoc = await getDoc(doc(db, "users", uid));
@@ -213,11 +219,14 @@ window.deleteLostPet = async function (id) {
   }
 };
 
-//(currentl can use but not done)
-window.openModalById = function(id) {
+window.openModalById = async function (id) {
   // Find the pet data from your global array
   const data = allLostPets.find(l => l.id === id);
   if (!data) return;
+
+  const owner = data.user_id 
+    ? await getUserById(data.user_id)
+    : null;
 
   // Get modal elements by ID
   const modalMainTitle = document.getElementById('modalMainTitle');
@@ -244,7 +253,7 @@ window.openModalById = function(id) {
     <div class="modal-detail-item">
       <i class="fas fa-paw"></i>
       <div>
-        <p class="modal-inner-info-text-title">Type</p>
+        <p class="modal-inner-info-text-title">Type & Breed</p>
         <span>${data.animal_type}${data.breed ? " • " + data.breed : ""}</span>
       </div>
     </div>
@@ -268,13 +277,45 @@ window.openModalById = function(id) {
       </div>
     </div>
 
+    <div class="modal-detail-item">
+      <i class="<fas fa-solid fa-calendar"></i>
+      <div>
+        <p class="modal-inner-info-text-title">Last Seen Date</p>
+        <span>${data.last_seen_Date || "Unknown"}</span>
+      </div>
+    </div>
+
+    <div class="modal-detail-item">
+      <i class="<fas fas fa-address-card"></i>
+      <div>
+        <p class="modal-inner-info-text-title">Owner Name</p>
+        <span>${owner?.username || "Unknown"}</span>
+      </div>
+    </div>
+
+    <div class="modal-detail-item">
+      <i class="<fas fas fa-address-book"></i>
+      <div>
+        <p class="modal-inner-info-text-title">Owner Phone Number</p>
+        <span>${owner?.phone_Number|| "Unknown"}</span>
+      </div>
+    </div>
+
     <h3 style="color:#0d3b25; font-size:18px; font-weight:700; margin-top:25px; margin-bottom:8px;">
       About ${data.name}
     </h3>
 
-    <p style="color:#555; line-height:1.6; font-size:14px; margin-top:0;">
-      ${data.description || 'No description provided.'}
-    </p>
+    <p style="
+        color:#555;
+        line-height:1.6;
+        font-size:14px;
+        margin-top:0;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    ">
+  ${data.description || 'No description provided.'}
+</p>
   `;
 
   // Open modal
@@ -283,118 +324,82 @@ window.openModalById = function(id) {
 
 // need to change also for this one (for admin)
 window.editLostPet = function (id) {
-  const data = allLostPets.find(a => a.id === id);
+  const data = allLostPets.find(p => p.id === id);
   if (!data) return;
 
-  document.getElementById('modalMainTitle').innerText = "Edit Lost Pet Report";
-  document.getElementById('modalImg').src = data.imageUrl || 'images/no-image.png';
+  document.getElementById('modalMainTitle').innerText = "Admin: Edit Lost Pet";
+  document.getElementById('modalImg').src = data.photo || 'images/no-image.png';
   const container = document.getElementById('modalContentContainer');
 
-  const getOption = (val, current) => `
-        <option value="${val}" ${current === val ? 'selected' : ''}>${val}</option>
-    `;
+  const opt = (v, c) => `<option value="${v}" ${v === c ? "selected" : ""}>${v}</option>`;
 
   container.innerHTML = `
-        <input type="hidden" id="editDocId" value="${data.id}">
+    <input type="hidden" id="editDocId" value="${data.id}">
 
-        <div class="edit-form-group">
-            <label class="edit-form-label">Animal Name</label>
-            <input type="text" id="editName" class="edit-form-input" value="${data.name}">
-        </div>
+    <label>Name</label>
+    <input id="editName" value="${data.name}">
 
-        <div class="form-row-split">
-             <div class="edit-form-group form-group-half">
-                <label class="edit-form-label">Type</label>
-                <select id="editType" class="edit-form-input">
-                    ${getOption('Dog', data.type)}
-                    ${getOption('Cat', data.type)}
-                    ${getOption('Rabbit', data.type)}
-                    ${getOption('Bird', data.type)}
-                    ${getOption('Other', data.type)}
-                </select>
-            </div>
-            <div class="edit-form-group form-group-half">
-                <label class="edit-form-label">Breed</label>
-                <input type="text" id="editBreed" class="edit-form-input" value="${data.breed}">
-            </div>
-        </div>
+    <label>Animal Type</label>
+    <input id="editType" value="${data.animal_type}">
 
-         <div class="form-row-split">
-            <div class="edit-form-group form-group-half">
-                <label class="edit-form-label">Age (Months)</label>
-                <input type="number" id="editAge" class="edit-form-input" min="0" value="${data.age}">
-            </div>
-            <div class="edit-form-group form-group-half">
-                <label class="edit-form-label">Gender</label>
-                <select id="editGender" class="edit-form-input">
-                    ${getOption('Male', data.gender)}
-                    ${getOption('Female', data.gender)}
-                </select>
-            </div>
-        </div>
+    <label>Breed</label>
+    <input id="editBreed" value="${data.breed || ""}">
 
-        <div class="edit-form-group">
-            <label class="edit-form-label">Location</label>
-            <input type="text" id="editLocation" class="edit-form-input" value="${data.location}">
-        </div>
+    <label>Status (Pet)</label>
+    <select id="editStatus">
+      ${opt("Lost", data.status)}
+      ${opt("Found", data.status)}
+    </select>
 
-        <div class="edit-form-group">
-            <label class="edit-form-label">Vaccination Status</label>
-            <select id="editVaccine" class="edit-form-input">
-                ${getOption('Vaccinated', data.vaccinationStatus)}
-                ${getOption('Not Vaccinated', data.vaccinationStatus)}
-                ${getOption('Not specified', data.vaccinationStatus)}
-            </select>
-        </div>
+    <label>Verification Status</label>
+    <select id="editVerification">
+      ${opt("Pending", data.verification_status)}
+      ${opt("Approved", data.verification_status)}
+      ${opt("Rejected", data.verification_status)}
+    </select>
 
-        <div class="edit-form-group">
-            <label class="edit-form-label">Description</label>
-            <textarea id="editDescription" class="edit-form-textarea">${data.description}</textarea>
-        </div>
+    <label>Last Seen Location</label>
+    <input id="editLocation" value="${data.last_seen_Location}">
 
-        <button id="saveChangesBtn" class="btn-save-changes">
-            Save Changes
-        </button>
-    `;
+    <label>Description</label>
+    <textarea id="editDescription">${data.description || ""}</textarea>
 
-  document.getElementById("saveChangesBtn").onclick = handleSaveChanges;
+    <button id="saveChangesBtn">Save Changes</button>
+  `;
 
+  document.getElementById("saveChangesBtn").onclick = handleAdminSave;
   document.getElementById("animalModal").classList.add("open");
 };
 
 // 3. HANDLE SAVE (need to change also for admin to change the details one )
-async function handleSaveChanges() {
+async function handleAdminSave() {
   const id = document.getElementById("editDocId").value;
   const btn = document.getElementById("saveChangesBtn");
-  const newName = document.getElementById('editName').value;
 
-  if (!newName) { alert("Name is required"); return; }
-
-  btn.innerText = "Saving...";
   btn.disabled = true;
+  btn.innerText = "Saving...";
 
   try {
-    const docRef = doc(db, "lostPets", id);
-    await updateDoc(docRef, {
-      name: newName,
-      type: document.getElementById('editType').value,
-      breed: document.getElementById('editBreed').value,
-      age: document.getElementById('editAge').value,
-      gender: document.getElementById('editGender').value,
-      location: document.getElementById('editLocation').value,
-      vaccinationStatus: document.getElementById('editVaccine').value,
-      description: document.getElementById('editDescription').value
+    await updateDoc(doc(db, "lostPets", id), {
+      name: document.getElementById("editName").value,
+      animal_type: document.getElementById("editType").value,
+      breed: document.getElementById("editBreed").value,
+      status: document.getElementById("editStatus").value,
+      verification_status: document.getElementById("editVerification").value,
+      last_seen_Location: document.getElementById("editLocation").value,
+      description: document.getElementById("editDescription").value
     });
 
-    alert("Listing updated successfully!");
-    document.getElementById('animalModal').classList.remove('open');
-    loadAnimals();
-  } catch (error) {
-    console.error("Update failed", error);
-    alert("Update failed: " + error.message);
+    alert("Updated successfully");
+    document.getElementById("animalModal").classList.remove("open");
+    loadLostPets();
+
+  } catch (e) {
+    console.error(e);
+    alert("Update failed");
   } finally {
-    btn.innerText = "Save Changes";
     btn.disabled = false;
+    btn.innerText = "Save Changes";
   }
 }
 
