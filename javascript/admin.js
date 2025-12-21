@@ -44,6 +44,7 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         await loadListings();
         await loadRequests(); // only load requests for this user
+        await loadLostPetReports();
     }
     else {
         console.log("No user logged in");
@@ -697,6 +698,292 @@ window.openListingModal = function (category, id) {
     //#endregion
 };
 
+// DARREN
+// ---------- LOST PET REPORTS ----------
+
+let lostPetReports = [];
+
+// 1. Fetch Lost Pet Reports
+async function loadLostPetReports() {
+    // 1. Fetch all lost pet reports
+    const reportSnap = await getDocs(collection(db, "lostPets"));
+
+    if (reportSnap.empty) {
+        console.log("no lost pet reports found");
+        lostPetReports = [];
+        isLoading = false;
+        renderLostPetReports([]);
+        return;
+    }
+
+    // 2. Read raw report data
+    let rawReports = reportSnap.docs.map(docSnap => ({
+        id: docSnap.id,
+        ...docSnap.data()
+    }));
+
+    rawReports = rawReports.filter(r => r.verification_status === "Pending");
+
+    // 3. Collect unique user IDs (reporters)
+    const userIds = [...new Set(
+        rawReports
+            .map(r => r.user_id) // assuming the field storing user ID is "reportedBy"
+            .filter(Boolean)
+    )];
+
+    // 4. Fetch related users
+    const userMap = {};
+    await Promise.all(
+        userIds.map(async (userId) => {
+            const userSnap = await getDoc(doc(db, "users", userId));
+            if (userSnap.exists()) {
+                console.log("Fetched user:", userSnap.data());
+                userMap[userId] = userSnap.data();
+            }
+        })
+    );
+
+    // 5. Merge report + user
+    lostPetReports = rawReports.map(r => {
+        const user = userMap[r.user_id] || {};
+
+        let genderFull = "-";
+        if (r.gender) {
+            if (r.gender.toUpperCase() === "M") genderFull = "Male";
+            else if (r.gender.toUpperCase() === "F") genderFull = "Female";
+            else genderFull = r.gender;
+        }
+
+        // Date formatting
+        let dateReportedFormatted = "Date Unknown";
+        if (r.date_Reported && r.date_Reported.toDate) {
+            const d = r.date_Reported.toDate();
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0'); // months are 0-based
+            const dd = String(d.getDate()).padStart(2, '0');
+            dateReportedFormatted = `${yyyy}-${mm}-${dd}`;
+        }
+
+        let lastSeenDateFormatted = r.last_seen_Date || "Date Unknown";
+
+        return {
+            id: r.id,
+            status: r.verification_status ?? "Pending",
+            // report fields
+            name: r.name ?? "Unknown",
+            age: r.age ?? "-",
+            gender: genderFull,
+            animal_type: r.animal_type ?? "-",
+            breed: r.breed ?? "-",
+            description: r.description ?? "-",
+            photo: r.photo ?? "images/no-image.png",
+            last_seen_Location: r.last_seen_Location ?? "-",
+            last_seen_Date: lastSeenDateFormatted,
+            date_Reported: dateReportedFormatted,
+            // user info
+            reporterName: user.username ?? "-",
+            reporterEmail: user.email ?? "-",
+            reporterPhone: user.phone_Number ?? "-",
+            reporterID: user.identification_Number ?? "-"
+        };
+    });
+
+    isLoading = false;
+    
+}
+
+// 2. Render Lost Pet Cards
+function renderLostPetReports(list) {
+    const category = "lostPetReports";
+    container.innerHTML = "";
+
+    if (!list || list.length === 0) {
+        container.innerHTML = `<div class="request-content"><p>No lost pet reports at the moment.</p></div>`;
+        return;
+    }
+
+    list.forEach(report => {
+        const imgUrl = report.photo || 'images/no-image.png';
+        const dateReported = report.date_Reported || "Date Unknown";
+
+        // Status class for styling
+        const statusClass = `status-${report.verification_status?.toLowerCase() || 'pending'}`;
+
+        container.innerHTML += `
+        <a class="request-card-view-details" data-id="${report.id}" style="cursor:pointer;">
+            <div class="listing-card">
+                <div class="listing-card-img-container">
+                    <img src="${imgUrl}" alt="${report.name}" class="listing-card-img"/>
+                    <div class="listing-card-status">
+                        <p class="${statusClass}">
+                            ${capitalizeStatus(report.verification_status || "Pending")}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="listing-card-info-section">
+                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
+                        <p class="listing-card-animal-name" style="margin:0;">
+                            ${report.name || "Unknown"}
+                        </p>
+                        <span style="font-size:11px; color:#888; font-weight:500;">
+                            ${dateReported}
+                        </span>
+                    </div>
+
+                    <div class="listing-card-details-row">
+                        <i class="fas fa-user"></i>
+                        <span>${report.reporterName || 'Unknown'}</span>
+                    </div>
+                    
+                    <div class="listing-card-details-row">
+                        <i class="fas fa-phone-alt"></i>
+                        <span>${report.reporterPhone || 'Unknown'}</span>
+                    </div>
+
+                    <div class="listing-card-details-row">
+                        <i class="fas fa-envelope"></i>
+                        <span>${report.reporterEmail || 'Unknown'}</span>
+                    </div>
+                    
+                    <div class="listing-card-details-row">
+                        <i class="fas fa-id-card"></i>
+                        <span>${report.reporterID || 'Unknown'}</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+        `;
+    });
+
+    // Attach modal listeners
+    container.querySelectorAll(".request-card-view-details").forEach(el => {
+        el.addEventListener("click", () => openLostPetModal(el.dataset.id));
+    });
+}
+
+
+
+// 3. Modal for Lost Pet Report
+function openLostPetModal(id) {
+    const report = lostPetReports.find(r => r.id === id);
+    if (!report) return;
+
+    const modal = document.getElementById("modal");
+    const modalImg = modal.querySelector(".modalImg");
+    const infoContainer = modal.querySelector(".modal-inner-info-container");
+    const titleElement = modal.querySelector(".modal-inner-top-title h1");
+
+    if (titleElement) titleElement.innerText = report.name || "Unknown";
+    if (modalImg) modalImg.src = report.photo || 'images/no-image.png';
+
+    infoContainer.innerHTML = `
+        <div class="modal-inner-info-text">
+            <h3 id="modalName">${report.name || "Unknown"}</h3>
+        </div>
+
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="fas fa-paw"></i>
+            <p class="modal-inner-info-text-title">Type / Breed</p>
+            <span>${report.animal_type || '-'} • ${report.breed || '-'}</span>
+        </div>
+
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="fas fa-birthday-cake"></i>
+            <p class="modal-inner-info-text-title">Age</p>
+            <span>${report.age || '-'} Months</span>
+        </div>
+
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="fas fa-venus-mars"></i>
+            <p class="modal-inner-info-text-title">Gender</p>
+            <span>${report.gender || '-'}</span>
+        </div>
+
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <p class="modal-inner-info-text-title">Last Seen Location</p>
+            <span>${report.last_seen_Location || 'No location provided'}</span>
+        </div>
+
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="far fa-calendar-alt"></i>
+            <p class="modal-inner-info-text-title">Last Seen Date</p>
+            <span>${report.last_seen_Date || "Date Unknown"}</span>
+        </div>
+
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="far fa-calendar-check"></i>
+            <p class="modal-inner-info-text-title">Date Reported</p>
+            <span>${report.date_Reported || "Date Unknown"}</span>
+        </div>
+
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="fas fa-user"></i>
+            <p class="modal-inner-info-text-title">Reported By</p>
+            <span>${report.reporterName || 'Unknown'}</span>
+        </div>
+
+        <div class="modal-inner-info-text modal-detail-item">
+            <i class="fas fa-align-left"></i>
+            <p class="modal-inner-info-text-title">Description</p>
+        </div>
+        <div class="modal-inner-info-text modal-detail-item">
+            <span style="line-height: 1.5; color: #555;">${report.description || 'No description provided.'}</span>
+        </div>
+    `;
+
+    modal.classList.add("open");
+
+    // Approve/Reject Buttons (optional for admin)
+    document.getElementById("modalActions").addEventListener("click", (e) => {
+        if (e.target.dataset.action === "approve") {
+            handleLostPetDecision("lostPetReports", id, null, "Approved");
+            closeModal();
+        }
+        if (e.target.dataset.action === "reject") {
+            handleLostPetDecision("lostPetReports", id, null, "Rejected");
+            closeModal();
+        }
+    });
+}
+
+// 4. Handle Approve / Reject
+async function handleLostPetDecision(collectionName, docId, extraData = null, decision) {
+    try {
+        const docRef = doc(db, "lostPets", docId);
+
+        const updateData = {
+            verification_status: decision
+        };
+
+        // Only set status to "Lost" if approved
+        if (decision === "Approved") {
+            updateData.status = "Lost";
+        }
+
+        // Merge extra data if needed
+        if (extraData) {
+            Object.assign(updateData, extraData);
+        }
+
+        await updateDoc(docRef, updateData);
+
+        alert(`Lost pet report ${decision.toLowerCase()} successfully!`);
+
+        // Reload admin list
+        await loadLostPetReports();
+
+        // Optionally reload public listing
+        if (typeof loadLostPets === "function") {
+            loadLostPets();
+        }
+
+    } catch (err) {
+        console.error("Error updating lost pet report:", err);
+        alert("Failed to update the report. Try again.");
+    }
+}
 
 // ---------- HELPER ----------
 function capitalizeStatus(status) {
@@ -719,7 +1006,7 @@ function renderCategory(category) {
             renderRequests(unapprovedRequests); // your function
             break;
         case "lostPetReports":
-            //renderLostPetReports();
+            renderLostPetReports(lostPetReports);
             break;
         default:
             console.log("no category selected");

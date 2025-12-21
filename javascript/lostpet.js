@@ -224,7 +224,7 @@ window.openModalById = async function (id) {
   const data = allLostPets.find(l => l.id === id);
   if (!data) return;
 
-  const owner = data.user_id 
+  const owner = data.user_id
     ? await getUserById(data.user_id)
     : null;
 
@@ -297,7 +297,7 @@ window.openModalById = async function (id) {
       <i class="<fas fas fa-address-book"></i>
       <div>
         <p class="modal-inner-info-text-title">Owner Phone Number</p>
-        <span>${owner?.phone_Number|| "Unknown"}</span>
+        <span>${owner?.phone_Number || "Unknown"}</span>
       </div>
     </div>
 
@@ -380,12 +380,22 @@ async function handleAdminSave() {
   btn.innerText = "Saving...";
 
   try {
+    const verification = document.getElementById("editVerification").value;
+    let status = document.getElementById("editStatus").value;
+
+    // Only set status to "Lost" if approved
+    if (verification === "Approved") {
+      status = "Lost";
+    } else if (verification === "Rejected") {
+      status = ""; // or leave undefined
+    }
+
     await updateDoc(doc(db, "lostPets", id), {
       name: document.getElementById("editName").value,
       animal_type: document.getElementById("editType").value,
       breed: document.getElementById("editBreed").value,
-      status: document.getElementById("editStatus").value,
-      verification_status: document.getElementById("editVerification").value,
+      status: status,
+      verification_status: verification,
       last_seen_Location: document.getElementById("editLocation").value,
       description: document.getElementById("editDescription").value
     });
