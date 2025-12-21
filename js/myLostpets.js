@@ -16,19 +16,15 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-let currentUser = null;
 let myLostPets = [];
 
-/* =========================
-   AUTH CHECK
-========================= */
 onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
-  currentUser = user;
-  loadMyLostPets(user.uid);
+    if (user) {
+        loadMyLostPets(user.uid);
+    } else {
+        const grid = document.getElementById("myLostpetsGrid");
+        if(grid) grid.innerHTML = '<p class="my-lostpets-loading">Please log in to view lost pets.</p>';
+    }
 });
 
 /* =========================
@@ -62,10 +58,9 @@ async function loadMyLostPets(uid) {
             const statusA = statusOrder[a.verification_status] || 99;
             const statusB = statusOrder[b.verification_status] || 99;
             if (statusA !== statusB) return statusA - statusB;
-
-            const dateA = a.last_seen_Date ? new Date(a.last_seen_Date).getTime() : 0;
-            const dateB = b.last_seen_Date ? new Date(b.last_seen_Date).getTime() : 0;
-            return dateB - dateA;
+            const timeA = a.date_Reported && a.date_Reported.seconds ? a.cdate_Reported.seconds : 0;
+            const timeB = b.date_Reported && b.date_Reported.seconds ? b.date_Reported.seconds : 0;
+            return timeB - timeA;
         });
 
         // Render Grid
@@ -76,12 +71,12 @@ async function loadMyLostPets(uid) {
             if (statusText === "Approved") badgeClass = "badge-approved";
             else if (statusText === "Rejected") badgeClass = "badge-rejected";
 
-            const dateStr = pet.last_seen_Date 
-                ? new Date(pet.last_seen_Date).toLocaleDateString("en-GB")
+            const dateStr = pet.date_Reported 
+                ? new Date(pet.date_Reported).toLocaleDateString("en-GB")
                 : "Date Unknown";
-
+            
             const cardHTML = `
-                <div class="lostpet-item-card" data-pet-id="${pet.id}">
+              <div onclick="window.openMyLostPetModal('${pet.id}')" class="lostpet-item-card">
                     <div class="lostpet-item-img-container">
                         <img src="${pet.photo || 'images/no-image.png'}" class="lostpet-item-img">
                     </div>
@@ -99,28 +94,168 @@ async function loadMyLostPets(uid) {
             grid.innerHTML += cardHTML;
         });
 
-        // Attach event listeners to all cards
-        attachCardListeners();
-
     } catch (error) {
         console.error(error);
-        grid.innerHTML = '<p style="color:red; text-align:center;">Error loading your lost pets.</p>';
+        grid.innerHTML = '<p style="color:red; text-align:center;">Error loading your lost pet.</p>';
     }
 }
 
-/* =========================
-   ATTACH EVENT LISTENERS TO CARDS
-========================= */
-function attachCardListeners() {
-    const cards = document.querySelectorAll('.lostpet-item-card');
-    cards.forEach(card => {
-        card.addEventListener('click', function() {
-            const petId = this.getAttribute('data-pet-id');
-            openMyLostPetModal(petId);
-        });
-    });
-    console.log(`✅ Attached listeners to ${cards.length} cards`);
-}
+// 3. Open Modal (Dynamic Logic)
+window.openMyLostPetModal = function(id) {
+    const data = myLostPets.find(item => item.id === id);
+    if (!data) return;
+
+    const modal = document.getElementById("userLostPetModal");
+    
+    // Set Header Image
+    document.getElementById("modalEditImg").src = data.photo || 'images/no-image.png';
+    
+    const container = document.querySelector("#userLostPetModal .modal-inner-info-container");
+    
+    // ============================================================
+    // SCENARIO 1: STATUS IS PENDING -> SHOW EDIT FORM
+    // ============================================================
+    if (data.status === "Pending") {
+        document.getElementById("modalEditTitle").innerText = "Edit LostPet";
+        
+        const getOption = (val, current) => `<option value="${val}" ${current === val ? 'selected' : ''}>${val}</option>`;
+
+        container.innerHTML = `
+            <input type="hidden" id="editDocId" value="${data.id}">
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Animal Name</label>
+                <input type="text" id="editName" class="edit-form-input" ${required} value="${data.name}">
+            </div>
+
+            <div class="form-row-split">
+                <div class="edit-form-group form-group-half">
+                    <label class="edit-form-label">Type</label>
+                    <select id="editType" class="edit-form-input">
+                        ${getOption('Dog', data.animal_type)}
+                        ${getOption('Cat', data.animal_type)}
+                        ${getOption('Rabbit', data.animal_type)}
+                        ${getOption('Other', data.animal_type)}
+                    </select>
+                </div>
+                <div class="edit-form-group form-group-half">
+                    <label class="edit-form-label">Breed</label>
+                    <input type="text" id="editBreed" class="edit-form-input" ${required} value="${data.breed}">
+                </div>
+            </div>
+
+            <div class="form-row-split">
+                <div class="edit-form-group form-group-half">
+                    <label class="edit-form-label">Age (Months)</label>
+                    <input type="number" id="editAge" class="edit-form-input" ${required} value="${data.age}">
+                </div>
+                <div class="edit-form-group form-group-half">
+                    <label class="edit-form-label">Gender</label>
+                    <select id="editGender" class="edit-form-input">
+                        ${getOption('Male', data.gender)}
+                        ${getOption('Female', data.gender)}
+                    </select>
+                </div>
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Last Seen Location</label>
+                <input type="text" id="editLocation" class="edit-form-input" ${required} value="${data.last_seen_Location}">
+            </div>
+
+            <div class="edit-form-group">
+                    <label>Last Seen Date<span class="required">*</span></label>
+                    <input type="date" id="lastSeenDate" name="lastSeenDate" ${required} value="${data.last_seen_Date}">
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Description</label>
+                <textarea id="editDescription" class="edit-form-textarea">${data.description}</textarea>
+            </div>
+
+            <div class="edit-form-group">
+                <label class="edit-form-label">Current Status</label>
+                <div class="edit-status-text status-text-pending">Pending</div>
+            </div>
+
+            <button id="btnSaveChanges" class="btn-save-changes" onclick="saveUserLostPet()">
+                Save Changes
+            </button>
+        `;
+    } 
+    else {
+        document.getElementById("modalEditTitle").innerText = "View Details";
+        
+        let statusColor = "#000";
+        let statusBg = "#f0f0f0";
+        let displayStatus = data.status;
+
+        if(data.status === "Available") {
+            statusColor = "#166534";
+            statusBg = "#d1fae5";
+            displayStatus = "Approved"; 
+        } else if(data.status === "Rejected") {
+            statusColor = "#dc2626";
+            statusBg = "#fee2e2";
+        } else if(data.status === "Adopted") {
+            statusColor = "#0369a1";
+            statusBg = "#e0f2fe";
+        }
+
+        container.innerHTML = `
+            <h2 style="color: #164A41; margin-bottom: 15px;">${data.name}</h2>
+
+            <div class="modal-detail-item">
+                <i class="fas fa-paw"></i>
+                <div>
+                    <p class="modal-inner-info-text-title">Type</p>
+                    <span>${data.type} • ${data.breed}</span>
+                </div>
+            </div>
+
+            <div class="modal-detail-item">
+                <i class="fas fa-birthday-cake"></i>
+                <div>
+                    <p class="modal-inner-info-text-title">Age</p>
+                    <span>${data.age} months old • ${data.gender}</span>
+                </div>
+            </div>
+
+            <div class="modal-detail-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                    <p class="modal-inner-info-text-title">Location</p>
+                    <span>${data.location}</span>
+                </div>
+            </div>
+
+            <div class="modal-detail-item">
+                <i class="fas fa-syringe"></i>
+                <div>
+                    <p class="modal-inner-info-text-title">Vaccination</p>
+                    <span>${data.vaccinationStatus || 'Not Specified'}</span>
+                </div>
+            </div>
+
+            <h3 style="color: #0d3b25; font-size: 18px; font-weight: 700; margin-top: 25px; margin-bottom: 8px;">About ${data.name}</h3>
+            
+            <p style="color: #555; line-height: 1.6; font-size: 14px; margin-top: 0;">
+                ${data.description || 'No description provided.'}
+            </p>
+
+            <div style="margin-top: 25px; padding: 12px; background-color: ${statusBg}; color: ${statusColor}; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid ${statusColor};">
+                ${displayStatus}
+            </div>
+
+            
+            <p style="text-align: center; font-size: 12px; color: #888; margin-top: 5px;">
+                *You cannot edit this listing because it has been processed.
+            </p>
+        `;
+    }
+
+    modal.classList.add("open");
+};
 
 /* =========================
    OPEN MODAL (EDIT / VIEW)
