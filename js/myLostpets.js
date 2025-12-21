@@ -35,217 +35,147 @@ onAuthStateChanged(auth, (user) => {
    LOAD USER LOST PETS
 ========================= */
 async function loadMyLostPets(uid) {
-    const grid = document.getElementById("myLostpetsGrid");
-    if (!grid) return;
+  const listContainer = document.getElementById("myLostpetsGrid");
+  listContainer.innerHTML = "";
 
-    try {
-        const q = query(collection(db, "lostPets"), where("user_id", "==", uid));
-        const snapshot = await getDocs(q);
+  const q = query(
+    collection(db, "lostPets"),
+    where("user_id", "==", uid)
+  );
 
-        if (snapshot.empty) {
-            grid.innerHTML = '<p class="my-lostpets-loading">No reports submitted yet.</p>';
-            return;
-        }
+  const snapshot = await getDocs(q);
+  myLostPets = [];
 
-        grid.innerHTML = "";
-        myLostPets = [];
+  snapshot.forEach(docSnap => {
+    myLostPets.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    });
+  });
 
-        snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            data.id = docSnap.id;
-            myLostPets.push(data);
-        });
+  if (myLostPets.length === 0) {
+    listContainer.innerHTML = "<p>No reports submitted yet.</p>";
+    return;
+  }
 
-        // Sort: Pending first, then by lastSeenDate (latest first)
-        myLostPets.sort((a, b) => {
-            const statusOrder = { "Pending": 1, "Approved": 2, "Rejected": 3 };
-            const statusA = statusOrder[a.verification_status] || 99;
-            const statusB = statusOrder[b.verification_status] || 99;
-            if (statusA !== statusB) return statusA - statusB;
-
-            const dateA = a.last_seen_Date ? new Date(a.last_seen_Date).getTime() : 0;
-            const dateB = b.last_seen_Date ? new Date(b.last_seen_Date).getTime() : 0;
-            return dateB - dateA;
-        });
-
-        // Render Grid
-        myLostPets.forEach(pet => {
-            let badgeClass = "badge-pending";
-            let statusText = pet.verification_status || "Pending";
-
-            if (statusText === "Approved") badgeClass = "badge-approved";
-            else if (statusText === "Rejected") badgeClass = "badge-rejected";
-
-            const dateStr = pet.last_seen_Date 
-                ? new Date(pet.last_seen_Date).toLocaleDateString("en-GB")
-                : "Date Unknown";
-
-            const cardHTML = `
-                <div onclick="openMyLostPetModal('${pet.id}')" class="lostpet-item-card">
-                    <div class="lostpet-item-img-container">
-                        <img src="${pet.photo || 'images/no-image.png'}" class="lostpet-item-img">
-                    </div>
-                    <div class="lostpet-item-content">
-                        <h3 class="lostpet-item-title">${pet.name}</h3>
-                        <p class="lostpet-item-meta">${pet.animal_type || "Unknown"} • ${dateStr}</p>
-                    </div>
-                    <div class="lostpet-item-badge-container">
-                        <span class="lostpet-item-badge ${badgeClass}">
-                            ${statusText}
-                        </span>
-                    </div>
-                </div>
-            `;
-            grid.innerHTML += cardHTML;
-        });
-
-    } catch (error) {
-        console.error(error);
-        grid.innerHTML = '<p style="color:red; text-align:center;">Error loading your lost pets.</p>';
-    }
+  myLostPets.forEach(pet => {
+    listContainer.appendChild(createPetCard(pet));
+  });
 }
 
+/* =========================
+   CREATE PET CARD
+========================= */
+function createPetCard(pet) {
+  const card = document.createElement("div");
+  card.className = "my-lostpets-card";
+
+  let badgeClass = "badge-pending";
+  if (pet.verification_status === "Approved") badgeClass = "badge-approved";
+  if (pet.verification_status === "Rejected") badgeClass = "badge-rejected";
+
+  card.innerHTML = `
+    <img src="${pet.photo || 'images/no-image.png'}" alt="Pet Image">
+
+    <div class="my-lost-pets-card-content">
+      <h3>${pet.name}</h3>
+
+      <span class="status-badge ${badgeClass}">
+        ${pet.verification_status || "Pending"}
+      </span>
+
+      <p><strong>Status:</strong> ${pet.status}</p>
+
+      <div class="card-actions">
+        <button onclick="openMyPetModal('${pet.id}')">
+          ${pet.verification_status === "Pending" ? "Edit" : "View"}
+        </button>
+      </div>
+    </div>
+  `;
+
+  return card;
+}
 
 /* =========================
    OPEN MODAL (EDIT / VIEW)
 ========================= */
-window.openMyLostPetModal = function (id) {
-  console.log("🔍 Opening modal for pet ID:", id);
-  
+window.openMyPetModal = function (id) {
   const pet = myLostPets.find(p => p.id === id);
-  if (!pet) {
-    console.error("❌ Pet not found:", id);
-    alert("Pet not found!");
-    return;
-  }
-  
-  console.log("✅ Found pet:", pet);
+  if (!pet) return;
 
-  // Get modal element first to check if it exists
-  const modal = document.getElementById("myLostPet-modal");
-  if (!modal) {
-    console.error("❌ Modal element not found!");
-    alert("Modal element not found in HTML!");
-    return;
-  }
+  document.getElementById("modalPetId").value = pet.id;
+  document.getElementById("petName").value = pet.name || "";
+  document.getElementById("animalType").value = pet.animal_type || "";
+  document.getElementById("breed").value = pet.breed || "";
+  document.getElementById("age").value = pet.age || "";
+  document.getElementById("gender").value = pet.gender || "";
+  document.getElementById("lastSeenLocation").value = pet.last_seen_Location || "";
+  document.getElementById("lastSeenDate").value = pet.last_seen_Date || "";
+  document.getElementById("description").value = pet.description || "";
 
-  // Populate fields
-  try {
-    document.getElementById("myLostPet-modalPetId").value = pet.id;
-    document.getElementById("myLostPet-petName").value = pet.name || "";
-    document.getElementById("myLostPet-animalType").value = pet.animal_type || "";
-    document.getElementById("myLostPet-breed").value = pet.breed || "";
-    document.getElementById("myLostPet-age").value = pet.age || "";
-    document.getElementById("myLostPet-genderSelect").value = pet.gender || "";
-    document.getElementById("myLostPet-lastSeenLocation").value = pet.last_seen_Location || "";
-    document.getElementById("myLostPet-lastSeenDate").value = pet.last_seen_Date || "";
-    document.getElementById("myLostPet-description").value = pet.description || "";
-    document.getElementById("myLostPet-verificationStatus").value = pet.verification_status || "Pending";
-    
-    // Set photo
-    const photoElement = document.getElementById("myLostPet-petPhoto");
-    if (photoElement) {
-      photoElement.src = pet.photo || 'images/no-image.png';
-    }
-    
-    console.log("✅ All fields populated");
-  } catch (error) {
-    console.error("❌ Error populating fields:", error);
-    alert("Error loading pet data: " + error.message);
-    return;
-  }
-
-  // Check if editable
   const isEditable = pet.verification_status === "Pending";
-  console.log("📝 Is editable:", isEditable, "Status:", pet.verification_status);
 
-  toggleMyLostPetFormEditable(isEditable);
+  toggleFormEditable(isEditable);
 
-  // Update modal title
-  document.getElementById("myLostPet-modalTitle").innerText =
+  document.getElementById("modalTitle").innerText =
     isEditable ? "Edit Lost Pet" : "View Lost Pet";
 
-  // Show/hide save button
-  const saveBtn = document.getElementById("myLostPet-saveBtn");
-  saveBtn.style.display = isEditable ? "inline-block" : "none";
+  document.getElementById("saveBtn").style.display =
+    isEditable ? "inline-block" : "none";
 
-  // Open modal
-  modal.classList.add("open");
-  console.log("✅ Modal opened, classes:", modal.className);
-  console.log("🎉 Modal should be visible now");
+  document.getElementById("myPetModal").classList.add("open");
 };
 
 /* =========================
    TOGGLE FORM EDIT MODE
 ========================= */
-function toggleMyLostPetFormEditable(editable) {
-  const inputs = document.querySelectorAll(
-    "#myLostPet-modal input:not(#myLostPet-modalPetId):not(#myLostPet-verificationStatus), " +
-    "#myLostPet-modal textarea, " +
-    "#myLostPet-modal select"
-  );
-  inputs.forEach(input => {
-    input.disabled = !editable;
-  });
-  console.log(`🔒 Form fields ${editable ? 'enabled' : 'disabled'}`);
+function toggleFormEditable(editable) {
+  const inputs = document.querySelectorAll("#myPetModal input, #myPetModal textarea, #myPetModal select");
+  inputs.forEach(input => input.disabled = !editable);
 }
 
 /* =========================
    SAVE UPDATE (PENDING ONLY)
 ========================= */
-window.saveMyLostPetChanges = async function () {
-  const petId = document.getElementById("myLostPet-modalPetId").value;
-  if (!petId) {
-    alert("No pet ID found.");
+window.saveMyPetChanges = async function () {
+  const petId = document.getElementById("modalPetId").value;
+  if (!petId) return;
+
+  const petRef = doc(db, "lostPets", petId);
+  const snap = await getDoc(petRef);
+
+  if (!snap.exists()) {
+    alert("Lost Pets not found.");
     return;
   }
 
-  console.log("💾 Saving changes for pet:", petId);
-
-  try {
-    const petRef = doc(db, "lostPets", petId);
-    const snap = await getDoc(petRef);
-
-    if (!snap.exists()) {
-      alert("Lost Pet not found.");
-      return;
-    }
-
-    if (snap.data().verification_status !== "Pending") {
-      alert("This report has already been processed and cannot be edited.");
-      closeMyLostPetModal();
-      loadMyLostPets(currentUser.uid);
-      return;
-    }
-
-    await updateDoc(petRef, {
-      name: document.getElementById("myLostPet-petName").value,
-      animal_type: document.getElementById("myLostPet-animalType").value,
-      breed: document.getElementById("myLostPet-breed").value,
-      age: parseInt(document.getElementById("myLostPet-age").value) || 0,
-      gender: document.getElementById("myLostPet-genderSelect").value,
-      last_seen_Location: document.getElementById("myLostPet-lastSeenLocation").value,
-      last_seen_Date: document.getElementById("myLostPet-lastSeenDate").value,
-      description: document.getElementById("myLostPet-description").value
-    });
-
-    console.log("✅ Report updated successfully");
-    alert("Report updated successfully!");
-    closeMyLostPetModal();
+  if (snap.data().verification_status !== "Pending") {
+    alert("This report has already been processed.");
+    closeMyPetModal();
     loadMyLostPets(currentUser.uid);
-  } catch (error) {
-    console.error("❌ Error saving changes:", error);
-    alert("Error saving changes: " + error.message);
+    return;
   }
+
+  await updateDoc(petRef, {
+    name: document.getElementById("petName").value,
+    animal_type: document.getElementById("animalType").value,
+    breed: document.getElementById("breed").value,
+    age: document.getElementById("age").value,
+    gender: document.getElementById("gender").value,
+    last_seen_Location: document.getElementById("lastSeenLocation").value,
+    last_seen_Date: document.getElementById("lastSeenDate").value,
+    description: document.getElementById("description").value
+  });
+
+  alert("Report updated successfully.");
+  closeMyPetModal();
+  loadMyLostPets(currentUser.uid);
 };
 
 /* =========================
    CLOSE MODAL
 ========================= */
-window.closeMyLostPetModal = function () {
-  const modal = document.getElementById("myLostPet-modal");
-  if (modal) {
-    modal.classList.remove("open");
-    console.log("❌ Modal closed");
-  }
+window.closeMyPetModal = function () {
+  document.getElementById("myPetModal").classList.remove("open");
 };
