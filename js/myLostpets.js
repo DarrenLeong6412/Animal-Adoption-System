@@ -23,12 +23,12 @@ let myLostPets = [];
    AUTH CHECK
 ========================= */
 onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
-  currentUser = user;
-  loadMyLostPets(user.uid);
+  if (user) {
+        loadMyLostPet(user.uid);
+    } else {
+        const grid = document.getElementById("myLostPetGrid");
+        if(grid) grid.innerHTML = '<p class="my-listings-loading">Please log in to view listings.</p>';
+    }
 });
 
 /* =========================
@@ -81,7 +81,7 @@ async function loadMyLostPets(uid) {
                 : "Date Unknown";
 
             const cardHTML = `
-                <div onclick="openMyLostPetModal('${pet.id}')" class="lostpet-item-card">
+                <div class="lostpet-item-card" data-pet-id="${pet.id}">
                     <div class="lostpet-item-img-container">
                         <img src="${pet.photo || 'images/no-image.png'}" class="lostpet-item-img">
                     </div>
@@ -99,17 +99,33 @@ async function loadMyLostPets(uid) {
             grid.innerHTML += cardHTML;
         });
 
+        // Attach event listeners to all cards
+        attachCardListeners();
+
     } catch (error) {
         console.error(error);
         grid.innerHTML = '<p style="color:red; text-align:center;">Error loading your lost pets.</p>';
     }
 }
 
+/* =========================
+   ATTACH EVENT LISTENERS TO CARDS
+========================= */
+function attachCardListeners() {
+    const cards = document.querySelectorAll('.lostpet-item-card');
+    cards.forEach(card => {
+        card.addEventListener('click', function() {
+            const petId = this.getAttribute('data-pet-id');
+            openMyLostPetModal(petId);
+        });
+    });
+    console.log(`✅ Attached listeners to ${cards.length} cards`);
+}
 
 /* =========================
    OPEN MODAL (EDIT / VIEW)
 ========================= */
-window.openMyLostPetModal = function (id) {
+function openMyLostPetModal(id) {
   console.log("🔍 Opening modal for pet ID:", id);
   
   const pet = myLostPets.find(p => p.id === id);
@@ -173,7 +189,7 @@ window.openMyLostPetModal = function (id) {
   modal.classList.add("open");
   console.log("✅ Modal opened, classes:", modal.className);
   console.log("🎉 Modal should be visible now");
-};
+}
 
 /* =========================
    TOGGLE FORM EDIT MODE
@@ -193,7 +209,7 @@ function toggleMyLostPetFormEditable(editable) {
 /* =========================
    SAVE UPDATE (PENDING ONLY)
 ========================= */
-window.saveMyLostPetChanges = async function () {
+async function saveMyLostPetChanges() {
   const petId = document.getElementById("myLostPet-modalPetId").value;
   if (!petId) {
     alert("No pet ID found.");
@@ -237,15 +253,50 @@ window.saveMyLostPetChanges = async function () {
     console.error("❌ Error saving changes:", error);
     alert("Error saving changes: " + error.message);
   }
-};
+}
 
 /* =========================
    CLOSE MODAL
 ========================= */
-window.closeMyLostPetModal = function () {
+function closeMyLostPetModal() {
   const modal = document.getElementById("myLostPet-modal");
   if (modal) {
     modal.classList.remove("open");
     console.log("❌ Modal closed");
   }
-};
+}
+
+/* =========================
+   ATTACH BUTTON EVENT LISTENERS (on page load)
+========================= */
+document.addEventListener('DOMContentLoaded', function() {
+  console.log("📄 DOM loaded, attaching button listeners");
+
+  // Save button
+  const saveBtn = document.getElementById("myLostPet-saveBtn");
+  if (saveBtn) {
+    saveBtn.addEventListener('click', saveMyLostPetChanges);
+    console.log("✅ Save button listener attached");
+  }
+
+  // Close button (X icon)
+  const closeBtn = document.querySelector('#myLostPet-modal .modal-inner-top-exit a');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      closeMyLostPetModal();
+    });
+    console.log("✅ Close button listener attached");
+  }
+
+  // Close on background click
+  const modal = document.getElementById("myLostPet-modal");
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeMyLostPetModal();
+      }
+    });
+    console.log("✅ Background click listener attached");
+  }
+});
