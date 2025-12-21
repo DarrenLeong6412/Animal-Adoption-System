@@ -274,36 +274,88 @@ window.closeUserModal = function() {
     document.getElementById("userListingModal").classList.remove("open");
 };
 
-// 5. Save Changes
+// 5. Save Changes (With Strict Validation)
 window.saveUserListing = async function() {
     const id = document.getElementById("editDocId").value;
     const btn = document.getElementById("btnSaveChanges");
-    
-    const name = document.getElementById('editName').value;
-    if(!name) { alert("Name is required"); return; }
 
-    const currentDoc = await getDoc(doc(db, "animals", id));
-    if (currentDoc.exists() && currentDoc.data().status !== "Pending") {
-        alert("This listing is no longer Pending and cannot be edited.");
-        closeUserModal();
-        loadUserListings(auth.currentUser.uid);
+    // --- 1. GET VALUES ---
+    const nameVal = document.getElementById('editName').value.trim();
+    const breedVal = document.getElementById('editBreed').value.trim();
+    const locVal = document.getElementById('editLocation').value.trim();
+    const descVal = document.getElementById('editDescription').value.trim();
+    const ageInput = document.getElementById('editAge').value;
+    const typeVal = document.getElementById('editType').value;
+    const genderVal = document.getElementById('editGender').value;
+    const vaccineVal = document.getElementById('editVaccine').value;
+
+    // --- 2. VALIDATION CHECKS (Matches addListing.js) ---
+    
+    // Name Validation
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (nameVal.length < 1) {
+        alert("Invalid Name: Please enter a name.");
+        return;
+    }
+    if (!nameRegex.test(nameVal)) {
+        alert("Invalid Name: Name must contain only alphabets (no numbers or symbols).");
         return;
     }
 
+    // Location Validation
+    if (locVal.length < 3) {
+        alert("Invalid Location: Please provide a specific location.");
+        return;
+    }
+
+    // Description Validation
+    if (descVal.length < 10) {
+        alert("Description too short: Please provide at least 10 characters describing the animal.");
+        return;
+    }
+
+    // Age Validation
+    const ageInt = parseInt(ageInput);
+    if (isNaN(ageInt) || ageInt < 0) {
+        alert("Invalid Age: Age cannot be negative.");
+        return; 
+    }
+    if (ageInt > 300) { 
+        alert("Invalid Age: Please check the age (value seems too high for months).");
+        return;
+    }
+
+    // --- 3. FIREBASE STATUS CHECK ---
+    // Ensure the item is still Pending before writing
+    try {
+        const currentDoc = await getDoc(doc(db, "animals", id));
+        if (currentDoc.exists() && currentDoc.data().status !== "Pending") {
+            alert("This listing is no longer Pending and cannot be edited.");
+            closeUserModal();
+            loadUserListings(auth.currentUser.uid);
+            return;
+        }
+    } catch (err) {
+        console.error("Error checking status:", err);
+        return;
+    }
+
+    // --- 4. UPDATE FIRESTORE ---
     btn.innerText = "Saving...";
     btn.disabled = true;
 
     try {
         const docRef = doc(db, "animals", id);
+        
         await updateDoc(docRef, {
-            name: name,
-            type: document.getElementById('editType').value,
-            breed: document.getElementById('editBreed').value,
-            age: document.getElementById('editAge').value,
-            gender: document.getElementById('editGender').value,
-            location: document.getElementById('editLocation').value,
-            vaccinationStatus: document.getElementById('editVaccine').value,
-            description: document.getElementById('editDescription').value
+            name: nameVal,
+            type: typeVal,
+            breed: breedVal || "Unknown",
+            age: ageInt.toString(), // Store as string to match addListing format
+            gender: genderVal,
+            location: locVal,
+            vaccinationStatus: vaccineVal,
+            description: descVal
         });
 
         alert("Listing updated successfully!");

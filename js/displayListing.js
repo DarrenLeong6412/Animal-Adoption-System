@@ -369,39 +369,89 @@ window.editListing = function (id) {
     document.getElementById("animalModal").classList.add("open");
 };
 
-// 3. HANDLE SAVE
+// 3. HANDLE SAVE (With Strict Validation)
 async function handleSaveChanges() {
     const id = document.getElementById("editDocId").value;
     const btn = document.getElementById("saveChangesBtn");
-    const newName = document.getElementById('editName').value;
 
-    if (!newName) { alert("Name is required"); return; }
+    // --- 1. GET VALUES ---
+    const nameVal = document.getElementById('editName').value.trim();
+    const breedVal = document.getElementById('editBreed').value.trim();
+    const locVal = document.getElementById('editLocation').value.trim();
+    const descVal = document.getElementById('editDescription').value.trim();
+    const ageInput = document.getElementById('editAge').value;
+    
+    // Dropdown values
+    const typeVal = document.getElementById('editType').value;
+    const genderVal = document.getElementById('editGender').value;
+    const vaccineVal = document.getElementById('editVaccine').value;
 
+    // --- 2. VALIDATION CHECKS ---
+
+    // A. Name Validation
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (nameVal.length < 1) {
+        alert("Invalid Name: Please enter a name.");
+        return;
+    }
+    if (!nameRegex.test(nameVal)) {
+        alert("Invalid Name: Name must contain only alphabets (no numbers or symbols).");
+        return;
+    }
+
+    // B. Location Validation
+    if (locVal.length < 3) {
+        alert("Invalid Location: Please provide a specific location.");
+        return;
+    }
+
+    // C. Description Validation
+    if (descVal.length < 10) {
+        alert("Description too short: Please provide at least 10 characters describing the animal.");
+        return;
+    }
+
+    // D. Age Validation
+    const ageInt = parseInt(ageInput);
+    if (isNaN(ageInt) || ageInt < 0) {
+        alert("Invalid Age: Age cannot be negative.");
+        return; 
+    }
+    if (ageInt > 300) { 
+        alert("Invalid Age: Please check the age (value seems too high for months).");
+        return;
+    }
+
+    // --- 3. EXECUTE UPDATE ---
     btn.innerText = "Saving...";
     btn.disabled = true;
 
     try {
         const docRef = doc(db, "animals", id);
+        
         await updateDoc(docRef, {
-            name: newName,
-            type: document.getElementById('editType').value,
-            breed: document.getElementById('editBreed').value,
-            age: document.getElementById('editAge').value,
-            gender: document.getElementById('editGender').value,
-            location: document.getElementById('editLocation').value,
-            vaccinationStatus: document.getElementById('editVaccine').value,
-            description: document.getElementById('editDescription').value
+            name: nameVal,
+            type: typeVal,
+            breed: breedVal || "Unknown", // Default to Unknown if empty
+            age: ageInt.toString(),       // Store as string to remain consistent with addListing
+            gender: genderVal,
+            location: locVal,
+            vaccinationStatus: vaccineVal,
+            description: descVal
         });
 
         alert("Listing updated successfully!");
         document.getElementById('animalModal').classList.remove('open');
-        loadAnimals();
+        loadAnimals(); // Refresh the grid to show new changes
+
     } catch (error) {
         console.error("Update failed", error);
         alert("Update failed: " + error.message);
     } finally {
-        btn.innerText = "Save Changes";
-        btn.disabled = false;
+        if (btn) {
+            btn.innerText = "Save Changes";
+            btn.disabled = false;
+        }
     }
 }
 
