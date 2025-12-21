@@ -1617,8 +1617,8 @@ p.subtitle {
     text-align: center;
 }
 
-#myLostPet-modal {
-    background-color: rgba(0, 0, 0, 0.3);
+#userLostPet-modal {
+    background-color: rgba(2, 2, 2, 0.3);
     position: fixed;
     top: 0;
     left: 0;
@@ -1632,12 +1632,12 @@ p.subtitle {
     justify-content: center;
 }
 
-#myLostPet-modal.open {
+#userLostPet-modal.open {
     opacity: 1;
     z-index: 999 !important;
 }
 
-#myLostPet-modal .modal-inner {
+#userLostPet-modal .modal-inner {
     background-color: white;
     max-width: 900px;
     width: 90%;
@@ -1651,7 +1651,7 @@ p.subtitle {
 }
 
 /* Ensure verification status field looks disabled */
-#myLostPet-verificationStatus {
+#userLostPet-verificationStatus {
     background-color: #f3f4f6 !important;
     cursor: not-allowed;
     color: #6b7280;
@@ -1659,9 +1659,9 @@ p.subtitle {
 }
 
 /* Disabled state for non-editable fields */
-#myLostPet-modal input:disabled,
-#myLostPet-modal textarea:disabled,
-#myLostPet-modal select:disabled {
+#userLostPet-modal input:disabled,
+#userLostPet-modal textarea:disabled,
+#userLostPet-modal select:disabled {
     background-color: #f9fafb;
     border-color: #e5e7eb;
     cursor: not-allowed;

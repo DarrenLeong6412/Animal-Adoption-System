@@ -142,7 +142,6 @@ window.openUserListingModal = function(id) {
                         ${getOption('Dog', data.type)}
                         ${getOption('Cat', data.type)}
                         ${getOption('Rabbit', data.type)}
-                        ${getOption('Bird', data.type)}
                         ${getOption('Other', data.type)}
                     </select>
                 </div>
