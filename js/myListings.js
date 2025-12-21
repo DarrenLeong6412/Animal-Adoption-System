@@ -55,7 +55,7 @@ async function loadUserListings(userId) {
 
         // Sort: Pending first, then by date
         myUserListings.sort((a, b) => {
-            const statusOrder = { "Pending": 1, "Available": 2, "Adopted": 3, "Rejected": 4};
+            const statusOrder = { "Pending": 1, "Available": 2, "Rejected": 3 };
             const statusA = statusOrder[a.status] || 99;
             const statusB = statusOrder[b.status] || 99;
             if (statusA !== statusB) return statusA - statusB;
@@ -75,9 +75,6 @@ async function loadUserListings(userId) {
             } else if (data.status === "Rejected") {
                 badgeClass = "badge-rejected";
                 statusText = "Rejected";
-            } else if (data.status === "Adopted") {
-                badgeClass = "badge-adopted";
-                statusText = "Adopted";
             }
 
             const dateStr = data.createdAt && data.createdAt.seconds 
@@ -127,6 +124,7 @@ window.openUserListingModal = function(id) {
     if (data.status === "Pending") {
         document.getElementById("modalEditTitle").innerText = "Edit Listing";
         
+        // Helper for Selects
         const getOption = (val, current) => `<option value="${val}" ${current === val ? 'selected' : ''}>${val}</option>`;
 
         container.innerHTML = `
@@ -200,21 +198,9 @@ window.openUserListingModal = function(id) {
     else {
         document.getElementById("modalEditTitle").innerText = "View Details";
         
-        let statusColor = "#000";
-        let statusBg = "#f0f0f0";
-        let displayStatus = data.status;
-
-        if(data.status === "Available") {
-            statusColor = "#166534";
-            statusBg = "#d1fae5";
-            displayStatus = "Approved";
-        } else if(data.status === "Rejected") {
-            statusColor = "#dc2626";
-            statusBg = "#fee2e2";
-        } else if(data.status === "Adopted") {
-            statusColor = "#0369a1";
-            statusBg = "#e0f2fe";
-        }
+        let statusColor = data.status === "Available" ? "#166534" : "#dc2626"; 
+        let statusBg = data.status === "Available" ? "#d1fae5" : "#fee2e2";
+        let displayStatus = data.status === "Available" ? "Approved" : "Rejected";
 
         container.innerHTML = `
             <h2 style="color: #164A41; margin-bottom: 15px;">${data.name}</h2>
@@ -281,9 +267,11 @@ window.saveUserListing = async function() {
     const id = document.getElementById("editDocId").value;
     const btn = document.getElementById("btnSaveChanges");
     
+    // Validation
     const name = document.getElementById('editName').value;
     if(!name) { alert("Name is required"); return; }
 
+    // Double check status before saving (Security)
     const currentDoc = await getDoc(doc(db, "animals", id));
     if (currentDoc.exists() && currentDoc.data().status !== "Pending") {
         alert("This listing is no longer Pending and cannot be edited.");

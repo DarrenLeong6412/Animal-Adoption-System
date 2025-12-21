@@ -22,10 +22,18 @@ const auth = getAuth(app);
 
 let adoptionChart = null;
 const yearSelect = document.getElementById("yearSelect");
-let dateSortOrder = "desc"; // "desc" = most recent first, "asc" = oldest first
 
 const tableWrapper = document.getElementById("report-table-wrapper");
+const categoryButtons = document.querySelectorAll('input[name="report-category-button"]');
 let currentCategory = "adoptedAnimals";
+
+// Event listener for category filter
+categoryButtons.forEach(input => {
+    input.addEventListener("change", () => {
+        currentCategory = input.id;
+        renderReport(currentCategory);
+    });
+});
 
 // Check login
 onAuthStateChanged(auth, (user) => {
@@ -135,12 +143,7 @@ function renderTable(category, data) {
     const headers = [
         "Animal Name",
         "Type / Breed",
-        `
-        <span id="dateHeader" style="cursor:pointer;">
-            Date Applied
-            <span id="dateArrow">${dateSortOrder === "desc" ? "▼" : "▲"}</span>
-        </span>
-        `,
+        "Date Applied",
         "Name of Adopter",
         "Status",
         "Details"
@@ -183,25 +186,6 @@ function renderTable(category, data) {
             await openModal(cat, id);
         });
     });
-
-    const dateHeader = document.getElementById("dateHeader");
-    if (dateHeader) {
-        dateHeader.onclick = () => {
-            // Toggle sort order
-            dateSortOrder = dateSortOrder === "desc" ? "asc" : "desc";
-
-            // Sort data in-place
-            data.sort((a, b) => {
-                if (!a.dateAppliedRaw || !b.dateAppliedRaw) return 0;
-                return dateSortOrder === "desc"
-                    ? b.dateAppliedRaw - a.dateAppliedRaw
-                    : a.dateAppliedRaw - b.dateAppliedRaw;
-            });
-
-            // Re-render table
-            renderTable(category, data);
-        };
-    }
 }
 
 // ---------- OPEN MODAL ----------
