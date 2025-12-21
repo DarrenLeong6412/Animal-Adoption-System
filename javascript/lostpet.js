@@ -1,12 +1,18 @@
-// js/lostpet.js
-
+// javascript/lostpet.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-import { 
-  getFirestore, collection, addDoc, getDocs, serverTimestamp, query, orderBy 
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  doc,
+  deleteDoc,
+  updateDoc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// ===== FIREBASE CONFIG =====
 const firebaseConfig = {
   apiKey: "AIzaSyCy5YAmmb1aTnWiXljQr3yOVsTKmYPAS08",
   authDomain: "pet-adoption-system-cf9f7.firebaseapp.com",
@@ -17,282 +23,406 @@ const firebaseConfig = {
   measurementId: "G-RZQDCB3V2C"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-// ===== GLOBAL VARIABLES =====
-let allLostPets = [];
 let currentUser = null;
-let base64Image = "";
+let isAdmin = false;
+let allLostPets = [];
 
-// ===== DOM ELEMENTS =====
-const grid = document.getElementById("lostpetGrid");
-const countText = document.getElementById("countText");
-const searchInput = document.getElementById("searchInput");
-const createBtn = document.getElementById("createLostPetBtn");
-const modal = document.getElementById("lostPetFormModal");
-const closeModalBtn = document.getElementById("closeLostPetModal");
-const addLostPetForm = document.getElementById("addLostPetForm");
-const fileInput = document.getElementById("fileInput");
-const previewImg = document.getElementById("previewImg");
-
-// ===== ANIMAL TYPE OTHER FIELD TOGGLE =====
-const animalTypeSelect = document.getElementById("animalType");
-const animalTypeOtherInput = document.getElementById("animalTypeOther");
-
-if (animalTypeSelect && animalTypeOtherInput) {
-  animalTypeSelect.addEventListener("change", function() {
-    if (this.value === "Other") {
-      animalTypeOtherInput.style.display = "block";
-      animalTypeOtherInput.required = true;
-    } else {
-      animalTypeOtherInput.style.display = "none";
-      animalTypeOtherInput.required = false;
-      animalTypeOtherInput.value = "";
-    }
-  });
-}
-
-// =================== AUTH STATE ===================
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   currentUser = user;
-  console.log("Auth state changed:", user ? user.email : "Not logged in");
+  if (user) {
+    await checkAdminStatus(user.uid);
+  }
+  loadLostPets();
 });
 
-// =================== FETCH LOST PETS ===================
-async function fetchLostPets() {
-  grid.innerHTML = "<p style='text-align:center; color:#666; padding:40px;'>Loading lost pet reports...</p>";
+async function getUserById(uid) {
+  const userRef = doc(db, "users", uid);
+  const snap = await getDoc(userRef);
+  return snap.exists() ? snap.data() : null;
+}
 
+async function checkAdminStatus(uid) {
   try {
-    const q = query(collection(db, "lostPets"), orderBy("date_Reported", "desc"));
-    const snapshot = await getDocs(q);
-
-    allLostPets = snapshot.docs.map(doc => ({
-      lostpet_id: doc.id,
-      ...doc.data()
-    }));
-
-    console.log("Fetched lost pets:", allLostPets.length);
-    renderLostPets(allLostPets);
-  } catch (err) {
-    console.error("Error fetching lost pets:", err);
-    grid.innerHTML = "<p style='color:red; text-align:center; padding:40px;'>Error loading lost pets. Please try again.</p>";
+    const userDoc = await getDoc(doc(db, "users", uid));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const role = (userData.role || "").toLowerCase();
+      if (role === "admin") {
+        isAdmin = true;
+      }
+    }
+  } catch (error) {
+    console.error("Error checking admin status:", error);
   }
 }
 
-// =================== RENDER LOST PETS ===================
-function renderLostPets(list) {
+async function loadLostPets() {
+  const grid = document.getElementById("lostpet-grid");
+  grid.innerHTML = '<p style="text-align:center; width:100%;">Loading Lost Pets...</p>';
+
+  try {
+    const q = query(collection(db, "lostPets"), orderBy("date_Reported", "asc"));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      grid.innerHTML = '<p>No Lost petsright now.</p>';
+      return;
+    }
+
+    allLostPets = [];
+    querySnapshot.forEach((doc) => {
+      let data = doc.data();
+      data.id = doc.id;
+
+      if (data.date_Reported && data.date_Reported.seconds) {
+        const dateObj = new Date(data.date_Reported.seconds * 1000);
+        data.formattedDate = dateObj.toLocaleDateString("en-GB", {
+          day: 'numeric', month: 'short', year: 'numeric'
+        });
+      } else {
+        data.formattedDate = "Date Unknown";
+      }
+
+      allLostPets.push(data);
+    });
+
+    filterAndRender();
+    setupFilters();
+
+  } catch (error) {
+    console.error("Error:", error);
+    grid.innerHTML = '<p style="color:red;">Error loading data.</p>';
+  }
+}
+
+function renderGrid(dataList) {
+  const grid = document.getElementById("lostpet-grid");
   grid.innerHTML = "";
-  
-  if (list.length === 0) {
-    grid.innerHTML = "<p style='text-align:center; color:#666; padding:40px;'>No lost pet reports found.</p>";
-    countText.innerText = "Showing 0 reports";
+
+  const publicList = dataList.filter(lostPet => lostPet.status === "Lost");
+
+  if (publicList.length === 0) {
+    grid.innerHTML = '<p style="text-align:center; width:100%; padding:20px;">No Lost Pets found matching your criteria.</p>';
     return;
   }
 
-  list.forEach(pet => {
+  publicList.forEach((lostPet) => {
+    let badgeStyle = "background-color: #ed2525ff; color: white;";
+    let statusText = "Lost";
+    const breedDisplay = lostPet.breed ? `${lostPet.type} • ${lostPet.breed}` : lostPet.type;
+
+    let adminMenu = "";
+    if (isAdmin) {
+      adminMenu = `
+                <div class="card-menu" onclick="event.stopPropagation()">
+                    <div class="menu-icon" onclick="toggleMenu('${lostPet.id}')">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </div>
+                    <div id="menu-${lostPet.id}" class="menu-dropdown">
+                        <div onclick="editLostPet('${lostPet.id}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </div>
+                        <div onclick="deleteLostPet('${lostPet.id}')" style="color: #dc2626;">
+                            <i class="fas fa-trash"></i> Delete
+                        </div>
+                    </div>
+                </div>
+            `;
+    }
+
     const cardHTML = `
-      <div class="lostpet-card">
-        <div class="lostpet-card-img-container">
-          <img src="${pet.photo || 'images/default-pet.jpg'}" alt="${pet.name}" class="lostpet-card-img">
-          <div class="lostpet-card-status">
-            <p class="${pet.status === 'Lost' ? '' : 'status-pending'}">${pet.status || 'Lost'}</p>
-          </div>
-        </div>
-        <div class="lostpet-card-info-section">
-          <div class="lostpet-card-info">
-            <p class="lostpet-card-animal-name">${pet.name}</p>
-            <p>${pet.animal_type} • ${pet.breed || "Unknown"} • ${pet.gender}</p>
-            <p><strong>Last seen:</strong> ${pet.last_seen_Location}</p>
-            <p><strong>Date:</strong> ${pet.last_seen_Date}</p>
-          </div>
-        </div>
+  <div class="lostpet-card" onclick="openModalById('${lostPet.id}')" style="position: relative;">
+    
+    <div class="lostpet-card-img-container">
+      ${adminMenu}
+      <img src="${lostPet.photo}" alt="${lostPet.name}" class="lostpet-card-img">
+      
+      <div class="lostpet-card-status">
+        <p style="${badgeStyle}">${statusText}</p>
       </div>
-    `;
+    </div>
+
+    <div class="lostpet-card-info-section">
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
+        <p class="lostpet-card-animal-name" style="margin:0;">
+          ${lostPet.name}
+        </p>
+        <span style="font-size:11px; color:#888; font-weight:500;">
+          ${lostPet.formattedDate || "Date Unknown"}
+        </span>
+      </div>
+
+      <p>
+        ${lostPet.animal_type}
+        ${lostPet.breed ? " • " + lostPet.breed : ""}
+        ${lostPet.age ? " • " + lostPet.age + " Months" : ""}
+        ${lostPet.gender ? " • " + lostPet.gender : ""}
+      </p>
+
+      <div class="lostpet-card-details-row">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>${lostPet.last_seen_Location}</span>
+      </div>
+
+    </div>
+  </div>
+`;
+
     grid.innerHTML += cardHTML;
-  });
 
-  countText.innerText = `Showing ${list.length} report${list.length !== 1 ? "s" : ""}`;
-}
-
-// =================== LIVE SEARCH ===================
-if (searchInput) {
-  searchInput.addEventListener("input", () => {
-    const queryText = searchInput.value.toLowerCase();
-    const filtered = allLostPets.filter(pet =>
-      [pet.name, pet.animal_type, pet.breed, pet.gender, pet.last_seen_Location]
-        .some(field => field?.toLowerCase().includes(queryText))
-    );
-
-    renderLostPets(filtered);
   });
 }
 
-// =================== CREATE LOST PET MODAL ===================
-if (createBtn) {
-  createBtn.addEventListener("click", () => {
-    console.log("Create button clicked, user:", currentUser);
-    
-    if (!currentUser) {
-      alert("Please login first to create a lost pet report.");
-      window.location.href = "login.html";
-      return;
-    }
-    
-    modal.classList.add("open");
+window.toggleMenu = function (id) {
+  document.querySelectorAll('.menu-dropdown').forEach(el => {
+    if (el.id !== `menu-${id}`) el.style.display = 'none';
   });
-}
+  const menu = document.getElementById(`menu-${id}`);
+  if (menu) {
+    menu.style.display = (menu.style.display === "block") ? "none" : "block";
+  }
+};
 
-// Close modal
-if (closeModalBtn) {
-  closeModalBtn.addEventListener("click", () => {
-    modal.classList.remove("open");
-    addLostPetForm.reset();
-    previewImg.style.display = "none";
-    base64Image = "";
-    
-    // Reset animal type other field
-    if (animalTypeOtherInput) {
-      animalTypeOtherInput.style.display = "none";
-      animalTypeOtherInput.required = false;
-    }
-  });
-}
 
-// Close modal when clicking outside
-window.addEventListener("click", (event) => {
-  if (event.target === modal) {
-    modal.classList.remove("open");
-    addLostPetForm.reset();
-    previewImg.style.display = "none";
-    base64Image = "";
+window.addEventListener('click', (e) => {
+  // Close admin menu
+  if (!e.target.closest('.card-menu')) {
+    document.querySelectorAll('.menu-dropdown').forEach(el => el.style.display = 'none');
+  }
+
+  // Close Modal on outside click
+  const modal = document.getElementById("lostPetModal");
+  if (e.target == modal) {
+    window.closePetModal();
   }
 });
 
-// =================== IMAGE UPLOAD ===================
-if (fileInput) {
-  fileInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload a valid image file (JPG, PNG).");
-      fileInput.value = "";
-      return;
-    }
+// Modal Close Function (need change in html and maybe css)
+window.closePetModal = function () {
+  document.getElementById("lostPetDetailModal").classList.remove("open");
+};
 
-    // Check file size (limit to 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      alert("Image size must be less than 2MB.");
-      fileInput.value = "";
-      return;
-    }
+window.deleteLostPet = async function (id) {
+  if (!confirm("Are you sure you want to delete this lost pet report?")) return;
+  try {
+    await deleteDoc(doc(db, "lostPets", id));
+    alert("Lost pet report deleted successfully.");
+    loadLostPets();
+  } catch (error) {
+    console.error("Error deleting:", error);
+    alert("Failed to delete lost pet report.");
+  }
+};
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      previewImg.src = event.target.result;
-      previewImg.style.display = "block";
-      base64Image = event.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
+window.openModalById = async function (id) {
+  // Find the pet data from your global array
+  const data = allLostPets.find(l => l.id === id);
+  if (!data) return;
+
+  const owner = data.user_id 
+    ? await getUserById(data.user_id)
+    : null;
+
+  // Get modal elements by ID
+  const modalMainTitle = document.getElementById('modalMainTitle');
+  const modalPetImg = document.getElementById('modalPetImg');
+  const modalPetInfo = document.getElementById('modalPetInfo');
+  const lostPetModal = document.getElementById('lostPetDetailModal');
+
+  // Safety check
+  if (!modalMainTitle || !modalPetImg || !modalPetInfo || !lostPetModal) {
+    console.error("Modal elements not found in DOM");
+    return;
+  }
+
+  // Set modal title
+  modalMainTitle.innerText = `${data.name}'s Details`;
+
+  // Set image with fallback if null or empty
+  modalPetImg.src = data.photo && data.photo.trim() !== '' ? data.photo : 'images/no-image.png';
+
+  // Set modal content
+  modalPetInfo.innerHTML = `
+    <h2 id="modalName">${data.name}</h2>
+
+    <div class="modal-detail-item">
+      <i class="fas fa-paw"></i>
+      <div>
+        <p class="modal-inner-info-text-title">Type & Breed</p>
+        <span>${data.animal_type}${data.breed ? " • " + data.breed : ""}</span>
+      </div>
+    </div>
+
+    <div class="modal-detail-item">
+      <i class="fas fa-birthday-cake"></i>
+      <div>
+        <p class="modal-inner-info-text-title">Age & Gender</p>
+        <span>
+          ${data.age ? data.age + " months" : "Not specified"}
+          ${data.gender ? " • " + data.gender : ""}
+        </span>
+      </div>
+    </div>
+
+    <div class="modal-detail-item">
+      <i class="fas fa-map-marker-alt"></i>
+      <div>
+        <p class="modal-inner-info-text-title">Last Seen Location</p>
+        <span>${data.last_seen_Location || "Unknown"}</span>
+      </div>
+    </div>
+
+    <div class="modal-detail-item">
+      <i class="<fas fa-solid fa-calendar"></i>
+      <div>
+        <p class="modal-inner-info-text-title">Last Seen Date</p>
+        <span>${data.last_seen_Date || "Unknown"}</span>
+      </div>
+    </div>
+
+    <div class="modal-detail-item">
+      <i class="<fas fas fa-address-card"></i>
+      <div>
+        <p class="modal-inner-info-text-title">Owner Name</p>
+        <span>${owner?.username || "Unknown"}</span>
+      </div>
+    </div>
+
+    <div class="modal-detail-item">
+      <i class="<fas fas fa-address-book"></i>
+      <div>
+        <p class="modal-inner-info-text-title">Owner Phone Number</p>
+        <span>${owner?.phone_Number|| "Unknown"}</span>
+      </div>
+    </div>
+
+    <h3 style="color:#0d3b25; font-size:18px; font-weight:700; margin-top:25px; margin-bottom:8px;">
+      About ${data.name}
+    </h3>
+
+    <p style="
+        color:#555;
+        line-height:1.6;
+        font-size:14px;
+        margin-top:0;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    ">
+  ${data.description || 'No description provided.'}
+</p>
+  `;
+
+  // Open modal
+  lostPetModal.classList.add("open");
+};
+
+// need to change also for this one (for admin)
+window.editLostPet = function (id) {
+  const data = allLostPets.find(p => p.id === id);
+  if (!data) return;
+
+  document.getElementById('modalMainTitle').innerText = "Admin: Edit Lost Pet";
+  document.getElementById('modalImg').src = data.photo || 'images/no-image.png';
+  const container = document.getElementById('modalContentContainer');
+
+  const opt = (v, c) => `<option value="${v}" ${v === c ? "selected" : ""}>${v}</option>`;
+
+  container.innerHTML = `
+    <input type="hidden" id="editDocId" value="${data.id}">
+
+    <label>Name</label>
+    <input id="editName" value="${data.name}">
+
+    <label>Animal Type</label>
+    <input id="editType" value="${data.animal_type}">
+
+    <label>Breed</label>
+    <input id="editBreed" value="${data.breed || ""}">
+
+    <label>Status (Pet)</label>
+    <select id="editStatus">
+      ${opt("Lost", data.status)}
+      ${opt("Found", data.status)}
+    </select>
+
+    <label>Verification Status</label>
+    <select id="editVerification">
+      ${opt("Pending", data.verification_status)}
+      ${opt("Approved", data.verification_status)}
+      ${opt("Rejected", data.verification_status)}
+    </select>
+
+    <label>Last Seen Location</label>
+    <input id="editLocation" value="${data.last_seen_Location}">
+
+    <label>Description</label>
+    <textarea id="editDescription">${data.description || ""}</textarea>
+
+    <button id="saveChangesBtn">Save Changes</button>
+  `;
+
+  document.getElementById("saveChangesBtn").onclick = handleAdminSave;
+  document.getElementById("animalModal").classList.add("open");
+};
+
+// 3. HANDLE SAVE (need to change also for admin to change the details one )
+async function handleAdminSave() {
+  const id = document.getElementById("editDocId").value;
+  const btn = document.getElementById("saveChangesBtn");
+
+  btn.disabled = true;
+  btn.innerText = "Saving...";
+
+  try {
+    await updateDoc(doc(db, "lostPets", id), {
+      name: document.getElementById("editName").value,
+      animal_type: document.getElementById("editType").value,
+      breed: document.getElementById("editBreed").value,
+      status: document.getElementById("editStatus").value,
+      verification_status: document.getElementById("editVerification").value,
+      last_seen_Location: document.getElementById("editLocation").value,
+      description: document.getElementById("editDescription").value
+    });
+
+    alert("Updated successfully");
+    document.getElementById("animalModal").classList.remove("open");
+    loadLostPets();
+
+  } catch (e) {
+    console.error(e);
+    alert("Update failed");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "Save Changes";
+  }
 }
 
-// =================== SUBMIT LOST PET REPORT ===================
-if (addLostPetForm) {
-  addLostPetForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    
-    if (!currentUser) {
-      alert("Please login first.");
-      window.location.href = "login.html";
-      return;
-    }
-
-    const name = document.getElementById("petName").value.trim();
-    const ageInput = document.getElementById("petAge").value;
-    const age = ageInput ? parseInt(ageInput) : null;
-    const gender = document.getElementById("petGender").value;
-    let animal_type = document.getElementById("animalType").value;
-    
-    // Handle "Other" animal type
-    if (animal_type === "Other") {
-      const otherType = document.getElementById("animalTypeOther").value.trim();
-      if (!otherType) {
-        alert("Please specify the animal type.");
-        return;
-      }
-      animal_type = otherType;
-    }
-    
-    const breed = document.getElementById("petBreed").value.trim();
-    const description = document.getElementById("petDescription").value.trim();
-    const last_seen_Location = document.getElementById("lastSeenLocation").value.trim();
-    const last_seen_Date = document.getElementById("lastSeenDate").value;
-
-    // Validation
-    if (!name || !animal_type || !gender || !description || !last_seen_Location || !last_seen_Date) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-
-    if (!base64Image) {
-      alert("Please upload a photo of the pet.");
-      return;
-    }
-
-    // Disable submit button to prevent double submission
-    const submitBtn = document.getElementById("submitLostPetBtn");
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Submitting...";
-
-    try {
-      await addDoc(collection(db, "lostPets"), {
-        user_id: currentUser.uid,
-        name,
-        age,
-        gender,
-        animal_type,
-        breed: breed || null,
-        description,
-        photo: base64Image,
-        last_seen_Location,
-        last_seen_Date,
-        status: "Lost",
-        verified_By: null,
-        date_Reported: serverTimestamp()
-      });
-
-      alert("Lost pet report submitted successfully!");
-      modal.classList.remove("open");
-      addLostPetForm.reset();
-      previewImg.style.display = "none";
-      base64Image = "";
-      
-      // Reset animal type other field
-      if (animalTypeOtherInput) {
-        animalTypeOtherInput.style.display = "none";
-        animalTypeOtherInput.required = false;
-      }
-
-      // Re-enable submit button
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Submit Report";
-
-      // Refresh the list
-      fetchLostPets();
-    } catch (err) {
-      console.error("Error submitting report:", err);
-      alert("Failed to submit report. Please try again.");
-      
-      // Re-enable submit button
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Submit Report";
-    }
-  });
+//(need look for the search input)
+function setupFilters() {
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.addEventListener("input", filterAndRender);
+  }
 }
 
-// =================== INITIAL LOAD ===================
-fetchLostPets();
+function filterAndRender() {
+  const searchInput = document.getElementById("searchInput");
+  const searchText = searchInput?.value.toLowerCase() || "";
+
+  const filteredData = allLostPets.filter(pet => {
+    return (
+      (pet.name || "").toLowerCase().includes(searchText) ||
+      (pet.animal_type || "").toLowerCase().includes(searchText) ||
+      (pet.breed || "").toLowerCase().includes(searchText) ||
+      (pet.last_seen_Location || "").toLowerCase().includes(searchText)
+    );
+  });
+
+  renderGrid(filteredData);
+}

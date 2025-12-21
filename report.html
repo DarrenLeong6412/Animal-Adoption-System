@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PawResQ — Report</title>
+
+    <link rel="stylesheet" href="css/style.css"> <!--link to external CSS-->
+    <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script>
+    <!--link for cart and acc icons-->
+    <script>document.documentElement.classList.add("auth-loading");</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!--link for google fonts-->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body class="report">
+
+    <div id="navbar"></div>
+
+    <div class="request-content">
+
+        <div class="listing-flex-container">
+
+            <div class="listing-header-row">
+                <div class="listing-title-group">
+                    <h1>Report</h1>
+                    <p>View summaries of successful adoptions and at a glance.</p>
+                </div>
+                <button class="btn-add-listing" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print Report
+                </button>
+            </div>
+
+        </div>
+
+        <section class="report-chart-section">
+            <div class="chart-controls">
+                <label for="yearSelect">Select Year:</label>
+                <select id="yearSelect"></select>
+            </div>
+
+            <canvas id="adoptionQuarterChart" height="100"></canvas>
+        </section>
+
+
+        <div class="report-container">
+            <div id="report-table-wrapper">
+                <!-- Table will be inserted dynamically -->
+            </div>
+
+            <div class="modal" id="modal">
+                <div class="modal-inner">
+                    <div class="modal-inner-top">
+                        <div class="modal-inner-top-title">
+                            <h1>Error</h1>
+                        </div>
+                        <div class="modal-inner-top-exit">
+                            <a onclick="closeModal()"><i class="fa-solid fa-x"></i></a>
+                        </div>
+                    </div>
+                    <div class="modal-inner-details-section">
+                        <div class="modal-inner-image-container">
+                            <img class="modalImg" src="images/no-image.png">
+                        </div>
+                        <div class="modal-inner-info-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="javascript/script.js"></script>
+    <script src="javascript/template-loader.js"></script>
+    <script type="module" src="javascript/report.js"></script>
+    <script type="module" src="js/auth.js"></script>
+</body>
+
+</html>

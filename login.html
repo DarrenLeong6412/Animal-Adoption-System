@@ -18,7 +18,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 
-<body class="auth-page">
+<body class="auth-page" id="user-body">
+  <a href="index.html" class="auth-back-btn">
+    ← Back to Home
+  </a>
 
   <div class="auth-card auth-ui">
     <h1 class="auth-title">Log In</h1>
@@ -29,7 +32,16 @@
       <input type="email" id="loginEmail" required />
 
       <label for="loginPassword">Password</label>
+      <div class="password-wrapper">
       <input type="password" id="loginPassword" required />
+      <span class="toggle-password" data-target="loginPassword">🙈</span>
+      </div>
+
+
+      <div class="auth-actions">
+      <a href="#" id="forgotPasswordLink" class="auth-link">Forgot password?</a>
+      </div>
+
 
       <button type="submit" class="auth-submit">Log In</button>
     </form>

@@ -1,15 +1,16 @@
 // js/auth.js
 // ============== FIREBASE CORE ==============
-import { initializeApp } 
+import { initializeApp }
   from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 
-import { getAnalytics } 
+import { getAnalytics }
   from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
 
-import { 
+import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
@@ -18,7 +19,8 @@ import {
   getFirestore,
   doc,
   setDoc,
-  getDoc
+  getDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
@@ -35,7 +37,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// 🔹 Protect against Analytics crash when local
+// Protect against Analytics crash when local
 try {
   getAnalytics(app);
 } catch (e) {
@@ -43,35 +45,95 @@ try {
 }
 
 const auth = getAuth(app);
-const db   = getFirestore(app);
+const db = getFirestore(app);
 
-// optional for debugging
+// for debugging
 window.auth = auth;
-window.db   = db;
+window.db = db;
+
+// ============== SIMPLE VALIDATION HELPERS (REUSE EVERYWHERE) ==============
+function normalizeEmail(email = "") {
+  return String(email).trim().toLowerCase();
+}
+
+function isValidEmail(email = "") {
+  const e = normalizeEmail(email);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  return emailRegex.test(e);
+}
+
+function normalizePhone(phone = "") {
+  return String(phone).trim();
+}
+
+function isValidPhone(phone = "") {
+  const cleaned = normalizePhone(phone);
+
+  // allow only digits
+  const allowedChars = /^[0-9]+$/;
+  if (!allowedChars.test(cleaned)) return false;
+
+  // must have 7-15 digits (ignore +, -, spaces)
+  const digits = cleaned.replace(/\D/g, "");
+  if (digits.length < 7 || digits.length > 15) return false;
+
+  
+
+  return true;
+}
+
+function normalizeIC(ic = "") {
+  return String(ic).trim().replace(/\s+/g, "");
+}
+
+/*ic validation*/
+function isValidIC(ic = "") {
+  const raw = normalizeIC(ic);
+
+  // must be either 12 digits or dashed format
+  const ic12 = /^\d{12}$/;
+  const icDashed = /^\d{6}-\d{2}-\d{4}$/;
+
+  if (!ic12.test(raw) && !icDashed.test(raw)) return false;
+
+  // convert to 12 digits for date check
+  const digits = raw.replace(/-/g, "");
+
+  const yy = parseInt(digits.slice(0, 2), 10);
+  const mm = parseInt(digits.slice(2, 4), 10);
+  const dd = parseInt(digits.slice(4, 6), 10);
+
+  if (mm < 1 || mm > 12) return false;
+  if (dd < 1 || dd > 31) return false;
+
+  // Basic day-per-month check (including leap year for Feb)
+  const isLeap = (yy % 4 === 0); 
+  const daysInMonth = [31, (isLeap ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (dd > daysInMonth[mm - 1]) return false;
+
+  return true;
+}
 
 // ============== "REPOSITORY" LAYER ==============
-//userID generate function removed
-
-async function saveUserProfileToFirestore(firebaseUser, formData) {
+async function saveUserProfileToFirestore(firebaseUser, formData = {}) {
   const {
-    fullName,
-    gender,
-    identificationNumber,
-    phoneNumber,
-    address
+    fullName = "",
+    gender = null,
+    identificationNumber = null,
+    phoneNumber = null,
+    address = null
   } = formData;
 
   const userRef = doc(db, "users", firebaseUser.uid);
 
   const userData = {
-    
     username: fullName || "",
     email: firebaseUser.email,
-    password: null,                            // NOT storing plain password
+    password: null, // NOT storing plain password
     gender: gender || null,
-    identification_Number: identificationNumber || null,
+    identification_Number: identificationNumber ? normalizeIC(identificationNumber) : null,
     role: "User",
-    phone_Number: phoneNumber || null,
+    phone_Number: phoneNumber ? normalizePhone(phoneNumber) : null,
     address: address || null,
 
     createdAt: new Date().toISOString(),
@@ -79,7 +141,7 @@ async function saveUserProfileToFirestore(firebaseUser, formData) {
     firebaseUid: firebaseUser.uid
   };
 
-  await setDoc(userRef, userData);
+  await setDoc(userRef, userData, { merge: true });
 }
 
 // ============== "USE CASE" LAYER ==============
@@ -94,60 +156,41 @@ function validateSignupData({
 }) {
   const errors = [];
 
-  if (!fullName || fullName.trim().length === 0) {
-    errors.push("Full Name is required.");
-  } else if (fullName.length > 50) {
-    errors.push("Full Name must not exceed 50 characters.");
-  }
+  // Full name
+  if (!fullName || fullName.trim().length === 0) errors.push("Full Name is required.");
+  else if (fullName.length > 50) errors.push("Full Name must not exceed 50 characters.");
 
-  if (!email || email.trim().length === 0) {
-    errors.push("Email is required.");
-  } else if (email.length > 100) {
-    errors.push("Email must not exceed 100 characters.");
-  } else {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      errors.push("Email format is invalid.");
-    }
-  }
+  // Email
+  if (!email || String(email).trim().length === 0) errors.push("Email is required.");
+  else if (String(email).length > 100) errors.push("Email must not exceed 100 characters.");
+  else if (!isValidEmail(email)) errors.push("Email format is invalid.");
 
-  if (!password || password.length === 0) {
-    errors.push("Password is required.");
-  } else if (password.length > 255) {
-    errors.push("Password must not exceed 255 characters.");
-  }
+  // Password
+  if (!password || password.length === 0) errors.push("Password is required.");
+  else if (password.length < 6) errors.push("Password must be at least 6 characters.");
+  else if (password.length > 255) errors.push("Password must not exceed 255 characters.");
 
-  if (gender && !["M", "F", "O"].includes(gender)) {
-    errors.push("Gender must be M, F, or O.");
-  }
+  // Gender
+  if (gender && !["M", "F", "O"].includes(gender)) errors.push("Gender must be Male, Female, or Other.");
 
+  // IC
   if (identificationNumber) {
-    if (identificationNumber.length > 20) {
-      errors.push("Identification Number must not exceed 20 characters.");
-    }
-    const idRegex = /^[A-Za-z0-9\-]+$/;
-    if (!idRegex.test(identificationNumber)) {
-      errors.push("Identification Number can only contain letters, numbers, and dashes.");
+    if (!isValidIC(identificationNumber)) {
+      errors.push("Identification Number (IC) is invalid. Example: 010203-04-1234 or 010203041234.");
     }
   }
 
-  if (phoneNumber) {
-    if (phoneNumber.length > 15) {
-      errors.push("Phone Number must not exceed 15 characters.");
-    }
-    const phoneRegex = /^[0-9+\-\s]+$/;
-    if (!phoneRegex.test(phoneNumber)) {
-      errors.push("Phone Number can only contain digits, spaces, '+', and '-'.");
-    }
+  // Phone (REQUIRED)
+  if (!phoneNumber || String(phoneNumber).trim().length === 0) {
+    errors.push("Phone Number is required.");
+  } else if (!isValidPhone(phoneNumber)) {
+    errors.push("Phone Number is invalid. Use 7–15 digits only.");
   }
 
-  if (address && address.length > 255) {
-    errors.push("Address must not exceed 255 characters.");
-  }
+  // Address
+  if (address && address.length > 255) errors.push("Address must not exceed 255 characters.");
 
-  if (errors.length > 0) {
-    throw new Error(errors.join("\n"));
-  }
+  if (errors.length > 0) throw new Error(errors.join("\n"));
 }
 
 async function registerUserInDatabase(firebaseUser, formData) {
@@ -167,76 +210,57 @@ async function registerUserInDatabase(firebaseUser, formData) {
 // ============== "UI" LAYER ==============
 // SIGN UP HANDLER
 const signupForm = document.getElementById("signupForm");
-
 if (signupForm) {
-  signupForm.addEventListener("submit", (e) => {
+  signupForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("signupEmail").value;
+    const email = normalizeEmail(document.getElementById("signupEmail").value);
     const password = document.getElementById("signupPassword").value;
-    const fullName = document.getElementById("signupName")?.value.trim() || "";
-    const gender = document.getElementById("signupGender")?.value || "";
-    const identificationNumber = document.getElementById("signupIC")?.value.trim() || "";
-    const phoneNumber = document.getElementById("signupPhone")?.value.trim() || "";
-    const address = document.getElementById("signupAddress")?.value.trim() || "";
+    const fullName = document.getElementById("signupName").value.trim();
+    const phoneNumber = document.getElementById("signupPhone").value.trim();
+
+    
 
     try {
-      validateSignupData({
-        fullName,
-        email,
-        password,
-        gender,
-        identificationNumber,
-        phoneNumber,
-        address
-      });
+      
+      validateSignupData({ fullName, email, phoneNumber, password /*, identificationNumber */ });
     } catch (err) {
       alert(err.message);
       return;
     }
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(async (userCredential) => {
-        const user = userCredential.user;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-        try {
-          await registerUserInDatabase(user, {
-            fullName,
-            gender,
-            identificationNumber,
-            phoneNumber,
-            address,
-            password
-          });
-
-          alert("Account created successfully!");
-          window.location.href = "login.html";
-        } catch (err) {
-          console.error("Error saving user profile:", err);
-          alert(err.message || "Account created, but failed to save profile.");
-        }
-      })
-      .catch((error) => {
-        console.error("Signup error:", error);
-        alert(error.message);
+      await registerUserInDatabase(user, {
+        fullName,
+        password,
+        phoneNumber
+        
       });
+
+      alert("Account created successfully!");
+      window.location.href = "login.html";
+    } catch (error) {
+      console.error("Signup error:", error);
+      alert(error.message);
+    }
   });
 }
 
-// LOGIN HANDLER (used on login.html)
+// LOGIN HANDLER
 const loginForm = document.getElementById("loginForm");
-
 if (loginForm) {
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("loginEmail").value;
+    const email = normalizeEmail(document.getElementById("loginEmail").value);
     const password = document.getElementById("loginPassword").value;
 
     signInWithEmailAndPassword(auth, email, password)
       .then(() => {
         alert("Login successful!");
-        
         window.location.href = "index.html";
       })
       .catch((error) => {
@@ -246,24 +270,34 @@ if (loginForm) {
   });
 }
 
-// LOGOUT HANDLER (used on profile.html)
-const logoutBtn = document.getElementById("logoutBtn");
+// FORGOT PASSWORD HANDLER
+const forgotPasswordLink = document.getElementById("forgotPasswordLink");
+if (forgotPasswordLink) {
+  forgotPasswordLink.addEventListener("click", async (e) => {
+    e.preventDefault();
 
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", async () => {
+    const email = normalizeEmail(document.getElementById("loginEmail")?.value);
+    if (!email) {
+      alert("Please enter your email first, then click 'Forgot password?'.");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
     try {
-      await signOut(auth);
-      alert("Logged out successfully.");
-      window.location.href = "login.html";
-    } catch (err) {
-      console.error("Logout error:", err);
-      alert("Failed to log out.");
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent! Please check your inbox (and spam).");
+    } catch (error) {
+      console.error("Reset password error:", error);
+      alert(error.message);
     }
   });
 }
 
-// ============== AUTH STATE LISTENER (SESSION) ==============
-// This will run on every page that includes auth.js
+// ============== AUTH STATE LISTENER ==============
 async function getUserRole(uid) {
   const ref = doc(db, "users", uid);
   const snap = await getDoc(ref);
@@ -274,32 +308,58 @@ async function getUserRole(uid) {
 onAuthStateChanged(auth, async (user) => {
   console.log("Auth state changed. Current user:", user?.uid || "null");
 
-  // Elements only exist on profile.html
+  // ===== Profile page elements =====
   const profileEmailEl = document.getElementById("profileEmail");
-  const profileNameEl  = document.getElementById("profileName");
-  const profileIdEl    = document.getElementById("profileUserId");
-  const profileGenderEl= document.getElementById("profileGender");
+  const profileNameEl = document.getElementById("profileName");
+  const profileGenderEl = document.getElementById("profileGender");
   const profilePhoneEl = document.getElementById("profilePhone");
   const profileAddressEl = document.getElementById("profileAddress");
-  
+  const profileIdentificationEl = document.getElementById("profileIdentification");
 
-
-  const onProfilePage =
+  const onProfilePage = !!(
     profileEmailEl ||
     profileNameEl ||
-    profileIdEl ||
     profileGenderEl ||
     profilePhoneEl ||
-    profileAddressEl;
+    profileAddressEl ||
+    profileIdentificationEl
+  );
 
-  // If we're on profile.html and user is NOT logged in → kick to login
+  // Profile edit controls
+  const editBtn = document.getElementById("editProfileBtn");
+  const saveBtn = document.getElementById("saveProfileBtn");
+  const cancelBtn = document.getElementById("cancelProfileBtn");
+
+  const editGenderEl = document.getElementById("editGender");
+  const editPhoneEl = document.getElementById("editPhone");
+  const editAddressEl = document.getElementById("editAddress");
+  const editIdentificationEl = document.getElementById("editIdentification");
+
+  let originalProfile = null;
+
+  const showDash = (v) =>
+    (v === null || v === undefined || String(v).trim() === "" ? "-" : v);
+
+  function setEditMode(isEdit) {
+    const displayEls = [profileGenderEl, profilePhoneEl, profileAddressEl, profileIdentificationEl];
+    const editEls = [editGenderEl, editPhoneEl, editAddressEl, editIdentificationEl];
+
+    displayEls.forEach(el => el && (el.style.display = isEdit ? "none" : ""));
+    editEls.forEach(el => el && (el.style.display = isEdit ? "" : "none"));
+
+    if (editBtn) editBtn.style.display = isEdit ? "none" : "";
+    if (saveBtn) saveBtn.style.display = isEdit ? "" : "none";
+    if (cancelBtn) cancelBtn.style.display = isEdit ? "" : "none";
+  }
+
+  // If on profile page but not logged in
   if (onProfilePage && !user) {
     alert("You must be logged in to view your profile.");
     window.location.href = "login.html";
     return;
   }
 
-  // If user is logged in & we're on profile page → load data from Firestore
+  // Load profile data
   if (onProfilePage && user) {
     try {
       const userRef = doc(db, "users", user.uid);
@@ -308,21 +368,118 @@ onAuthStateChanged(auth, async (user) => {
       if (snap.exists()) {
         const data = snap.data();
 
-        if (profileEmailEl)   profileEmailEl.textContent = data.email || "";
-        if (profileNameEl)    profileNameEl.textContent = data.username || "";
-        if (profileIdEl)      profileIdEl.textContent   = data.user_ID || "";
-        if (profileGenderEl)  profileGenderEl.textContent = data.gender || "";
-        if (profilePhoneEl)   profilePhoneEl.textContent  = data.phone_Number || "";
-        if (profileAddressEl) profileAddressEl.textContent = data.address || "";
+        // Save original snapshot for Cancel
+        originalProfile = {
+          gender: data.gender ?? "",
+          phone_Number: data.phone_Number ?? "",
+          address: data.address ?? "",
+          identification_Number: data.identification_Number ?? ""
+        };
+
+        profileEmailEl && (profileEmailEl.textContent = data.email || "");
+        profileNameEl && (profileNameEl.textContent = data.username || "");
+
+        profileGenderEl && (profileGenderEl.textContent = showDash(data.gender));
+        profilePhoneEl && (profilePhoneEl.textContent = showDash(data.phone_Number));
+        profileAddressEl && (profileAddressEl.textContent = showDash(data.address));
+        profileIdentificationEl && (profileIdentificationEl.textContent = showDash(data.identification_Number));
+
+        editGenderEl && (editGenderEl.value = data.gender ?? "");
+        editPhoneEl && (editPhoneEl.value = data.phone_Number ?? "");
+        editAddressEl && (editAddressEl.value = data.address ?? "");
+        editIdentificationEl && (editIdentificationEl.value = data.identification_Number ?? "");
+
+        setEditMode(false);
       } else {
-        console.warn("No profile data found for this user.");
+        console.warn("No profile doc found for user.uid:", user.uid);
       }
     } catch (err) {
       console.error("Error loading profile:", err);
     }
+
+    // Edit
+    if (editBtn) editBtn.onclick = () => setEditMode(true);
+
+    // Cancel
+    if (cancelBtn) cancelBtn.onclick = () => {
+      if (originalProfile) {
+        editGenderEl && (editGenderEl.value = originalProfile.gender);
+        editPhoneEl && (editPhoneEl.value = originalProfile.phone_Number);
+        editAddressEl && (editAddressEl.value = originalProfile.address);
+        editIdentificationEl && (editIdentificationEl.value = originalProfile.identification_Number);
+
+        profileGenderEl && (profileGenderEl.textContent = showDash(originalProfile.gender));
+        profilePhoneEl && (profilePhoneEl.textContent = showDash(originalProfile.phone_Number));
+        profileAddressEl && (profileAddressEl.textContent = showDash(originalProfile.address));
+        profileIdentificationEl && (
+          profileIdentificationEl.textContent = showDash(originalProfile.identification_Number)
+        );
+      }
+      setEditMode(false);
+    };
+
+    // Save
+    if (saveBtn) saveBtn.onclick = async () => {
+      try {
+        const newGender = editGenderEl?.value ?? "";
+        const newPhone = editPhoneEl?.value?.trim() ?? "";
+        const newAddress = editAddressEl?.value?.trim() ?? "";
+        const newIdentification = editIdentificationEl?.value?.trim() ?? "";
+
+        // ===== VALIDATION =====
+        if (!newPhone || newPhone.trim().length === 0) {
+          alert("Phone Number is required.");
+          return;
+        }
+        if (!isValidPhone(newPhone)) {
+          alert("Phone Number is invalid. Use 7–15 digits only.");
+          return;
+        }
+
+        // IC - validate only if user filled it
+        if (newIdentification && !isValidIC(newIdentification)) {
+          alert("Identification Number (IC) is invalid. Example: 010203-04-1234 or 010203041234.");
+          return;
+        }
+
+        if (newAddress && newAddress.length > 255) {
+          alert("Address must not exceed 255 characters.");
+          return;
+        }
+
+        const payload = {
+          gender: newGender === "" ? null : newGender,
+          phone_Number: normalizePhone(newPhone),
+          address: newAddress === "" ? null : newAddress,
+          identification_Number: newIdentification === "" ? null : normalizeIC(newIdentification)
+        };
+
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, payload);
+
+        // update original snapshot
+        originalProfile = {
+          gender: payload.gender ?? "",
+          phone_Number: payload.phone_Number ?? "",
+          address: payload.address ?? "",
+          identification_Number: payload.identification_Number ?? ""
+        };
+
+        profileGenderEl && (profileGenderEl.textContent = showDash(payload.gender));
+        profilePhoneEl && (profilePhoneEl.textContent = showDash(payload.phone_Number));
+        profileAddressEl && (profileAddressEl.textContent = showDash(payload.address));
+        profileIdentificationEl && (profileIdentificationEl.textContent = showDash(payload.identification_Number));
+
+        setEditMode(false);
+        alert("Profile updated!");
+      } catch (err) {
+        console.error("Save profile error:", err);
+        alert("Failed to update profile.");
+      }
+    };
   }
 
-
+  // ===== NAVBAR AUTH UI =====
   const authBtnDesktop = document.getElementById("authBtnDesktop");
   const authBtnSidebar = document.getElementById("authBtnSidebar");
 
@@ -331,6 +488,8 @@ onAuthStateChanged(auth, async (user) => {
   const profileIconDesktop = document.getElementById("profileIconDesktop");
   const profileIconSidebar = document.getElementById("profileIconSidebar");
 
+  const adminEls = document.querySelectorAll(".admin-only");
+
   const doLogout = async (e) => {
     e.preventDefault();
     await signOut(auth);
@@ -338,11 +497,9 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "index.html";
   };
 
-  const adminEls = document.querySelectorAll(".admin-only");
   if (user) {
-    // normal logged-in UI
-    if (authBtnDesktop) authBtnDesktop.style.display = "none";
-    if (authBtnSidebar) authBtnSidebar.style.display = "none";
+    authBtnDesktop && (authBtnDesktop.style.display = "none");
+    authBtnSidebar && (authBtnSidebar.style.display = "none");
 
     logoutIconDesktop && (logoutIconDesktop.style.display = "");
     logoutIconSidebar && (logoutIconSidebar.style.display = "");
@@ -350,21 +507,21 @@ onAuthStateChanged(auth, async (user) => {
     logoutIconDesktop && (logoutIconDesktop.onclick = doLogout);
     logoutIconSidebar && (logoutIconSidebar.onclick = doLogout);
 
-
     profileIconDesktop && (profileIconDesktop.style.display = "");
     profileIconSidebar && (profileIconSidebar.style.display = "");
 
-    // role check
     const role = await getUserRole(user.uid);
 
     adminEls.forEach(el => {
-     el.style.display = role === "Admin" ? "" : "none";
+      el.style.display = role === "Admin" ? "" : "none";
     });
 
+    if (role !== "Admin") {
+      document.querySelectorAll('#navbar > ul:not(#sidebar) > li.admin-only').forEach(el => el.remove());
+    }
   } else {
-    // logged out UI
-    if (authBtnDesktop) authBtnDesktop.style.display = "";
-    if (authBtnSidebar) authBtnSidebar.style.display = "";
+    authBtnDesktop && (authBtnDesktop.style.display = "");
+    authBtnSidebar && (authBtnSidebar.style.display = "");
 
     logoutIconDesktop && (logoutIconDesktop.style.display = "none");
     logoutIconSidebar && (logoutIconSidebar.style.display = "none");
@@ -374,6 +531,24 @@ onAuthStateChanged(auth, async (user) => {
 
     adminEls.forEach(el => el.style.display = "none");
   }
-  document.documentElement.classList.remove("auth-loading");
 
+  document.documentElement.classList.remove("auth-loading");
+});
+
+// Password visibility toggle
+document.addEventListener("click", (e) => {
+  if (!e.target.classList.contains("toggle-password")) return;
+
+  const inputId = e.target.getAttribute("data-target");
+  const input = document.getElementById(inputId);
+
+  if (!input) return;
+
+  if (input.type === "password") {
+    input.type = "text";
+    e.target.textContent = "🐵";
+  } else {
+    input.type = "password";
+    e.target.textContent = "🙈";
+  }
 });
