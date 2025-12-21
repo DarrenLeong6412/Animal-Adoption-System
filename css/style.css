@@ -1606,6 +1606,57 @@ p.subtitle {
     text-align: center;
 }
 
+#myLostPet-modal {
+    background-color: rgba(0, 0, 0, 0.3);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: all 0.1s ease-in-out;
+    z-index: -1;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#myLostPet-modal.open {
+    opacity: 1;
+    z-index: 999 !important;
+}
+
+#myLostPet-modal .modal-inner {
+    background-color: white;
+    max-width: 900px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+}
+
+/* Ensure verification status field looks disabled */
+#myLostPet-verificationStatus {
+    background-color: #f3f4f6 !important;
+    cursor: not-allowed;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+/* Disabled state for non-editable fields */
+#myLostPet-modal input:disabled,
+#myLostPet-modal textarea:disabled,
+#myLostPet-modal select:disabled {
+    background-color: #f9fafb;
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 /* ===== LOST PET FORM SPECIFIC MODAL STYLES ===== */
 /* Override modal-inner height for form */
 #lostPetFormModal .modal-inner {
@@ -2133,6 +2184,7 @@ p.subtitle {
     font-size: 14px;
 }
 
+/* --- 1. Section Layout for Lost Pets --- */
 .my-lostpets-wrapper {
     max-width: 700px;
     width: 100%;
@@ -2248,6 +2300,56 @@ p.subtitle {
     color: #666;
 }
 
+/* Lost Pet Item Specific Styles */
+.lostpet-item-card {
+    display: flex;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 100px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.lostpet-item-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.lostpet-item-img-container {
+    width: 100px;
+    height: 100%;
+    flex-shrink: 0;
+}
+
+.lostpet-item-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lostpet-item-content {
+    flex: 1;
+    padding: 10px 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.lostpet-item-title {
+    margin: 0;
+    font-size: 16px;
+    color: #164A41;
+    font-weight: 700;
+}
+
+.lostpet-item-meta {
+    margin: 5px 0 0;
+    font-size: 13px;
+    color: #666;
+}
+
 /* Badge Container & Styles */
 .listing-item-badge-container {
     padding: 0 20px;
@@ -2286,6 +2388,43 @@ p.subtitle {
     border: 1px solid #0369a1;
 }
 
+/* Lost Pet Badge Container & Styles */
+.lostpet-item-badge-container {
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lostpet-item-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.badge-pending {
+    background-color: #ffedd5;
+    color: #9a3412;
+    border: 1px solid #fed7aa;
+}
+
+.badge-approved {
+    background-color: #d1fae5;
+    color: #166534;
+    border: 1px solid #a7f3d0;
+}
+
+.badge-rejected {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+}
+.badge-markedfound {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #0369a1;
+}
 
 /* --- 3. Edit Modal Form Styles --- */
 
