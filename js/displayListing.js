@@ -10,6 +10,7 @@ import {
     orderBy,
     doc,
     deleteDoc,
+    writeBatch,
     updateDoc,
     where,
     getDoc
@@ -194,6 +195,23 @@ window.closeAnimalModal = function () {
 window.deleteListing = async function (id) {
     if (!confirm("Are you sure you want to delete this listing?")) return;
     try {
+
+        // Delete every req of the same animal
+        const q = query(
+            collection(db, "requests"),
+            where("listing_ID", "==", id)
+        );
+
+        const snapshot = await getDocs(q);
+        const batch = writeBatch(db);
+
+        snapshot.forEach(docSnap => {
+            console.log("Queuing delete for request:", docSnap.id);
+            batch.delete(docSnap.ref);
+        });
+
+        await batch.commit();
+        // Delete animal listing
         await deleteDoc(doc(db, "animals", id));
         alert("Listing deleted successfully.");
         loadAnimals();
