@@ -23,12 +23,12 @@ let myLostPets = [];
    AUTH CHECK
 ========================= */
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-        loadMyLostPet(user.uid);
-    } else {
-        const grid = document.getElementById("myLostPetGrid");
-        if(grid) grid.innerHTML = '<p class="my-listings-loading">Please log in to view listings.</p>';
-    }
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+  currentUser = user;
+  loadMyLostPets(user.uid);
 });
 
 /* =========================
