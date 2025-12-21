@@ -1292,7 +1292,7 @@ p.subtitle {
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .modal-inner-image-container,
     .modal-inner-info-container {
         flex: 0 0 auto;
@@ -2184,6 +2184,7 @@ p.subtitle {
     font-size: 14px;
 }
 
+<<<<<<< HEAD
 /* --- 1. Section Layout for Lost Pets --- */
 .my-lostpets-wrapper {
     max-width: 700px;
@@ -2250,6 +2251,8 @@ p.subtitle {
     object-fit: cover;
 }
 
+=======
+>>>>>>> parent of 84ce10e (profile ui havent update)
 /* --- 2. Listing Cards (The Horizontal Cards) --- */
 .listing-item-card {
     display: flex;
