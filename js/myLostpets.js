@@ -54,10 +54,14 @@ async function loadMyLostPets(uid) {
 
     // Sort: Pending first, then by date_Reported descending
     myLostPets.sort((a, b) => {
-      const statusOrder = { "Pending": 1, "Approved": 2, "Rejected": 3 };
-      const statusA = statusOrder[a.verification_status] || 99;
-      const statusB = statusOrder[b.verification_status] || 99;
-      if (statusA !== statusB) return statusA - statusB;
+      const priority = (pet) => {
+        if (pet.status === "Found") return 1;
+        if (pet.verification_status === "Approved") return 2;
+        if (pet.verification_status === "Pending") return 3;
+        if (pet.verification_status === "Rejected") return 4;
+        return 5; // fallback
+      };  
+  return priority(a) - priority(b);
 
       // Compare by last_seen_Date string (YYYY-MM-DD)
       const timeA = a.last_seen_Date ? new Date(a.last_seen_Date).getTime() : 0;
@@ -67,13 +71,41 @@ async function loadMyLostPets(uid) {
 
     // Render grid
     myLostPets.forEach(pet => {
-      let badgeClass = "badge-pending";
-      let statusText = pet.verification_status || "Pending";
+      let badgeClass = "";
+let statusText = "";
 
-      if (statusText === "Approved") badgeClass = "badge-approved";
-      else if (statusText === "Rejected") badgeClass = "badge-rejected";
+// 1️⃣ Found first
+if (pet.status === "Found") {
+  statusText = "Found";
+  badgeClass = "badge-found";
+}
 
-      const dateStr = pet.last_seen_Date || "Date Unknown";
+// 2️⃣ Approved (not found)
+else if (pet.verification_status === "Approved") {
+  statusText = "Approved";
+  badgeClass = "badge-approved";
+}
+
+// 3️⃣ Pending
+else if (pet.verification_status === "Pending") {
+  statusText = "Pending";
+  badgeClass = "badge-pending";
+}
+
+// 4️⃣ Rejected
+else if (pet.verification_status === "Rejected") {
+  statusText = "Rejected";
+  badgeClass = "badge-rejected";
+}
+
+// fallback
+else {
+  statusText = "Pending";
+  badgeClass = "badge-pending";
+}
+      const formattedDate = pet.date_Reported
+  ? pet.date_Reported.toDate().toISOString().split("T")[0]
+  : "Unknown";
 
       const cardHTML = `
         <div onclick="window.openMyLostPetModal('${pet.id}')" class="lostpet-item-card">
@@ -82,7 +114,7 @@ async function loadMyLostPets(uid) {
           </div>
           <div class="lostpet-item-content">
             <h3 class="lostpet-item-title">${pet.name}</h3>
-            <p class="lostpet-item-meta">${pet.animal_type || "Unknown"} • ${dateStr}</p>
+            <p class="lostpet-item-meta">${pet.animal_type || "Unknown"} • ${formattedDate}</p>
           </div>
           <div class="lostpet-item-badge-container">
             <span class="lostpet-item-badge ${badgeClass}">
@@ -224,14 +256,14 @@ window.openMyLostPetModal = function (id) {
 
     if (data.verification_status === "Approved") {
       // ✅ REPLACEMENT: Show "Mark as Found" button instead of "Approved" text
-      statusHTML = `<button id="markFoundBtn" class="mark-found-btn">
+      statusHTML = `<button id="markFoundBtn" class="lostpet-mark-found-btn">
     Mark as Found
 </button>`;
 
       // 2. Add CSS (either in your <style> or dynamically)
       const style = document.createElement('style');
       style.innerHTML = `
-.mark-found-btn {
+.lostpet-mark-found-btn {
     width: 95%;
     background-color: #164A41;
     color: white;
@@ -245,7 +277,7 @@ window.openMyLostPetModal = function (id) {
     transition: 0.2s;
 }
 
-.mark-found-btn:hover {
+.lostpet-mark-found-btn:hover {
     background-color: #d0e0d3;
 }
 `;
@@ -261,18 +293,35 @@ window.openMyLostPetModal = function (id) {
       <h2 style="color: #164A41; margin-bottom: 15px;">${data.name}</h2>
       <div class="modal-detail-item">
         <i class="fas fa-paw"></i>
-        <div><p class="modal-inner-info-text-title">Type</p><span>${data.animal_type} • ${data.breed}</span></div>
+        <div><p class="modal-inner-info-text-title">Type & Breed</p><span>${data.animal_type} • ${data.breed}</span></div>
       </div>
       <div class="modal-detail-item">
         <i class="fas fa-birthday-cake"></i>
-        <div><p class="modal-inner-info-text-title">Age</p><span>${data.age} months old • ${data.gender}</span></div>
+        <div><p class="modal-inner-info-text-title">Age & Gender</p><span>${data.age} months old • ${data.gender}</span></div>
       </div>
       <div class="modal-detail-item">
         <i class="fas fa-map-marker-alt"></i>
         <div><p class="modal-inner-info-text-title">Last Seen Location</p><span>${data.last_seen_Location}</span></div>
       </div>
-      <h3 style="color: #0d3b25; font-size: 18px; font-weight: 700; margin-top: 25px; margin-bottom: 8px;">About ${data.name}</h3>
-      <p style="color: #555; line-height: 1.6; font-size: 14px; margin-top: 0;">${data.description || 'No description provided.'}</p>
+      <div class="modal-detail-item">
+        <i class="fas fa-solid fa-calendar"></i>
+        <div><p class="modal-inner-info-text-title">Last Seen Date</p><span>${data.last_seen_Date}</span></div>
+      </div>
+      <h3 style="color:#0d3b25; font-size:18px; font-weight:700; margin-top:25px; margin-bottom:8px;">
+      Description
+    </h3>
+
+    <p style="
+        color:#555;
+        line-height:1.6;
+        font-size:14px;
+        margin-top:0;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    ">
+  ${data.description || 'No description provided.'}
+</p>
 
       ${statusHTML}
       <p style="text-align: center; font-size: 12px; color: #888; margin-top: 5px;">*You cannot edit this listing because it has been processed.</p>
@@ -282,12 +331,13 @@ window.openMyLostPetModal = function (id) {
     const markFoundBtn = document.getElementById("markFoundBtn");
     if (markFoundBtn) {
       markFoundBtn.addEventListener("click", async () => {
+        if (!confirm("Are you sure you want to mark this pet as found?")) return;
         try {
           const docRef = doc(db, "lostPets", data.id);
           await updateDoc(docRef, {
-            verification_status: "Found" // <- match the field your UI uses
+            status: "Found" // <- match the field your UI uses
           });
-
+          
           alert(`${data.name} has been marked as Found!`);
           modal.classList.remove("open");
 

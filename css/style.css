@@ -1329,13 +1329,22 @@ p.subtitle {
     }
 }
 
-
-
 /*#endregion*/
 
 /*#region lostpetpage*/
 /*Lost Pet Reports*/
 /* ===== LOST PET CONTENT AREA ===== */
+
+.badge-found {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #0369a1;
+}
+
+.badge-lost {
+  background-color: red; /* orange */
+  color: white;
+}
 .lostpet-content {
     display: flex;
     padding-top: 80px;
