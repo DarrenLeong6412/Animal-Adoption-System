@@ -93,6 +93,7 @@
 
       <!-- Actions -->
       <div class="profile-actions">
+        <button id="changePasswordBtn" class="profile-btn profile-btn-secondary" type="button">Change Password</button>
         <button id="editProfileBtn" class="profile-btn">Edit</button>
         <button id="saveProfileBtn" class="profile-btn" style="display:none;">Save</button>
         <button id="cancelProfileBtn" class="profile-btn profile-btn-secondary" style="display:none;">Cancel</button>
@@ -116,7 +117,7 @@
   </div>
 
   <div class="modal" id="userListingModal">
-  <div></div>
+    <div></div>
     <div class="modal-inner">
       <div class="modal-inner-top">
         <div class="modal-inner-top-title">
@@ -203,45 +204,45 @@
     </div>
   </div>
 
-  
+
   <!-- DARREN DO HERE -->
-<div class="my-lostpets-wrapper">
-  <div class="profile-card" style="width: 100%; box-sizing: border-box;">
-    <div class="my-lostpets-header">
-      <h2 class="my-lostpets-title">My Lost Pets</h2>
-      <p class="my-lostpets-subtitle">Manage lost pets you have created.</p>
-    </div>
-
-    <div id="myLostpetsGrid" class="my-lostpets-grid">
-      <p class="my-lostpets-loading">Loading your lost pets...</p>
-    </div>
-  </div>
-</div>
-
-<!-- Modal -->
-<div class="modal"id="userLostPet-modal">
-  <div class="modal-inner" >
-    <div class="modal-inner-top">
-      <div class="modal-inner-top-title">
-        <h1 id="modalEditTitle">Manage Lost Pet</h1>
-      </div>
-      <div class="modal-inner-top-exit">
-        <a href="#" onclick="closeLostPetModal()"><i class="fa-solid fa-x"></i></a>
-      </div>
-    </div>
-
-    <div class="modal-inner-details-section">
-      <div class="modal-inner-image-container">
-        <img id="modalImg" alt="Pet Image" class="modalImg" style="object-fit: cover;">
+  <div class="my-lostpets-wrapper">
+    <div class="profile-card" style="width: 100%; box-sizing: border-box;">
+      <div class="my-lostpets-header">
+        <h2 class="my-lostpets-title">My Lost Pets</h2>
+        <p class="my-lostpets-subtitle">Manage lost pets you have created.</p>
       </div>
 
-      <div class="modal-inner-info-container">
-        <!-- Dynamic content will be injected here by JS -->
-         <button class="mark-found-btn" data-id="${pet.id}">Mark as Found</button>
+      <div id="myLostpetsGrid" class="my-lostpets-grid">
+        <p class="my-lostpets-loading">Loading your lost pets...</p>
       </div>
     </div>
   </div>
-</div>
+
+  <!-- Modal -->
+  <div class="modal" id="userLostPet-modal">
+    <div class="modal-inner">
+      <div class="modal-inner-top">
+        <div class="modal-inner-top-title">
+          <h1 id="modalEditTitle">Manage Lost Pet</h1>
+        </div>
+        <div class="modal-inner-top-exit">
+          <a href="#" onclick="closeLostPetModal()"><i class="fa-solid fa-x"></i></a>
+        </div>
+      </div>
+
+      <div class="modal-inner-details-section">
+        <div class="modal-inner-image-container">
+          <img id="modalImg" alt="Pet Image" class="modalImg" style="object-fit: cover;">
+        </div>
+
+        <div class="modal-inner-info-container">
+          <!-- Dynamic content will be injected here by JS -->
+          <button class="mark-found-btn" data-id="${pet.id}">Mark as Found</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- FOOTER -->
   <div id="footer"></div>
 
