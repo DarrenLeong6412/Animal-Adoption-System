@@ -365,6 +365,30 @@ onAuthStateChanged(auth, async (user) => {
       const userRef = doc(db, "users", user.uid);
       const snap = await getDoc(userRef);
 
+      // CHANGE PASSWORD (send reset email to logged-in user)
+      const changePasswordBtn = document.getElementById("changePasswordBtn");
+
+      if (changePasswordBtn && onProfilePage) {
+        changePasswordBtn.onclick = async () => {
+          if (!user?.email) {
+            alert("No email found for this account.");
+            return;
+          }
+
+          const ok = confirm(`Send a password reset email to:\n\n${user.email}\n\nProceed?`);
+          if (!ok) return;
+
+          try {
+            await sendPasswordResetEmail(auth, user.email);
+            alert("Password reset email sent! Please check your inbox (and spam).");
+          } catch (error) {
+            console.error("Change password error:", error);
+            alert(error.message);
+          }
+        };
+      }
+
+
       if (snap.exists()) {
         const data = snap.data();
 
