@@ -131,7 +131,7 @@ Pet Name: ${name}
 Type: ${animal_type}
 Last Seen: ${last_seen_Location} on ${last_seen_Date}
 
-⚠️ IMPORTANT: Once submitted, you cannot edit the details yourself. If you need to make changes after submission, please contact us at our support email.
+⚠️ IMPORTANT: Once submitted, you can only edit the details when it is pending. If you need to make changes after approved listing, please contact us at our support email.
 
 Do you want to submit this report?`;
 

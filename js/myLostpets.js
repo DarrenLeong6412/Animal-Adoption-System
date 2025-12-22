@@ -242,20 +242,21 @@ window.openMyLostPetModal = function (id) {
     let statusColor = "#000";
     let statusBg = "#f0f0f0";
 
-    if (data.verification_status === "Approved") {
-      statusColor = "#16a34a";
-      statusBg = "#d1fae5"; // light green for Approved
-    }
-    if (data.verification_status === "Rejected") {
-      statusColor = "#dc2626";
-      statusBg = "#fee2e2";
-    }
+    if (data.status === "Found") {
+    statusColor = "#0369a1";     
+    statusBg = "#e0f2fe";        // light blue background   
+} else if (data.verification_status === "Approved") {
+    statusColor = "#16a34a";        // green text
+    statusBg = "#d1fae5";           // light green background
+} else if (data.verification_status === "Rejected") {
+    statusColor = "#dc2626";        // red text
+    statusBg = "#fee2e2";           // light red background
+}
 
     // Build HTML for the modal content
     let statusHTML = "";
 
-    if (data.verification_status === "Approved") {
-      // ✅ REPLACEMENT: Show "Mark as Found" button instead of "Approved" text
+    if (data.verification_status === "Approved" && data.status === "Lost") {
       statusHTML = `<button id="markFoundBtn" class="lostpet-mark-found-btn">
     Mark as Found
 </button>`;
@@ -284,9 +285,21 @@ window.openMyLostPetModal = function (id) {
       document.head.appendChild(style);
     } else {
       // Pending or Rejected → show colored block
-      statusHTML = `<div style="margin-top: 25px; padding: 12px; background-color: ${statusBg}; color: ${statusColor}; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid ${statusColor};">
-                      ${data.verification_status}
-                    </div>`;
+
+      let displayStatus = "";
+if (data.verification_status === "Rejected") {
+  displayStatus = "Rejected";
+} else if (data.status) {
+  displayStatus = data.status;
+} else if (data.verification_status) {
+  displayStatus = data.verification_status;
+} else {
+  displayStatus = "Pending";
+}
+
+statusHTML = `<div style="margin-top: 25px; padding: 12px; background-color: ${statusBg}; color: ${statusColor}; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid ${statusColor};">
+                ${displayStatus}
+              </div>`;
     }
 
     container.innerHTML = `
@@ -395,28 +408,85 @@ window.saveLostPetChanges = async function () {
     }
 
     // Gather form data
-    const name = modal.querySelector("#editName")?.value.trim() || currentData.name;
-
-    let animalType = modal.querySelector("#editType")?.value || currentData.animal_type;
+    const name = modal.querySelector("#editName")?.value.trim();
+    let animalType = modal.querySelector("#editType")?.value;
+    let otherTypeInput = modal.querySelector("#animalTypeOther");
     if (animalType === "Other") {
-      const otherTypeInput = modal.querySelector("#animalTypeOther");
-      if (!otherTypeInput?.value.trim()) {
-        alert("Please specify the animal type.");
-        btn.innerText = "Save Changes";
-        btn.disabled = false;
-        return;
-      }
-      animalType = otherTypeInput.value.trim();
+      animalType = otherTypeInput?.value.trim();
     }
-
-    const breed = modal.querySelector("#editBreed")?.value.trim() || currentData.breed;
+    const breed = modal.querySelector("#editBreed")?.value.trim();
     const ageInput = modal.querySelector("#editAge")?.value;
-    const age = ageInput ? parseInt(ageInput) : currentData.age;
-    const gender = modal.querySelector("#editGender")?.value || currentData.gender;
-    const lastSeenLocation = modal.querySelector("#editLastSeenLocation")?.value.trim() || currentData.last_seen_Location;
-    const lastSeenDate = modal.querySelector("#editLastSeenDate")?.value || currentData.last_seen_Date || ""; // store as string
-    const description = modal.querySelector("#editDescription")?.value.trim() || currentData.description;
+    const age = ageInput ? parseInt(ageInput) : null;
+    const gender = modal.querySelector("#editGender")?.value;
+    const lastSeenLocation = modal.querySelector("#editLastSeenLocation")?.value.trim();
+    const lastSeenDate = modal.querySelector("#editLastSeenDate")?.value;
+    const description = modal.querySelector("#editDescription")?.value.trim();
 
+    // ================= VALIDATION =================
+    if (!name) {
+  alert("Animal name cannot be blank.");
+  btn.innerText = "Save Changes";
+  btn.disabled = false;
+  return;
+}
+
+if (!animalType) {
+  alert("Animal type cannot be blank.");
+  btn.innerText = "Save Changes";
+  btn.disabled = false;
+  return;
+}
+
+if (!breed) {
+  alert("Breed cannot be blank.");
+  btn.innerText = "Save Changes";
+  btn.disabled = false;
+  return;
+}
+
+// Age validation: must not be blank or negative
+if (age === null || isNaN(age)) {
+  alert("Age cannot be blank.");
+  btn.innerText = "Save Changes";
+  btn.disabled = false;
+  return;
+}
+if (age < 0) {
+  alert("Age cannot be negative.");
+  btn.innerText = "Save Changes";
+  btn.disabled = false;
+  return;
+}
+
+if (!gender) {
+  alert("Gender cannot be blank.");
+  btn.innerText = "Save Changes";
+  btn.disabled = false;
+  return;
+}
+
+if (!lastSeenLocation) {
+  alert("Last seen location cannot be blank.");
+  btn.innerText = "Save Changes";
+  btn.disabled = false;
+  return;
+}
+
+if (!lastSeenDate) {
+  alert("Last seen date cannot be blank.");
+  btn.innerText = "Save Changes";
+  btn.disabled = false;
+  return;
+}
+
+if (!description) {
+  alert("Description cannot be blank.");
+  btn.innerText = "Save Changes";
+  btn.disabled = false;
+  return;
+}
+
+    // ================= UPDATE DOC =================
     await updateDoc(docRef, {
       name,
       animal_type: animalType,
@@ -441,25 +511,3 @@ window.saveLostPetChanges = async function () {
   }
 };
 
-document.querySelectorAll(".mark-found-btn").forEach(btn => {
-  btn.addEventListener("click", async (e) => {
-    const petId = btn.dataset.id;
-    if (!confirm("Are you sure you want to mark this pet as found?")) return;
-
-    try {
-      await updateDoc(doc(db, "lostPets", petId), {
-        status: "Found"
-      });
-
-      alert("Pet marked as Found!");
-      // Reload the user profile lost pet list
-      loadMyLostPets(); // your function to reload user's lost pets
-      // Optionally reload public lost pets
-      if (typeof loadMyLostPets === "function") loadMyLostPets();
-
-    } catch (err) {
-      console.error("Error marking pet as found:", err);
-      alert("Failed to update pet status. Try again.");
-    }
-  });
-});

@@ -104,8 +104,8 @@ function renderGrid(dataList) {
   grid.innerHTML = "";
 
   // Only show pets that are approved and still lost
-  const publicList = dataList.filter(lostPet => 
-      lostPet.verification_status === "Approved" && lostPet.status === "Lost"
+  const publicList = dataList.filter(lostPet =>
+    lostPet.verification_status === "Approved" && lostPet.status === "Lost"
   );
 
   if (publicList.length === 0) {
@@ -258,7 +258,9 @@ window.openModalById = async function (id) {
       <div>
         <p class="modal-inner-info-text-title">Age & Gender</p>
         <span>
-          ${data.age ? data.age + " months" : "Not specified"}
+          ${data.age === 0 || typeof data.age === "number"
+      ? data.age + " months"
+      : "Not specified"}
           ${data.gender ? " • " + data.gender : ""}
         </span>
       </div>
@@ -323,7 +325,6 @@ window.editLostPet = function (id) {
   const data = allLostPets.find(pet => pet.id === id);
   if (!data) return;
 
-  // Use correct IDs from your HTML for edit modal
   const modalTitle = document.querySelector('#editLostPetDetailModal .modal-inner-top-title h1');
   const modalImg = document.querySelector('#editLostPetDetailModal .modalImg');
   const container = document.querySelector('#editLostPetDetailModal .modal-inner-info-container');
@@ -334,83 +335,103 @@ window.editLostPet = function (id) {
     return;
   }
 
-  // Set modal title and image
+  const standardTypes = ['Dog', 'Cat', 'Rabbit'];
+  const getOption = (val, current) =>
+    `<option value="${val}" ${val === current ? 'selected' : ''}>${val}</option>`;
+
+  let selectedType = data.animal_type;
+  let otherTypeValue = "";
+
+  if (!standardTypes.includes(data.animal_type)) {
+    selectedType = "Other";
+    otherTypeValue = data.animal_type;
+  }
+
+  const formattedDate = data.last_seen_Date
+    ? new Date(data.last_seen_Date).toISOString().split("T")[0]
+    : "";
+
   modalTitle.innerText = "Admin: Edit Lost Pet";
-  modalImg.src = data.photo || 'images/no-image.png';
+  modalImg.src = data.photo || "images/no-image.png";
 
-  const createOption = (value, current) => `<option value="${value}" ${value === current ? "selected" : ""}>${value}</option>`;
-
-  // Populate modal content
   container.innerHTML = `
     <input type="hidden" id="editDocId" value="${data.id}">
 
-    <div style="margin-bottom: 15px;">
-      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Name</label>
-      <input id="editName" value="${data.name}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    <div class="edit-form-group">
+      <label class="edit-form-label">Animal Name *</label>
+      <input type="text" id="editName" class="edit-form-input" value="${data.name || ''}">
     </div>
 
-    <div style="margin-bottom: 15px;">
-      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Animal Type</label>
-      <input id="editType" value="${data.animal_type}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-    </div>
-
-    <div style="margin-bottom: 15px;">
-      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Breed</label>
-      <input id="editBreed" value="${data.breed || ""}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-    </div>
-
-    <div style="margin-bottom: 15px;">
-      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Status (Pet)</label>
-      <select id="editStatus" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-        ${createOption("Lost", data.status)}
-        ${createOption("Found", data.status)}
+    <div class="edit-form-group">
+      <label class="edit-form-label">Type *</label>
+      <select id="editType" class="edit-form-input">
+        ${getOption('Dog', selectedType)}
+        ${getOption('Cat', selectedType)}
+        ${getOption('Rabbit', selectedType)}
+        ${getOption('Other', selectedType)}
       </select>
     </div>
 
-    <div style="margin-bottom: 15px;">
-      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Verification Status</label>
-      <select id="editVerification" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-        ${createOption("Pending", data.verification_status)}
-        ${createOption("Approved", data.verification_status)}
-        ${createOption("Rejected", data.verification_status)}
+    <div class="edit-form-group" id="otherAnimalTypeGroup" style="display:${selectedType === 'Other' ? 'block' : 'none'};">
+      <label class="edit-form-label">Specify Animal Type *</label>
+      <input type="text" id="animalTypeOther" class="edit-form-input" value="${otherTypeValue}">
+    </div>
+
+    <div class="edit-form-group">
+      <label class="edit-form-label">Breed *</label>
+      <input type="text" id="editBreed" class="edit-form-input" value="${data.breed || ''}">
+    </div>
+
+    <div class="edit-form-group">
+      <label class="edit-form-label">Age (Months) *</label>
+      <input type="number" id="editAge" class="edit-form-input" min="0" value="${typeof data.age === 'number' ? data.age : 0}">
+    </div>
+
+    <div class="edit-form-group">
+      <label class="edit-form-label">Gender *</label>
+      <select id="editGender" class="edit-form-input">
+        ${getOption('Male', data.gender)}
+        ${getOption('Female', data.gender)}
       </select>
     </div>
 
-    <div style="margin-bottom: 15px;">
-      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Last Seen Location</label>
-      <input id="editLocation" value="${data.last_seen_Location}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    <div class="edit-form-group">
+      <label class="edit-form-label">Last Seen Location *</label>
+      <input type="text" id="editLastSeenLocation" class="edit-form-input" value="${data.last_seen_Location || ''}">
     </div>
 
-    <div style="margin-bottom: 15px;">
-      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Description</label>
-      <textarea id="editDescription" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;">${data.description || ""}</textarea>
+    <div class="edit-form-group">
+      <label class="edit-form-label">Last Seen Date *</label>
+      <input type="date" id="editLastSeenDate" value="${formattedDate}">
     </div>
 
-    <div class="modal-status-preview" style="margin: 15px 0; padding: 10px; background: #f3f4f6; border-radius: 4px; font-weight: bold;">
-      Current Status: <span id="statusPreview">${data.status}</span> • Verification: <span id="verificationPreview">${data.verification_status}</span>
+    <div class="edit-form-group">
+      <label class="edit-form-label">Description *</label>
+      <textarea id="editDescription" class="edit-form-textarea">${data.description || ''}</textarea>
     </div>
 
-    <button id="saveChangesBtn" style="width: 100%; padding: 12px; background: #0d3b25; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Save Changes</button>
+    <button id="saveChangesBtn" class="btn-save-changes">Save Changes</button>
   `;
 
-  // Update status preview dynamically when selects change
-  const statusSelect = container.querySelector('#editStatus');
-  const verificationSelect = container.querySelector('#editVerification');
+  document.getElementById("saveChangesBtn").addEventListener("click", handleAdminSave);
 
-  statusSelect.addEventListener('change', e => {
-    container.querySelector('#statusPreview').innerText = e.target.value;
+  container.addEventListener("change", e => {
+    if (e.target.id === "editType") {
+      const otherGroup = document.getElementById("otherAnimalTypeGroup");
+      const otherInput = document.getElementById("animalTypeOther");
+
+      if (e.target.value === "Other") {
+        otherGroup.style.display = "block";
+      } else {
+        otherGroup.style.display = "none";
+        otherInput.value = "";
+      }
+    }
   });
 
-  verificationSelect.addEventListener('change', e => {
-    container.querySelector('#verificationPreview').innerText = e.target.value;
-  });
-
-  // Attach save handler
-  document.getElementById("saveChangesBtn").onclick = handleAdminSave;
-
-  // Open the correct modal
   editModal.classList.add("open");
 };
+
 
 // Add a function to close the edit modal
 window.closeEditModal = function () {
@@ -423,49 +444,86 @@ window.closePetModal = function () {
   document.getElementById("editLostPetDetailModal").classList.remove("open");
 };
 
+function showError(input, message) {
+  input.style.border = "2px solid #dc2626";
+  alert(message);
+  input.focus();
+}
 
+function clearError(input) {
+  input.style.border = "";
+}
 
 // 3. HANDLE SAVE (need to change also for admin to change the details one )
 async function handleAdminSave() {
-  const id = document.getElementById("editDocId").value;
   const btn = document.getElementById("saveChangesBtn");
 
+  const name = document.getElementById("editName");
+  const typeSelect = document.getElementById("editType");
+  const otherType = document.getElementById("animalTypeOther");
+  const breed = document.getElementById("editBreed");
+  const age = document.getElementById("editAge");
+  const location = document.getElementById("editLastSeenLocation");
+  const date = document.getElementById("editLastSeenDate");
+  const desc = document.getElementById("editDescription");
+
+  [name, typeSelect, otherType, breed, age, location, date, desc].forEach(clearError);
+
+  if (!name.value.trim()) return showError(name, "Animal name is required");
+
+  if (typeSelect.value === "Other" && !otherType.value.trim())
+    return showError(otherType, "Please specify animal type");
+
+  if (!breed.value.trim()) return showError(breed, "Breed is required");
+
+  if (age.value === "" || Number(age.value) < 0)
+    return showError(age, "Age must be 0 or more");
+
+  if (!location.value.trim())
+    return showError(location, "Last seen location is required");
+
+  if (!date.value)
+    return showError(date, "Last seen date is required");
+
+  if (desc.value.trim().length < 10)
+    return showError(desc, "Description must be at least 10 characters");
+
+  // ✅ ONLY reaches here if validation passed
   btn.disabled = true;
   btn.innerText = "Saving...";
 
   try {
-    const verification = document.getElementById("editVerification").value;
-    let status = document.getElementById("editStatus").value;
+    const id = document.getElementById("editDocId").value;
 
-    // Only set status to "Lost" if approved
-    if (verification === "Approved") {
-      status = "Lost";
-    } else if (verification === "Rejected") {
-      status = ""; // or leave undefined
-    }
+    const finalType =
+      typeSelect.value === "Other"
+        ? otherType.value.trim()
+        : typeSelect.value;
 
     await updateDoc(doc(db, "lostPets", id), {
-      name: document.getElementById("editName").value,
-      animal_type: document.getElementById("editType").value,
-      breed: document.getElementById("editBreed").value,
-      status: status,
-      verification_status: verification,
-      last_seen_Location: document.getElementById("editLocation").value,
-      description: document.getElementById("editDescription").value
+      name: name.value.trim(),
+      animal_type: finalType,
+      breed: breed.value.trim(),
+      age: Number(age.value),
+      gender: document.getElementById("editGender").value,
+      last_seen_Location: location.value.trim(),
+      last_seen_Date: date.value,
+      description: desc.value.trim()
     });
 
     alert("Updated successfully");
-    document.getElementById("animalModal").classList.remove("open");
+    closeEditModal();
     loadLostPets();
 
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     alert("Update failed");
   } finally {
     btn.disabled = false;
     btn.innerText = "Save Changes";
   }
 }
+
 
 //(need look for the search input)
 function setupFilters() {
