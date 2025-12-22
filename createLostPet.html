@@ -48,7 +48,8 @@
 
                     <div class="form-group" id="otherAnimalTypeGroup" style="display:none;">
                         <label>Specify Animal Type<span class="required">*</span></label>
-                        <input type="text" id="animalTypeOther" name="animalTypeOther" placeholder="e.g., Hamster, Guinea Pig">
+                        <input type="text" id="animalTypeOther" name="animalTypeOther"
+                            placeholder="e.g., Hamster, Guinea Pig">
                     </div>
                 </div>
 
@@ -75,15 +76,16 @@
 
                 <div class="form-group">
                     <label>Description<span class="required">*</span></label>
-                    <textarea id="petDescription" name="petDescription" 
-                        placeholder="Describe your pet's appearance, distinctive features, personality, etc." required></textarea>
+                    <textarea id="petDescription" name="petDescription"
+                        placeholder="Describe your pet's appearance, distinctive features, personality, etc."
+                        required></textarea>
                 </div>
 
                 <div class="section-title">Last Seen Information</div>
 
                 <div class="form-group">
                     <label>Last Seen Location<span class="required">*</span></label>
-                    <input type="text" id="lastSeenLocation" name="lastSeenLocation" 
+                    <input type="text" id="lastSeenLocation" name="lastSeenLocation"
                         placeholder="e.g., Near Central Park, 5th Avenue" required>
                 </div>
 
@@ -100,12 +102,38 @@
                     <div class="image-preview-container" onclick="document.getElementById('petPhoto').click()">
                         <div id="uploadText">
                             Click to upload pet photo<br>
-                            <span style="font-size: 12px; color: #9ca3af;">(Max size auto-resized to fit database)</span>
+                            <span style="font-size: 12px; color: #9ca3af;">(Max size auto-resized to fit
+                                database)</span>
                         </div>
                         <img id="previewImg" src="" alt="Preview" style="display: none;">
                     </div>
                 </div>
+                
+                <div class="container">
+                    <label>Report Posting Fee <span class="required">*</span></label>
 
+                    <div id="paymentInstructions"
+                        style="border: 1px solid #ccc; padding: 15px; border-radius: 5px; background-color: #f9f9f9; margin-top: 10px;">
+
+                        <div id="uploadText"
+                            style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; background-color: #f9f9f9; line-height: 1.6;">
+                            <p style="font-weight: bold; font-size: 16px; margin-bottom: 10px;">Please transfer
+                                <strong>RM20</strong> to the following bank account:
+                            </p>
+                            <ul style="list-style-type: none; padding-left: 0; margin-bottom: 10px;">
+                                <li><strong>Account Number:</strong> <span
+                                        style="color: #121314;">8128937789216578460</span></li>
+                                <li><strong>Remarks:</strong> <span style="color: #121314;">Pet Name + Your
+                                        Username</span></li>
+                                <li><strong>Send payment receipt to:</strong> <span
+                                        style="color: #121314;">shaunlooiyw@gmail.com</span></li>
+                            </ul>
+                            <p style="color: #d9534f; font-weight: bold; margin-top: 10px;">
+                                ⚠️ Your lost pet report will only be submitted after you have completed the payment.
+                            </p>
+                        </div>
+                    </div>
+                </div>    
                 <div class="button-group">
                     <button type="button" class="btn btn-cancel" onclick="window.history.back()">Cancel</button>
                     <button type="submit" class="btn btn-submit" id="submitBtn">Submit Report</button>
@@ -113,7 +141,6 @@
             </form>
         </div>
     </div>
-
     <div id="footer"></div>
 
     <script src="javascript/script.js"></script>
