@@ -108,24 +108,26 @@ async function loadUserListings(userId) {
     }
 }
 
-// 3. Open Modal (Dynamic Logic)
+// 3. Open Modal 
 window.openUserListingModal = function(id) {
     const data = myUserListings.find(item => item.id === id);
     if (!data) return;
 
     const modal = document.getElementById("userListingModal");
     
-    // Set Header Image
+    
     document.getElementById("modalEditImg").src = data.imageUrl || 'images/no-image.png';
     
     const container = document.querySelector("#userListingModal .modal-inner-info-container");
     
-   
-    //STATUS IS PENDING - ALLOW EDITING
+    // STATUS IS PENDING - ALLOW EDITING
     if (data.status === "Pending") {
         document.getElementById("modalEditTitle").innerText = "Edit Listing";
         
-        const getOption = (val, current) => `<option value="${val}" ${current === val ? 'selected' : ''}>${val}</option>`;
+        
+        const getOption = (val, current) => `
+            <option value="${val}" ${val === current ? 'selected' : ''}>${val}</option>
+        `;
 
         container.innerHTML = `
             <input type="hidden" id="editDocId" value="${data.id}">
@@ -144,6 +146,9 @@ window.openUserListingModal = function(id) {
                         ${getOption('Rabbit', data.type)}
                         ${getOption('Other', data.type)}
                     </select>
+                    <input type="text" id="editTypeOther" class="edit-form-input" 
+                           placeholder="Please specify" 
+                           style="display: none; margin-top: 10px;">
                 </div>
                 <div class="edit-form-group form-group-half">
                     <label class="edit-form-label">Breed</label>
@@ -175,7 +180,7 @@ window.openUserListingModal = function(id) {
                 <select id="editVaccine" class="edit-form-input">
                     ${getOption('Vaccinated', data.vaccinationStatus)}
                     ${getOption('Not Vaccinated', data.vaccinationStatus)}
-                    ${getOption('Not specified', data.vaccinationStatus)}
+                    ${getOption('Unknown', data.vaccinationStatus)}
                 </select>
             </div>
 
@@ -193,8 +198,54 @@ window.openUserListingModal = function(id) {
                 Save Changes
             </button>
         `;
-    } 
-    else {
+
+        // Other type logic
+        const typeSelect = document.getElementById('editType');
+        const otherInput = document.getElementById('editTypeOther');
+        const standardTypes = ["Dog", "Cat", "Rabbit", "Bird"];
+
+        // 1. Initial State Check
+        if (standardTypes.includes(data.type)) {
+            typeSelect.value = data.type;
+            otherInput.style.display = 'none';
+        } else {
+            typeSelect.value = 'Other';
+            otherInput.style.display = 'block';
+            otherInput.value = data.type; 
+        }
+
+        // 2. Toggle Visibility
+        typeSelect.addEventListener('change', () => {
+            if (typeSelect.value === 'Other') {
+                otherInput.style.display = 'block';
+                otherInput.required = true;
+                otherInput.focus();
+            } else {
+                otherInput.style.display = 'none';
+                otherInput.required = false;
+                otherInput.value = ''; 
+            }
+        });
+
+        // 3. Auto-detect logic
+        otherInput.addEventListener('input', () => {
+            const typedVal = otherInput.value.trim().toLowerCase();
+            for (let i = 0; i < typeSelect.options.length; i++) {
+                const optionVal = typeSelect.options[i].value;
+                if (optionVal === "Other") continue;
+
+                if (optionVal.toLowerCase() === typedVal) {
+                    typeSelect.value = optionVal;
+                    otherInput.style.display = 'none';
+                    otherInput.value = '';
+                    otherInput.required = false;
+                    break; 
+                }
+            }
+        });
+
+    } else {
+        // VIEW ONLY MODE (Not Pending)
         document.getElementById("modalEditTitle").innerText = "View Details";
         
         let statusColor = "#000";
@@ -257,7 +308,6 @@ window.openUserListingModal = function(id) {
             <div style="margin-top: 25px; padding: 12px; background-color: ${statusBg}; color: ${statusColor}; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid ${statusColor};">
                 ${displayStatus}
             </div>
-
             
             <p style="text-align: center; font-size: 12px; color: #888; margin-top: 5px;">
                 *You cannot edit this listing because it has been processed.
@@ -273,22 +323,33 @@ window.closeUserModal = function() {
     document.getElementById("userListingModal").classList.remove("open");
 };
 
-// 5. Save Changes (With Strict Validation)
+// 5. Save Changes (With Strict Validation & Other Logic)
 window.saveUserListing = async function() {
     const id = document.getElementById("editDocId").value;
     const btn = document.getElementById("btnSaveChanges");
 
-    // --- 1. GET VALUES ---
+    // GET VALUES
     const nameVal = document.getElementById('editName').value.trim();
     const breedVal = document.getElementById('editBreed').value.trim();
     const locVal = document.getElementById('editLocation').value.trim();
     const descVal = document.getElementById('editDescription').value.trim();
     const ageInput = document.getElementById('editAge').value;
-    const typeVal = document.getElementById('editType').value;
     const genderVal = document.getElementById('editGender').value;
     const vaccineVal = document.getElementById('editVaccine').value;
+    
+    // HANDLE TYPE
+    let typeVal = document.getElementById('editType').value;
+    if (typeVal === "Other") {
+        const customType = document.getElementById("editTypeOther").value.trim();
+        if (!customType) {
+            alert("Missing Type: Please specify the animal type.");
+            return;
+        }
+        // Capitalize first letter
+        typeVal = customType.charAt(0).toUpperCase() + customType.slice(1);
+    }
 
-    // --- 2. VALIDATION CHECKS (Matches addListing.js) ---
+    // VALIDATION CHECKS 
     
     // Name Validation
     const nameRegex = /^[a-zA-Z\s]+$/;
@@ -324,8 +385,7 @@ window.saveUserListing = async function() {
         return;
     }
 
-    // --- 3. FIREBASE STATUS CHECK ---
-    // Ensure the item is still Pending before writing
+    // FIREBASE STATUS CHECK 
     try {
         const currentDoc = await getDoc(doc(db, "animals", id));
         if (currentDoc.exists() && currentDoc.data().status !== "Pending") {
@@ -339,7 +399,7 @@ window.saveUserListing = async function() {
         return;
     }
 
-    // --- 4. UPDATE FIRESTORE ---
+    // UPDATE FIRESTORE 
     btn.innerText = "Saving...";
     btn.disabled = true;
 
@@ -348,9 +408,9 @@ window.saveUserListing = async function() {
         
         await updateDoc(docRef, {
             name: nameVal,
-            type: typeVal,
-            breed: breedVal || "Unknown",
-            age: ageInt.toString(), // Store as string to match addListing format
+            type: typeVal, // Save final type
+            breed: breedVal || "Unknown", 
+            age: ageInt.toString(), 
             gender: genderVal,
             location: locVal,
             vaccinationStatus: vaccineVal,

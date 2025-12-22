@@ -306,7 +306,7 @@ window.openModalById = function (id) {
     document.getElementById("animalModal").classList.add("open");
 };
 
-// 2. OPEN EDIT MODE 
+// 2. OPEN EDIT MODE (Updated with 'Other' type logic)
 window.editListing = function (id) {
     const data = allListings.find(a => a.id === id);
     if (!data) return;
@@ -315,8 +315,9 @@ window.editListing = function (id) {
     document.getElementById('modalImg').src = data.imageUrl || 'images/no-image.png';
     const container = document.getElementById('modalContentContainer');
 
+    // UPDATED HELPER: Accepts 'current' to handle selection logic
     const getOption = (val, current) => `
-        <option value="${val}" ${current === val ? 'selected' : ''}>${val}</option>
+        <option value="${val}" ${val === current ? 'selected' : ''}>${val}</option>
     `;
 
     container.innerHTML = `
@@ -337,6 +338,9 @@ window.editListing = function (id) {
                     ${getOption('Bird', data.type)}
                     ${getOption('Other', data.type)}
                 </select>
+                <input type="text" id="editTypeOther" class="edit-form-input" 
+                       placeholder="Please specify" 
+                       style="display: none; margin-top: 10px;">
             </div>
             <div class="edit-form-group form-group-half">
                 <label class="edit-form-label">Breed</label>
@@ -368,7 +372,7 @@ window.editListing = function (id) {
             <select id="editVaccine" class="edit-form-input">
                 ${getOption('Vaccinated', data.vaccinationStatus)}
                 ${getOption('Not Vaccinated', data.vaccinationStatus)}
-                ${getOption('Not specified', data.vaccinationStatus)}
+                ${getOption('Unknown', data.vaccinationStatus)}
             </select>
         </div>
 
@@ -382,31 +386,84 @@ window.editListing = function (id) {
         </button>
     `;
 
-    document.getElementById("saveChangesBtn").onclick = handleSaveChanges;
+    // Other type logic
+    const typeSelect = document.getElementById('editType');
+    const otherInput = document.getElementById('editTypeOther');
+    const standardTypes = ["Dog", "Cat", "Rabbit", "Bird"];
 
+    // 1. Initial State
+    if (standardTypes.includes(data.type)) {
+        typeSelect.value = data.type;
+        otherInput.style.display = 'none';
+    } else {
+        typeSelect.value = 'Other';
+        otherInput.style.display = 'block';
+        otherInput.value = data.type;
+    }
+
+    // 2. Change Listener
+    typeSelect.addEventListener('change', () => {
+        if (typeSelect.value === 'Other') {
+            otherInput.style.display = 'block';
+            otherInput.required = true;
+            otherInput.focus();
+        } else {
+            otherInput.style.display = 'none';
+            otherInput.required = false;
+            otherInput.value = ''; 
+        }
+    });
+
+    // 3. Auto-detect Listener
+    otherInput.addEventListener('input', () => {
+        const typedVal = otherInput.value.trim().toLowerCase();
+        for (let i = 0; i < typeSelect.options.length; i++) {
+            const optionVal = typeSelect.options[i].value;
+            if (optionVal === "Other") continue;
+
+            if (optionVal.toLowerCase() === typedVal) {
+                typeSelect.value = optionVal;
+                otherInput.style.display = 'none';
+                otherInput.value = '';
+                otherInput.required = false;
+                break; 
+            }
+        }
+    });
+
+    document.getElementById("saveChangesBtn").onclick = handleSaveChanges;
     document.getElementById("animalModal").classList.add("open");
 };
 
-// 3. HANDLE SAVE (With Strict Validation)
+// 3. HANDLE SAVE
 async function handleSaveChanges() {
     const id = document.getElementById("editDocId").value;
     const btn = document.getElementById("saveChangesBtn");
 
-    // --- 1. GET VALUES ---
+    //  GET VALUES 
     const nameVal = document.getElementById('editName').value.trim();
     const breedVal = document.getElementById('editBreed').value.trim();
     const locVal = document.getElementById('editLocation').value.trim();
     const descVal = document.getElementById('editDescription').value.trim();
     const ageInput = document.getElementById('editAge').value;
-    
-    // Dropdown values
-    const typeVal = document.getElementById('editType').value;
     const genderVal = document.getElementById('editGender').value;
     const vaccineVal = document.getElementById('editVaccine').value;
 
-    // --- 2. VALIDATION CHECKS ---
+    // Handle Type Logic
+    let typeVal = document.getElementById('editType').value;
+    if (typeVal === "Other") {
+        const customType = document.getElementById("editTypeOther").value.trim();
+        if (!customType) {
+            alert("Missing Type: Please specify the animal type.");
+            return;
+        }
+        // Capitalize first letter
+        typeVal = customType.charAt(0).toUpperCase() + customType.slice(1);
+    }
 
-    // A. Name Validation
+    // VALIDATION CHECKS 
+    
+    // Name Validation
     const nameRegex = /^[a-zA-Z\s]+$/;
     if (nameVal.length < 1) {
         alert("Invalid Name: Please enter a name.");
@@ -417,19 +474,19 @@ async function handleSaveChanges() {
         return;
     }
 
-    // B. Location Validation
+    // Location Validation
     if (locVal.length < 3) {
         alert("Invalid Location: Please provide a specific location.");
         return;
     }
 
-    // C. Description Validation
+    // Description Validation
     if (descVal.length < 10) {
         alert("Description too short: Please provide at least 10 characters describing the animal.");
         return;
     }
 
-    // D. Age Validation
+    // Age Validation
     const ageInt = parseInt(ageInput);
     if (isNaN(ageInt) || ageInt < 0) {
         alert("Invalid Age: Age cannot be negative.");
@@ -440,7 +497,7 @@ async function handleSaveChanges() {
         return;
     }
 
-    // --- 3. EXECUTE UPDATE ---
+    // EXECUTE UPDATE
     btn.innerText = "Saving...";
     btn.disabled = true;
 
@@ -450,8 +507,8 @@ async function handleSaveChanges() {
         await updateDoc(docRef, {
             name: nameVal,
             type: typeVal,
-            breed: breedVal || "Unknown", // Default to Unknown if empty
-            age: ageInt.toString(),       // Store as string to remain consistent with addListing
+            breed: breedVal || "Unknown", 
+            age: ageInt.toString(),       
             gender: genderVal,
             location: locVal,
             vaccinationStatus: vaccineVal,
@@ -460,7 +517,7 @@ async function handleSaveChanges() {
 
         alert("Listing updated successfully!");
         document.getElementById('animalModal').classList.remove('open');
-        loadAnimals(); // Refresh the grid to show new changes
+        loadAnimals(); 
 
     } catch (error) {
         console.error("Update failed", error);
@@ -514,8 +571,4 @@ function filterAndRender() {
     renderGrid(filteredData);
 }
 
-
-
 loadAnimals();
-
-
