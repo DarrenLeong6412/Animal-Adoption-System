@@ -6,16 +6,14 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>PawResQ — Report</title>
 
-    <link rel="stylesheet" href="css/style.css"> <!--link to external CSS-->
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://kit.fontawesome.com/07f96d8b4c.js" crossorigin="anonymous"></script>
-    <!--link for cart and acc icons-->
     <script>document.documentElement.classList.add("auth-loading");</script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <!--link for google fonts-->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
-
 </head>
 
 <body class="report">
@@ -29,7 +27,7 @@
             <div class="listing-header-row">
                 <div class="listing-title-group">
                     <h1>Report</h1>
-                    <p>View summaries of successful adoptions and at a glance.</p>
+                    <p>View summaries of successful adoptions and lost pets found at a glance.</p>
                 </div>
                 <button class="btn-add-listing" onclick="window.print()">
                     <i class="fas fa-print"></i> Print Report
@@ -38,21 +36,30 @@
 
         </div>
 
-        <section class="report-chart-section">
-            <div class="chart-controls">
-                <label for="yearSelect">Select Year:</label>
-                <select id="yearSelect"></select>
-            </div>
+        <!-- ---------------- REPORT FILTERS ---------------- -->
+        <div class="report-filters">
+            <label for="reportCategory">Select Report:</label>
+            <select id="reportCategory">
+                <option value="adoptedAnimals">Adopted Animals</option>
+                <option value="lostPets">Lost Pets Found</option>
+            </select>
 
+            <label for="yearSelect">Select Year:</label>
+            <select id="yearSelect"></select>
+        </div>
+
+        <!-- ---------------- CHART ---------------- -->
+        <section class="report-chart-section">
             <canvas id="adoptionQuarterChart" height="100"></canvas>
         </section>
 
-
+        <!-- ---------------- TABLE ---------------- -->
         <div class="report-container">
             <div id="report-table-wrapper">
                 <!-- Table will be inserted dynamically -->
             </div>
 
+            <!-- ---------------- MODAL ---------------- -->
             <div class="modal" id="modal">
                 <div class="modal-inner">
                     <div class="modal-inner-top">
@@ -73,7 +80,6 @@
             </div>
         </div>
 
-
     </div>
 
     <div id="footer"></div>
@@ -83,6 +89,6 @@
     <script src="javascript/template-loader.js"></script>
     <script type="module" src="javascript/report.js"></script>
     <script type="module" src="js/auth.js"></script>
-</body>
 
+</body>
 </html>

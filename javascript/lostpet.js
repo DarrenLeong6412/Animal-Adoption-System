@@ -228,7 +228,7 @@ window.openModalById = async function (id) {
   const modalPetImg = document.getElementById('modalPetImg');
   const modalPetInfo = document.getElementById('modalPetInfo');
   const lostPetModal = document.getElementById('lostPetDetailModal');
-
+  
   // Safety check
   if (!modalMainTitle || !modalPetImg || !modalPetInfo || !lostPetModal) {
     console.error("Modal elements not found in DOM");
@@ -350,7 +350,7 @@ window.editLostPet = function (id) {
   const formattedDate = data.last_seen_Date
     ? new Date(data.last_seen_Date).toISOString().split("T")[0]
     : "";
-
+  
   modalTitle.innerText = "Admin: Edit Lost Pet";
   modalImg.src = data.photo || "images/no-image.png";
 
@@ -484,6 +484,12 @@ async function handleAdminSave() {
 
   if (!date.value)
     return showError(date, "Last seen date is required");
+
+  const today = new Date();
+  const selectedDate = new Date(date.value);
+  if (selectedDate > today) {
+    return showError(date, "Last seen date cannot be in the future");
+  }
 
   if (desc.value.trim().length < 10)
     return showError(desc, "Description must be at least 10 characters");

@@ -114,6 +114,13 @@ form.addEventListener("submit", async (e) => {
   const last_seen_Location = document.getElementById("lastSeenLocation").value.trim();
   const last_seen_Date = document.getElementById("lastSeenDate").value;
 
+  const today = new Date();
+const selectedDate = new Date(last_seen_Date);
+if (selectedDate > today) {
+  alert("Last seen date cannot be in the future.");
+  return;
+}
+
   if (!name || !animal_type || !gender || !description || !last_seen_Location || !last_seen_Date) {
     alert("Please fill in all required fields.");
     return;

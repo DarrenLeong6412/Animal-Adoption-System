@@ -423,7 +423,10 @@ window.saveLostPetChanges = async function () {
     const description = modal.querySelector("#editDescription")?.value.trim();
 
     // ================= VALIDATION =================
-    if (!name) {
+    const today = new Date();
+const selectedDate = lastSeenDate ? new Date(lastSeenDate) : null;
+
+if (!name) {
   alert("Animal name cannot be blank.");
   btn.innerText = "Save Changes";
   btn.disabled = false;
@@ -444,7 +447,7 @@ if (!breed) {
   return;
 }
 
-// Age validation: must not be blank or negative
+// Age validation
 if (age === null || isNaN(age)) {
   alert("Age cannot be blank.");
   btn.innerText = "Save Changes";
@@ -479,7 +482,15 @@ if (!lastSeenDate) {
   return;
 }
 
-if (!description) {
+// ✅ Future date check
+if (selectedDate > today) {
+  alert("Last seen date cannot be in the future.");
+  btn.innerText = "Save Changes";
+  btn.disabled = false;
+  return;
+}
+
+if (!description ) {
   alert("Description cannot be blank.");
   btn.innerText = "Save Changes";
   btn.disabled = false;
