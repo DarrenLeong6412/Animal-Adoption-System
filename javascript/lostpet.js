@@ -103,7 +103,10 @@ function renderGrid(dataList) {
   const grid = document.getElementById("lostpet-grid");
   grid.innerHTML = "";
 
-  const publicList = dataList.filter(lostPet => lostPet.status === "Lost");
+  // Only show pets that are approved and still lost
+  const publicList = dataList.filter(lostPet => 
+      lostPet.verification_status === "Approved" && lostPet.status === "Lost"
+  );
 
   if (publicList.length === 0) {
     grid.innerHTML = '<p style="text-align:center; width:100%; padding:20px;">No Lost Pets found matching your criteria.</p>';
@@ -118,65 +121,57 @@ function renderGrid(dataList) {
     let adminMenu = "";
     if (isAdmin) {
       adminMenu = `
-                <div class="card-menu" onclick="event.stopPropagation()">
-                    <div class="menu-icon" onclick="toggleMenu('${lostPet.id}')">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </div>
-                    <div id="menu-${lostPet.id}" class="menu-dropdown">
-                        <div onclick="editLostPet('${lostPet.id}')">
-                            <i class="fas fa-edit"></i> Edit
-                        </div>
-                        <div onclick="deleteLostPet('${lostPet.id}')" style="color: #dc2626;">
-                            <i class="fas fa-trash"></i> Delete
-                        </div>
-                    </div>
-                </div>
-            `;
+        <div class="card-menu">
+  <div class="menu-icon" onclick="toggleMenu('${lostPet.id}'); event.stopPropagation();">
+    <i class="fas fa-ellipsis-v"></i>
+  </div>
+  <div id="menu-${lostPet.id}" class="menu-dropdown">
+    <div onclick="event.stopPropagation(); window.editLostPet('${lostPet.id}')">
+      <i class="fas fa-edit"></i> Edit
+    </div>
+    <div onclick="event.stopPropagation(); deleteLostPet('${lostPet.id}')" style="color: #dc2626;">
+      <i class="fas fa-trash"></i> Delete
+    </div>
+  </div>
+</div>
+      `;
     }
 
     const cardHTML = `
-  <div class="lostpet-card" onclick="openModalById('${lostPet.id}')" style="position: relative;">
-    
-    <div class="lostpet-card-img-container">
-      ${adminMenu}
-      <img src="${lostPet.photo}" alt="${lostPet.name}" class="lostpet-card-img">
-      
-      <div class="lostpet-card-status">
-        <p style="${badgeStyle}">${statusText}</p>
+      <div class="lostpet-card" onclick="openModalById('${lostPet.id}')" style="position: relative;">
+        <div class="lostpet-card-img-container">
+          ${adminMenu}
+          <img src="${lostPet.photo}" alt="${lostPet.name}" class="lostpet-card-img">
+          <div class="lostpet-card-status">
+            <p style="${badgeStyle}">${statusText}</p>
+          </div>
+        </div>
+        <div class="lostpet-card-info-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
+            <p class="lostpet-card-animal-name" style="margin:0;">
+              ${lostPet.name}
+            </p>
+            <span style="font-size:11px; color:#888; font-weight:500;">
+              ${lostPet.formattedDate || "Date Unknown"}
+            </span>
+          </div>
+          <p>
+            ${lostPet.animal_type}
+            ${lostPet.breed ? " • " + lostPet.breed : ""}
+            ${lostPet.age ? " • " + lostPet.age + " Months" : ""}
+            ${lostPet.gender ? " • " + lostPet.gender : ""}
+          </p>
+          <div class="lostpet-card-details-row">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>${lostPet.last_seen_Location}</span>
+          </div>
+        </div>
       </div>
-    </div>
-
-    <div class="lostpet-card-info-section">
-      
-      <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
-        <p class="lostpet-card-animal-name" style="margin:0;">
-          ${lostPet.name}
-        </p>
-        <span style="font-size:11px; color:#888; font-weight:500;">
-          ${lostPet.formattedDate || "Date Unknown"}
-        </span>
-      </div>
-
-      <p>
-        ${lostPet.animal_type}
-        ${lostPet.breed ? " • " + lostPet.breed : ""}
-        ${lostPet.age ? " • " + lostPet.age + " Months" : ""}
-        ${lostPet.gender ? " • " + lostPet.gender : ""}
-      </p>
-
-      <div class="lostpet-card-details-row">
-        <i class="fas fa-map-marker-alt"></i>
-        <span>${lostPet.last_seen_Location}</span>
-      </div>
-
-    </div>
-  </div>
-`;
-
+    `;
     grid.innerHTML += cardHTML;
-
   });
 }
+
 
 window.toggleMenu = function (id) {
   document.querySelectorAll('.menu-dropdown').forEach(el => {
@@ -224,7 +219,7 @@ window.openModalById = async function (id) {
   const data = allLostPets.find(l => l.id === id);
   if (!data) return;
 
-  const owner = data.user_id 
+  const owner = data.user_id
     ? await getUserById(data.user_id)
     : null;
 
@@ -297,12 +292,12 @@ window.openModalById = async function (id) {
       <i class="<fas fas fa-address-book"></i>
       <div>
         <p class="modal-inner-info-text-title">Owner Phone Number</p>
-        <span>${owner?.phone_Number|| "Unknown"}</span>
+        <span>${owner?.phone_Number || "Unknown"}</span>
       </div>
     </div>
 
     <h3 style="color:#0d3b25; font-size:18px; font-weight:700; margin-top:25px; margin-bottom:8px;">
-      About ${data.name}
+      Description
     </h3>
 
     <p style="
@@ -322,54 +317,113 @@ window.openModalById = async function (id) {
   lostPetModal.classList.add("open");
 };
 
-// need to change also for this one (for admin)
+// Replace your editLostPet function with this corrected version:
+
 window.editLostPet = function (id) {
-  const data = allLostPets.find(p => p.id === id);
+  const data = allLostPets.find(pet => pet.id === id);
   if (!data) return;
 
-  document.getElementById('modalMainTitle').innerText = "Admin: Edit Lost Pet";
-  document.getElementById('modalImg').src = data.photo || 'images/no-image.png';
-  const container = document.getElementById('modalContentContainer');
+  // Use correct IDs from your HTML for edit modal
+  const modalTitle = document.querySelector('#editLostPetDetailModal .modal-inner-top-title h1');
+  const modalImg = document.querySelector('#editLostPetDetailModal .modalImg');
+  const container = document.querySelector('#editLostPetDetailModal .modal-inner-info-container');
+  const editModal = document.getElementById('editLostPetDetailModal');
 
-  const opt = (v, c) => `<option value="${v}" ${v === c ? "selected" : ""}>${v}</option>`;
+  if (!modalTitle || !modalImg || !container || !editModal) {
+    console.error("Edit modal elements not found");
+    return;
+  }
 
+  // Set modal title and image
+  modalTitle.innerText = "Admin: Edit Lost Pet";
+  modalImg.src = data.photo || 'images/no-image.png';
+
+  const createOption = (value, current) => `<option value="${value}" ${value === current ? "selected" : ""}>${value}</option>`;
+
+  // Populate modal content
   container.innerHTML = `
     <input type="hidden" id="editDocId" value="${data.id}">
 
-    <label>Name</label>
-    <input id="editName" value="${data.name}">
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Name</label>
+      <input id="editName" value="${data.name}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
 
-    <label>Animal Type</label>
-    <input id="editType" value="${data.animal_type}">
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Animal Type</label>
+      <input id="editType" value="${data.animal_type}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
 
-    <label>Breed</label>
-    <input id="editBreed" value="${data.breed || ""}">
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Breed</label>
+      <input id="editBreed" value="${data.breed || ""}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
 
-    <label>Status (Pet)</label>
-    <select id="editStatus">
-      ${opt("Lost", data.status)}
-      ${opt("Found", data.status)}
-    </select>
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Status (Pet)</label>
+      <select id="editStatus" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        ${createOption("Lost", data.status)}
+        ${createOption("Found", data.status)}
+      </select>
+    </div>
 
-    <label>Verification Status</label>
-    <select id="editVerification">
-      ${opt("Pending", data.verification_status)}
-      ${opt("Approved", data.verification_status)}
-      ${opt("Rejected", data.verification_status)}
-    </select>
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Verification Status</label>
+      <select id="editVerification" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        ${createOption("Pending", data.verification_status)}
+        ${createOption("Approved", data.verification_status)}
+        ${createOption("Rejected", data.verification_status)}
+      </select>
+    </div>
 
-    <label>Last Seen Location</label>
-    <input id="editLocation" value="${data.last_seen_Location}">
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Last Seen Location</label>
+      <input id="editLocation" value="${data.last_seen_Location}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+    </div>
 
-    <label>Description</label>
-    <textarea id="editDescription">${data.description || ""}</textarea>
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px; font-weight: 600;">Description</label>
+      <textarea id="editDescription" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;">${data.description || ""}</textarea>
+    </div>
 
-    <button id="saveChangesBtn">Save Changes</button>
+    <div class="modal-status-preview" style="margin: 15px 0; padding: 10px; background: #f3f4f6; border-radius: 4px; font-weight: bold;">
+      Current Status: <span id="statusPreview">${data.status}</span> • Verification: <span id="verificationPreview">${data.verification_status}</span>
+    </div>
+
+    <button id="saveChangesBtn" style="width: 100%; padding: 12px; background: #0d3b25; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Save Changes</button>
   `;
 
+  // Update status preview dynamically when selects change
+  const statusSelect = container.querySelector('#editStatus');
+  const verificationSelect = container.querySelector('#editVerification');
+
+  statusSelect.addEventListener('change', e => {
+    container.querySelector('#statusPreview').innerText = e.target.value;
+  });
+
+  verificationSelect.addEventListener('change', e => {
+    container.querySelector('#verificationPreview').innerText = e.target.value;
+  });
+
+  // Attach save handler
   document.getElementById("saveChangesBtn").onclick = handleAdminSave;
-  document.getElementById("animalModal").classList.add("open");
+
+  // Open the correct modal
+  editModal.classList.add("open");
 };
+
+// Add a function to close the edit modal
+window.closeEditModal = function () {
+  document.getElementById("editLostPetDetailModal").classList.remove("open");
+};
+
+// Update your existing closePetModal to handle both modals
+window.closePetModal = function () {
+  document.getElementById("lostPetDetailModal").classList.remove("open");
+  document.getElementById("editLostPetDetailModal").classList.remove("open");
+};
+
+
 
 // 3. HANDLE SAVE (need to change also for admin to change the details one )
 async function handleAdminSave() {
@@ -380,12 +434,22 @@ async function handleAdminSave() {
   btn.innerText = "Saving...";
 
   try {
+    const verification = document.getElementById("editVerification").value;
+    let status = document.getElementById("editStatus").value;
+
+    // Only set status to "Lost" if approved
+    if (verification === "Approved") {
+      status = "Lost";
+    } else if (verification === "Rejected") {
+      status = ""; // or leave undefined
+    }
+
     await updateDoc(doc(db, "lostPets", id), {
       name: document.getElementById("editName").value,
       animal_type: document.getElementById("editType").value,
       breed: document.getElementById("editBreed").value,
-      status: document.getElementById("editStatus").value,
-      verification_status: document.getElementById("editVerification").value,
+      status: status,
+      verification_status: verification,
       last_seen_Location: document.getElementById("editLocation").value,
       description: document.getElementById("editDescription").value
     });

@@ -155,7 +155,6 @@ Do you want to submit this report?`;
       photo: base64Image,
       last_seen_Location,
       last_seen_Date,
-      status: "Lost",
       verified_By: null,
       verification_status: "Pending", // For admin approval
       date_Reported: serverTimestamp()

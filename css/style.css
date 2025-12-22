@@ -1329,13 +1329,22 @@ p.subtitle {
     }
 }
 
-
-
 /*#endregion*/
 
 /*#region lostpetpage*/
 /*Lost Pet Reports*/
 /* ===== LOST PET CONTENT AREA ===== */
+
+.badge-found {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #0369a1;
+}
+
+.badge-lost {
+  background-color: red; /* orange */
+  color: white;
+}
 .lostpet-content {
     display: flex;
     padding-top: 80px;
@@ -1404,7 +1413,7 @@ p.subtitle {
 }
 
 .lostpet-button-create-report:hover {
-    background-color: #0d352e;
+    background-color: #d0e0d3;
 }
 
 .lostpet-filter-card {

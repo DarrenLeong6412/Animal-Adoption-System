@@ -54,10 +54,14 @@ async function loadMyLostPets(uid) {
 
     // Sort: Pending first, then by date_Reported descending
     myLostPets.sort((a, b) => {
-      const statusOrder = { "Pending": 1, "Approved": 2, "Rejected": 3 };
-      const statusA = statusOrder[a.verification_status] || 99;
-      const statusB = statusOrder[b.verification_status] || 99;
-      if (statusA !== statusB) return statusA - statusB;
+      const priority = (pet) => {
+        if (pet.status === "Found") return 1;
+        if (pet.verification_status === "Approved") return 2;
+        if (pet.verification_status === "Pending") return 3;
+        if (pet.verification_status === "Rejected") return 4;
+        return 5; // fallback
+      };  
+  return priority(a) - priority(b);
 
       // Compare by last_seen_Date string (YYYY-MM-DD)
       const timeA = a.last_seen_Date ? new Date(a.last_seen_Date).getTime() : 0;
@@ -67,13 +71,41 @@ async function loadMyLostPets(uid) {
 
     // Render grid
     myLostPets.forEach(pet => {
-      let badgeClass = "badge-pending";
-      let statusText = pet.verification_status || "Pending";
+      let badgeClass = "";
+let statusText = "";
 
-      if (statusText === "Approved") badgeClass = "badge-approved";
-      else if (statusText === "Rejected") badgeClass = "badge-rejected";
+// 1️⃣ Found first
+if (pet.status === "Found") {
+  statusText = "Found";
+  badgeClass = "badge-found";
+}
 
-      const dateStr = pet.last_seen_Date || "Date Unknown";
+// 2️⃣ Approved (not found)
+else if (pet.verification_status === "Approved") {
+  statusText = "Approved";
+  badgeClass = "badge-approved";
+}
+
+// 3️⃣ Pending
+else if (pet.verification_status === "Pending") {
+  statusText = "Pending";
+  badgeClass = "badge-pending";
+}
+
+// 4️⃣ Rejected
+else if (pet.verification_status === "Rejected") {
+  statusText = "Rejected";
+  badgeClass = "badge-rejected";
+}
+
+// fallback
+else {
+  statusText = "Pending";
+  badgeClass = "badge-pending";
+}
+      const formattedDate = pet.date_Reported
+  ? pet.date_Reported.toDate().toISOString().split("T")[0]
+  : "Unknown";
 
       const cardHTML = `
         <div onclick="window.openMyLostPetModal('${pet.id}')" class="lostpet-item-card">
@@ -82,7 +114,7 @@ async function loadMyLostPets(uid) {
           </div>
           <div class="lostpet-item-content">
             <h3 class="lostpet-item-title">${pet.name}</h3>
-            <p class="lostpet-item-meta">${pet.animal_type || "Unknown"} • ${dateStr}</p>
+            <p class="lostpet-item-meta">${pet.animal_type || "Unknown"} • ${formattedDate}</p>
           </div>
           <div class="lostpet-item-badge-container">
             <span class="lostpet-item-badge ${badgeClass}">
@@ -113,6 +145,7 @@ window.openMyLostPetModal = function (id) {
   const standardTypes = ['Dog', 'Cat', 'Rabbit'];
   const getOption = (val, current) => `<option value="${val}" ${current === val ? 'selected' : ''}>${val}</option>`;
 
+  // ---------------------- PENDING / EDIT MODE ----------------------
   if (data.verification_status === "Pending") {
     document.getElementById("modalEditTitle").innerText = "Edit LostPet";
 
@@ -139,7 +172,7 @@ window.openMyLostPetModal = function (id) {
         </select>
       </div>
 
-      <div class="edit-form-group" id="otherAnimalTypeGroup" style="display:${selectedType==='Other' ? 'block' : 'none'};">
+      <div class="edit-form-group" id="otherAnimalTypeGroup" style="display:${selectedType === 'Other' ? 'block' : 'none'};">
         <label class="edit-form-label">Specify Animal Type <span class="required">*</span></label>
         <input type="text" id="animalTypeOther" class="edit-form-input" placeholder="e.g., Hamster" value="${otherTypeValue}">
       </div>
@@ -200,40 +233,129 @@ window.openMyLostPetModal = function (id) {
         }
       }
     });
+  }
 
-  } else {
-    // VIEW MODE
+  // ---------------------- VIEW MODE ----------------------
+  else {
     document.getElementById("modalEditTitle").innerText = "View Details";
+
     let statusColor = "#000";
     let statusBg = "#f0f0f0";
-    if (data.verification_status === "Approved") { statusColor = "#0369a1"; statusBg = "#e0f2fe"; }
-    if (data.verification_status === "Rejected") { statusColor = "#dc2626"; statusBg = "#fee2e2"; }
+
+    if (data.verification_status === "Approved") {
+      statusColor = "#16a34a";
+      statusBg = "#d1fae5"; // light green for Approved
+    }
+    if (data.verification_status === "Rejected") {
+      statusColor = "#dc2626";
+      statusBg = "#fee2e2";
+    }
+
+    // Build HTML for the modal content
+    let statusHTML = "";
+
+    if (data.verification_status === "Approved") {
+      // ✅ REPLACEMENT: Show "Mark as Found" button instead of "Approved" text
+      statusHTML = `<button id="markFoundBtn" class="lostpet-mark-found-btn">
+    Mark as Found
+</button>`;
+
+      // 2. Add CSS (either in your <style> or dynamically)
+      const style = document.createElement('style');
+      style.innerHTML = `
+.lostpet-mark-found-btn {
+    width: 95%;
+    background-color: #164A41;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.lostpet-mark-found-btn:hover {
+    background-color: #d0e0d3;
+}
+`;
+      document.head.appendChild(style);
+    } else {
+      // Pending or Rejected → show colored block
+      statusHTML = `<div style="margin-top: 25px; padding: 12px; background-color: ${statusBg}; color: ${statusColor}; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid ${statusColor};">
+                      ${data.verification_status}
+                    </div>`;
+    }
 
     container.innerHTML = `
       <h2 style="color: #164A41; margin-bottom: 15px;">${data.name}</h2>
       <div class="modal-detail-item">
         <i class="fas fa-paw"></i>
-        <div><p class="modal-inner-info-text-title">Type</p><span>${data.animal_type} • ${data.breed}</span></div>
+        <div><p class="modal-inner-info-text-title">Type & Breed</p><span>${data.animal_type} • ${data.breed}</span></div>
       </div>
       <div class="modal-detail-item">
         <i class="fas fa-birthday-cake"></i>
-        <div><p class="modal-inner-info-text-title">Age</p><span>${data.age} months old • ${data.gender}</span></div>
+        <div><p class="modal-inner-info-text-title">Age & Gender</p><span>${data.age} months old • ${data.gender}</span></div>
       </div>
       <div class="modal-detail-item">
         <i class="fas fa-map-marker-alt"></i>
         <div><p class="modal-inner-info-text-title">Last Seen Location</p><span>${data.last_seen_Location}</span></div>
       </div>
-      <h3 style="color: #0d3b25; font-size: 18px; font-weight: 700; margin-top: 25px; margin-bottom: 8px;">About ${data.name}</h3>
-      <p style="color: #555; line-height: 1.6; font-size: 14px; margin-top: 0;">${data.description || 'No description provided.'}</p>
-      <div style="margin-top: 25px; padding: 12px; background-color: ${statusBg}; color: ${statusColor}; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid ${statusColor};">
-        ${data.verification_status}
+      <div class="modal-detail-item">
+        <i class="fas fa-solid fa-calendar"></i>
+        <div><p class="modal-inner-info-text-title">Last Seen Date</p><span>${data.last_seen_Date}</span></div>
       </div>
+      <h3 style="color:#0d3b25; font-size:18px; font-weight:700; margin-top:25px; margin-bottom:8px;">
+      Description
+    </h3>
+
+    <p style="
+        color:#555;
+        line-height:1.6;
+        font-size:14px;
+        margin-top:0;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    ">
+  ${data.description || 'No description provided.'}
+</p>
+
+      ${statusHTML}
       <p style="text-align: center; font-size: 12px; color: #888; margin-top: 5px;">*You cannot edit this listing because it has been processed.</p>
     `;
+
+    // ---------------------- MARK AS FOUND BUTTON ----------------------
+    const markFoundBtn = document.getElementById("markFoundBtn");
+    if (markFoundBtn) {
+      markFoundBtn.addEventListener("click", async () => {
+        if (!confirm("Are you sure you want to mark this pet as found?")) return;
+        try {
+          const docRef = doc(db, "lostPets", data.id);
+          await updateDoc(docRef, {
+            status: "Found" // <- match the field your UI uses
+          });
+          
+          alert(`${data.name} has been marked as Found!`);
+          modal.classList.remove("open");
+
+          if (auth.currentUser) {
+            loadMyLostPets(auth.currentUser.uid); // reload user's lost pets
+          }
+
+        } catch (err) {
+          console.error(err);
+          alert("Failed to mark as found. Please try again.");
+        }
+      });
+    }
   }
 
   modal.classList.add("open");
 };
+
 
 // ==================== CLOSE MODAL ====================
 window.closeLostPetModal = function () {
@@ -318,3 +440,26 @@ window.saveLostPetChanges = async function () {
     btn.disabled = false;
   }
 };
+
+document.querySelectorAll(".mark-found-btn").forEach(btn => {
+  btn.addEventListener("click", async (e) => {
+    const petId = btn.dataset.id;
+    if (!confirm("Are you sure you want to mark this pet as found?")) return;
+
+    try {
+      await updateDoc(doc(db, "lostPets", petId), {
+        status: "Found"
+      });
+
+      alert("Pet marked as Found!");
+      // Reload the user profile lost pet list
+      loadMyLostPets(); // your function to reload user's lost pets
+      // Optionally reload public lost pets
+      if (typeof loadMyLostPets === "function") loadMyLostPets();
+
+    } catch (err) {
+      console.error("Error marking pet as found:", err);
+      alert("Failed to update pet status. Try again.");
+    }
+  });
+});
