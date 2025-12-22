@@ -705,7 +705,7 @@ function capitalizeStatus(status) {
         .map(w => w[0].toUpperCase() + w.slice(1))
         .join(" ");
 }
-const searchInput = document.getElementById("searchInput"); // make sure your HTML has this
+const searchInput = document.getElementById("searchInput"); 
 
 // ---------- CATEGORY SELECTION ----------
 function renderCategory(category) {
@@ -716,7 +716,7 @@ function renderCategory(category) {
             loadListings();
             break;
         case "adoptionRequests":
-            renderRequests(unapprovedRequests); // your function
+            renderRequests(unapprovedRequests); 
             break;
         case "lostPetReports":
             //renderLostPetReports();
